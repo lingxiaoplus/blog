@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
-@Slf4j
 public class CommonExceptionHandler {
     @ExceptionHandler(BlogException.class)
     public ResponseEntity<ExceptionResult> handleException(BlogException e){
@@ -18,10 +17,8 @@ public class CommonExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionResult> handleValidException(MethodArgumentNotValidException e){
-        //new ExceptionResult()
-        log.debug("捕获到MethodArgumentNotValidException: message: {}, BindingResult: {}",
-                e.getMessage(),e.getBindingResult());
-        e.getBindingResult().getAllErrors();
-        return ResponseEntity.status(200).build();
+        ExceptionResult exceptionResult = new ExceptionResult(ExceptionEnum.ILLEGA_ARGUMENT.getCode(),
+                "");
+        return ResponseEntity.status(200).body(exceptionResult);
     }
 }
