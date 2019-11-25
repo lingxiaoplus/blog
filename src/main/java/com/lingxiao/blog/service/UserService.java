@@ -1,7 +1,6 @@
 package com.lingxiao.blog.service;
 
 import com.lingxiao.blog.bean.User;
-import com.lingxiao.blog.bean.UserInfo;
 
 public interface UserService {
     /**

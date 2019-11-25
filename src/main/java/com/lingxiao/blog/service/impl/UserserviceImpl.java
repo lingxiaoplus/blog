@@ -4,7 +4,7 @@ import com.lingxiao.blog.bean.User;
 import com.lingxiao.blog.bean.UserInfo;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
-import com.lingxiao.blog.global.UserStatus;
+import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.jwt.JwtProperties;
 import com.lingxiao.blog.jwt.JwtUtils;
 import com.lingxiao.blog.mapper.UserMapper;
@@ -37,9 +37,9 @@ public class UserserviceImpl implements UserService {
     }
 
     @Override
-    public String register(User user,String ip) {
+    public String register(User user, String ip) {
         user.setCreateAt(new Date());
-        user.setStatus(UserStatus.USERTYPE_ENABLE);
+        user.setStatus(ContentValue.USERTYPE_ENABLE);
         user.setUserId(UIDUtil.nextId());
         user.setUserIp(IPUtils.ipToNum(ip));
         //密码加密
