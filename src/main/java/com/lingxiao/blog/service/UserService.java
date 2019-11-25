@@ -1,6 +1,7 @@
 package com.lingxiao.blog.service;
 
 import com.lingxiao.blog.bean.User;
+import com.lingxiao.blog.bean.UserInfo;
 
 public interface UserService {
     /**
@@ -11,7 +12,13 @@ public interface UserService {
      */
     User login(String account, String password);
 
-    void register(User user, String ip);
+    /**
+     * 登录成功返回一个token
+     * @param user
+     * @param ip
+     * @return
+     */
+    String register(User user, String ip);
 
     /**
      * 通过token验证用户是否登录

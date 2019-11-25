@@ -2,6 +2,7 @@ package com.lingxiao.blog.controller;
 
 import com.lingxiao.blog.bean.User;
 import com.lingxiao.blog.service.UserService;
+import com.lingxiao.blog.utils.IPUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -20,7 +21,7 @@ public class UserController {
 
     @RequestMapping(name = "/",method = RequestMethod.POST)
     public ResponseEntity<Void> register(@RequestBody @Valid User user, HttpServletRequest request){
-        userService.register(user,request.getRemoteAddr());
+        userService.register(user, IPUtils.getIpAddress(request));
         return ResponseEntity.ok().build();
     }
 }

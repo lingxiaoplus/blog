@@ -14,3 +14,10 @@ mybatis:
 logging:
   level:
     root: debug
+jwt:
+  secret: blog@Login(Auth}*^31)&lingxiao% # 登录校验的密钥
+  pubKeyPath: D:\\rsakey\\rsa.pub  # 公钥地址
+  priKeyPath: D:\\rsakey\\rsa.pri  # 私钥地址
+  expire: 30 # 过期时间,单位分钟
+  cookieName: LEYOU_COOKIE # cookie的名字
+  cookieMaxAge: 30 # cookie的有效时长

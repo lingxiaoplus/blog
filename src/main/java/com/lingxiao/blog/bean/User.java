@@ -1,5 +1,6 @@
 package com.lingxiao.blog.bean;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.Id;
@@ -15,6 +16,7 @@ public class User {
     private Long userIp;
     @NotEmpty(message = "用户名不能为空")
     private String username;
+    @JsonIgnore
     @NotEmpty(message = "密码不能为空")
     private String password;
     @NotEmpty(message = "邮箱不能为空")
@@ -27,8 +29,13 @@ public class User {
     private String nickname;
     private Integer status;
 
+    @JsonIgnore
+    private String salt; //盐值
+
     private Date birthday;
+    @JsonIgnore
     private Date createAt;
+    @JsonIgnore
     private Date updateAt;
 
 }
