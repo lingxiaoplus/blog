@@ -7,9 +7,10 @@ public interface UserService {
      * 登录
      * @param account  用户名/手机号/邮箱 三种方式登录
      * @param password
-     * @return
+     * @param loginType
+     * @return 返回token
      */
-    User login(String account, String password);
+    String login(String account, String password, int loginType);
 
     /**
      * 登录成功返回一个token

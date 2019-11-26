@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
+
 import java.util.Date;
 
 @Service
@@ -29,15 +30,46 @@ public class UserserviceImpl implements UserService {
     private JwtProperties jwtProperties;
 
     @Override
-    public User login(String account, String password) {
-        if (StringUtils.isBlank(account) || StringUtils.isBlank(password)){
+    public String login(String account, String password, int loginType) {
+        if (StringUtils.isBlank(account) || StringUtils.isBlank(password)) {
             throw new BlogException(ExceptionEnum.ILLEGA_ARGUMENT);
         }
-        return null;
+        User user = null;
+        switch (loginType) {
+            case ContentValue.LOGIN_TYPE_NAME:
+                user = userMapper.loginByName(account);
+                break;
+            case ContentValue.LOGIN_TYPE_EMAIL:
+                user = userMapper.loginByEmail(account);
+                break;
+            case ContentValue.LOGIN_TYPE_PHONE:
+                user = userMapper.loginByPhone(account);
+                break;
+        }
+        if (user == null){
+            throw new BlogException(ExceptionEnum.LOGIN_NAME_ERROR);
+        }
+        byte[] salt = MD5Util.hexStringToByte(user.getSalt());
+        boolean equals = MD5Util.validPassword(password, user.getPassword(), salt);
+        if (!equals){
+            throw new BlogException(ExceptionEnum.LOGIN_PASSWORD_ERROR);
+        }
+        String token = authEntication(user);
+        return token;
     }
 
     @Override
     public String register(User user, String ip) {
+        if (userMapper.countByEmail(user.getEmail()) > 0){
+            throw new BlogException(ExceptionEnum.REGISTER_EMAIL_ERROR);
+        }
+        if (userMapper.countByName(user.getUsername()) > 0){
+            throw new BlogException(ExceptionEnum.REGISTER_USERNAME_ERROR);
+        }
+        if (userMapper.countByPhone(user.getUsername()) > 0){
+            throw new BlogException(ExceptionEnum.REGISTER_PHONE_ERROR);
+        }
+
         user.setCreateAt(new Date());
         user.setStatus(ContentValue.USERTYPE_ENABLE);
         user.setUserId(UIDUtil.nextId());
@@ -50,7 +82,7 @@ public class UserserviceImpl implements UserService {
         user.setSalt(salt);
 
         int count = userMapper.insertSelective(user);
-        if (count != 1){
+        if (count != 1) {
             throw new BlogException(ExceptionEnum.ILLEGA_ARGUMENT);
         }
         String token = authEntication(user);
@@ -59,12 +91,16 @@ public class UserserviceImpl implements UserService {
 
     @Override
     public User verify(String token) {
+        if (StringUtils.isBlank(token)){
+            throw new BlogException(ExceptionEnum.VERIFY_USER_LOGIN_ERROR);
+        }
         try {
             UserInfo userInfo = JwtUtils.getInfoFromToken(token, jwtProperties.getPublicKey());
+            log.debug("解密得到用户信息: {}",userInfo);
             User user = userMapper.selectByPrimaryKey(userInfo.getId());
             return user;
         } catch (Exception e) {
-            log.error("解密失败",e);
+            log.error("解密失败", e);
             throw new BlogException(ExceptionEnum.VERIFY_USER_LOGIN_ERROR);
         }
     }
@@ -77,7 +113,7 @@ public class UserserviceImpl implements UserService {
         user.setEmail(null);
         user.setPhoneNumber(null);
         int count = userMapper.updateByPrimaryKeySelective(user);
-        if (count != 1){
+        if (count != 1) {
             throw new BlogException(ExceptionEnum.UPDATE_USER_ERROR);
         }
     }
@@ -85,13 +121,13 @@ public class UserserviceImpl implements UserService {
     @Override
     public void deleteUser(long userId) {
         int count = userMapper.deleteByPrimaryKey(userId);
-        if (count != 1){
+        if (count != 1) {
             throw new BlogException(ExceptionEnum.DELETE_USER_ERROR);
         }
     }
 
     private String authEntication(User user) {
-        if (user == null){
+        if (user == null) {
             return null;
         }
         UserInfo userInfo = new UserInfo();
@@ -104,10 +140,11 @@ public class UserserviceImpl implements UserService {
         userInfo.setAge(user.getAge());
         userInfo.setStatus(user.getStatus());*/
         try {
+            log.debug("加密前的用户信息: {}",userInfo);
             String generateToken = JwtUtils.generateToken(userInfo, jwtProperties.getPrivateKey(), jwtProperties.getExpire());
             return generateToken;
         } catch (Exception e) {
-            log.error("生成token失败 ",e);
+            log.error("生成token失败 ", e);
         }
         return null;
     }

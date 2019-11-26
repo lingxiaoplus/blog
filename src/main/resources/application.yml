@@ -6,10 +6,14 @@ spring:
     username: root
     password: 123456
     driver-class-name: com.mysql.jdbc.Driver
+  jackson:
+    default-property-inclusion: non_null
+
 
 mybatis:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true   # 开启mybatis驼峰式命名规则
 
 logging:
   level:
@@ -19,5 +23,5 @@ jwt:
   pubKeyPath: D:\\rsakey\\rsa.pub  # 公钥地址
   priKeyPath: D:\\rsakey\\rsa.pri  # 私钥地址
   expire: 30 # 过期时间,单位分钟
-  cookieName: LEYOU_COOKIE # cookie的名字
+  cookieName: BLOG_COOKIE # cookie的名字
   cookieMaxAge: 30 # cookie的有效时长
