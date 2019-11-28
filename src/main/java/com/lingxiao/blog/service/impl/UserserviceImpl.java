@@ -126,6 +126,11 @@ public class UserserviceImpl implements UserService {
         }
     }
 
+    @Override
+    public void initAdmin() {
+        //判断是否有系统管理员, 没有就注册
+    }
+
     private String authEntication(User user) {
         if (user == null) {
             return null;

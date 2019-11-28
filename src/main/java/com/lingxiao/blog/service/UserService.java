@@ -28,4 +28,9 @@ public interface UserService {
     User verify(String token);
     void changeUser(User user);
     void deleteUser(long userId);
+
+    /**
+     * 初始化系统管理员
+     */
+    void initAdmin();
 }

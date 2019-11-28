@@ -1,6 +1,7 @@
 package com.lingxiao.blog.controller;
 
 import com.lingxiao.blog.bean.User;
+import com.lingxiao.blog.global.ResponseResult;
 import com.lingxiao.blog.service.UserService;
 import com.lingxiao.blog.utils.IPUtils;
 import io.swagger.annotations.Api;
@@ -47,12 +48,13 @@ public class UserController {
 
     @ApiOperation(value = "验证用户是否登录，返回用户信息",notes = "登录状态")
     @GetMapping(value = "/verify")
-    public ResponseEntity<User> verify(@CookieValue(value = "BLOG_COOKIE",required = false) String cookieToken,
+    public ResponseEntity<ResponseResult<User>> verify(@CookieValue(value = "BLOG_COOKIE",required = false) String cookieToken,
                                          @RequestParam(name = "token",required = false) String token){
         if (!StringUtils.isBlank(cookieToken)){
             token = cookieToken;
         }
         User user = userService.verify(token);
-        return ResponseEntity.ok(user);
+        ResponseResult<User> result = new ResponseResult<>(user);
+        return ResponseEntity.ok(result);
     }
 }

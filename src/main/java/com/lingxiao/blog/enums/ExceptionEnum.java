@@ -16,7 +16,12 @@ public enum ExceptionEnum {
     LOGIN_NAME_ERROR(500,"登录失败，请检查用户名是否正确"),
     LOGIN_PASSWORD_ERROR(500,"登录失败，密码错误"),
     VERIFY_USER_LOGIN_ERROR(500,"用户未登录"),
-    DELETE_USER_ERROR(500,"删除用户失败");
+    DELETE_USER_ERROR(500,"删除用户失败"),
+    MENU_ADD_ERROR(500,"添加菜单失败"),
+    MENU_DELETE_ERROR(500,"删除菜单失败"),
+    MENU_UPDATE_ERROR(500,"更新菜单失败"),
+    MENU_SELECT_ERROR(404,"查询菜单失败"),
+    ;
     private int code;
     private String msg;
 }

@@ -2,15 +2,21 @@ package com.lingxiao.blog.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 @Table(name = "user")
 @Data
-public class User {
+public class User implements UserDetails {
     @Id
     private Long userId;
     private Long userIp;
@@ -38,4 +44,36 @@ public class User {
     @JsonIgnore
     private Date updateAt;
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        /*List<GrantedAuthority> authorities = new ArrayList<>();
+        for (Role role : roles) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
+        }*/
+        return null;
+    }
+
+    // 帐户是否过期
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    // 帐户是否被冻结
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    // 帐户密码是否过期，一般有的密码要求性高的系统会使用到，比较每隔一段时间就要求用户重置密码
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        //是否启用
+        return false;
+    }
 }
