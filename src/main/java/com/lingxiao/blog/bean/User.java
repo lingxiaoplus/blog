@@ -1,6 +1,7 @@
 package com.lingxiao.blog.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.lingxiao.blog.global.ContentValue;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -8,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,13 +46,16 @@ public class User implements UserDetails {
     @JsonIgnore
     private Date updateAt;
 
+    @Transient
+    private List<Role> roles;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        /*List<GrantedAuthority> authorities = new ArrayList<>();
+        List<GrantedAuthority> authorities = new ArrayList<>();
         for (Role role : roles) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
-        }*/
-        return null;
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getRoleName()));
+        }
+        return authorities;
     }
 
     // 帐户是否过期
@@ -74,6 +79,6 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         //是否启用
-        return false;
+        return this.status == ContentValue.USERTYPE_ENABLE;
     }
 }

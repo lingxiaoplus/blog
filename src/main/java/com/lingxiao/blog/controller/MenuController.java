@@ -16,9 +16,9 @@ public class MenuController {
     @Autowired
     private MenuService menuService;
 
-    @GetMapping(value = "/{uid}")
-    public ResponseEntity<ResponseResult<List<Menu>>> selectAllMenu(@PathVariable("uid") Long uid){
-        ResponseResult<List<Menu>> result = new ResponseResult<>(menuService.selectAll(uid));
+    @GetMapping
+    public ResponseEntity<ResponseResult<List<Menu>>> selectAllMenu(){
+        ResponseResult<List<Menu>> result = new ResponseResult<>(menuService.selectAll());
         return ResponseEntity.ok(result);
     }
     @PostMapping

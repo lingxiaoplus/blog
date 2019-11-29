@@ -16,4 +16,9 @@ public class ContentValue {
     public static final int LOGIN_TYPE_NAME = 1;
     public static final int LOGIN_TYPE_EMAIL = 2;
     public static final int LOGIN_TYPE_PHONE = 3;
+
+    /**
+     * 用户登录之后才能操作的权限
+     */
+    public static final String ROLE_LOGIN = "ROLE_LOGIN";
 }

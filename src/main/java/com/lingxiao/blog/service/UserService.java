@@ -1,8 +1,9 @@
 package com.lingxiao.blog.service;
 
 import com.lingxiao.blog.bean.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
-public interface UserService {
+public interface UserService extends UserDetailsService {
     /**
      * 登录
      * @param account  用户名/手机号/邮箱 三种方式登录

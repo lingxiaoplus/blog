@@ -21,6 +21,8 @@ public enum ExceptionEnum {
     MENU_DELETE_ERROR(500,"删除菜单失败"),
     MENU_UPDATE_ERROR(500,"更新菜单失败"),
     MENU_SELECT_ERROR(404,"查询菜单失败"),
+    ROLE_SELECT_ERROR(404,"查询角色失败"),
+    ACCESS_DENIED_ERROR(403,"权限不足"),
     ;
     private int code;
     private String msg;
