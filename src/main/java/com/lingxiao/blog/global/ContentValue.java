@@ -21,4 +21,7 @@ public class ContentValue {
      * 用户登录之后才能操作的权限
      */
     public static final String ROLE_LOGIN = "ROLE_LOGIN";
+
+    public static final String LOGIN_TOKEN_NAME = "blog_login_token";
+    public static final int COOKIE_MAXAGE = 30;
 }

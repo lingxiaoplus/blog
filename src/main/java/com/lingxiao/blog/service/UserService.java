@@ -30,6 +30,14 @@ public interface UserService extends UserDetailsService {
     void changeUser(User user);
     void deleteUser(long userId);
 
+
+    /**
+     * 生成token
+     * @param user
+     * @return
+     */
+    String authEntication(User user);
+
     /**
      * 初始化系统管理员
      */

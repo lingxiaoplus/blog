@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
@@ -21,7 +22,9 @@ import java.nio.charset.Charset;
  * security是默认使用form提交表单登录的，我们要定义一个Filter来拦截/login
  * 从json body中提取用户名和密码
  */
+@Component
 public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+
     protected AuthenticationFilter() {
         super(new AntPathRequestMatcher("/login", "POST"));
     }
