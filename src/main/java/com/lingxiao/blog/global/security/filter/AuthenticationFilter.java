@@ -1,4 +1,4 @@
-package com.lingxiao.blog.global.security;
+package com.lingxiao.blog.global.security.filter;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -22,11 +22,10 @@ import java.nio.charset.Charset;
  * security是默认使用form提交表单登录的，我们要定义一个Filter来拦截/login
  * 从json body中提取用户名和密码
  */
-@Component
 public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-    protected AuthenticationFilter() {
-        super(new AntPathRequestMatcher("/login", "POST"));
+    public AuthenticationFilter() {
+        super(new AntPathRequestMatcher("/user/login", "POST"));
     }
 
     /**

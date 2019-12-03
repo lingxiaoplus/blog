@@ -5,6 +5,7 @@ import com.lingxiao.blog.bean.UserInfo;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.global.ContentValue;
+import com.lingxiao.blog.global.security.bean.UserDetailsImpl;
 import com.lingxiao.blog.jwt.JwtProperties;
 import com.lingxiao.blog.jwt.JwtUtils;
 import com.lingxiao.blog.mapper.UserMapper;
@@ -162,6 +163,8 @@ public class UserserviceImpl implements UserService {
         if (user == null){
             throw new BlogException(ExceptionEnum.LOGIN_NAME_ERROR);
         }
-        return user;
+        UserDetailsImpl userDetails = new UserDetailsImpl(user);
+        // TODO: 2019/12/2  设置角色信息
+        return userDetails;
     }
 }

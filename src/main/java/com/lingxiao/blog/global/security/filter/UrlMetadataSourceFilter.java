@@ -1,4 +1,4 @@
-package com.lingxiao.blog.global.security;
+package com.lingxiao.blog.global.security.filter;
 
 import com.lingxiao.blog.bean.Menu;
 import com.lingxiao.blog.bean.Role;
@@ -19,7 +19,7 @@ import java.util.List;
  * 通过当前的请求地址，获取该地址需要的用户角色
  */
 @Component
-public class UrlFilterInvocationSecurityMetadataSource implements FilterInvocationSecurityMetadataSource {
+public class UrlMetadataSourceFilter implements FilterInvocationSecurityMetadataSource {
 
     @Autowired
     private MenuService menuService;

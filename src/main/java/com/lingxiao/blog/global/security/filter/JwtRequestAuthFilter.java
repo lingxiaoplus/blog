@@ -1,4 +1,4 @@
-package com.lingxiao.blog.global.security;
+package com.lingxiao.blog.global.security.filter;
 
 import com.lingxiao.blog.bean.UserInfo;
 import com.lingxiao.blog.global.ContentValue;
@@ -7,6 +7,8 @@ import com.lingxiao.blog.jwt.JwtUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -34,6 +36,7 @@ public class JwtRequestAuthFilter extends OncePerRequestFilter {
     private final RequestHeaderRequestMatcher requestHeaderRequestMatcher;
     @Autowired
     private JwtProperties jwtProperties;
+    private AuthenticationManager authenticationManager;
 
     private List<RequestMatcher> permissiveRequestMatchers = new ArrayList<>();
 
@@ -63,7 +66,8 @@ public class JwtRequestAuthFilter extends OncePerRequestFilter {
         }else {
             try {
                 UserInfo userInfo = JwtUtils.getInfoFromToken(token, jwtProperties.getPublicKey());
-                //authResult = getAuthenticationManager().authenticate(userInfo)
+
+                //authResult = authenticationManager.authenticate(userInfo);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -75,6 +79,14 @@ public class JwtRequestAuthFilter extends OncePerRequestFilter {
             return;
         }
         filterChain.doFilter(request,response);
+    }
+
+    /**
+     * manager需要在configuration中获取
+     * @param authenticationManager
+     */
+    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
     }
 
     protected boolean requiresAuthentication(HttpServletRequest request) {
