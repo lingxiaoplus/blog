@@ -25,3 +25,9 @@ jwt:
   expire: 30 # 过期时间,单位分钟
   cookieName: BLOG_COOKIE # cookie的名字
   cookieMaxAge: 30 # cookie的有效时长
+
+oss:
+  accessKey: V_ZleIlYzHPjekmAuRvDkkXLdV_MDkk69VZWM12f # 设置好账号的ACCESS_KEY和SECRET_KEY
+  secretKey: U8SndxcceqMZGIKvhfPL3gEPkYRN_NhrP75cJlOH
+  bucketName: smailchat  # 要上传的空间
+  prefixImg: http://chat.lingxiaosuse.cn/

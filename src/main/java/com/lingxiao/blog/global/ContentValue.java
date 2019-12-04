@@ -23,5 +23,5 @@ public class ContentValue {
     public static final String ROLE_LOGIN = "ROLE_LOGIN";
 
     public static final String LOGIN_TOKEN_NAME = "blog_login_token";
-    public static final int COOKIE_MAXAGE = 30;
+    public static final int COOKIE_MAXAGE = 30 * 60;
 }

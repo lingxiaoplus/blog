@@ -2,11 +2,6 @@ package com.lingxiao.blog.bean;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-
-import java.util.Collection;
-import java.util.Collections;
 
 @Data
 @NoArgsConstructor
