@@ -1,13 +1,26 @@
 package com.lingxiao.blog.global;
 
+import com.lingxiao.blog.jwt.JwtProperties;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class GlobalCorsConfig {
+@EnableConfigurationProperties(JwtProperties.class)
+public class GlobalCorsConfig implements WebMvcConfigurer {
+
+    @Autowired
+    private JwtProperties jwtProperties;
+    @Bean
+    public LoginInterceptor loginInterceptor(){
+        return new LoginInterceptor(jwtProperties);
+    }
     @Bean
     public CorsFilter corsFilter(){
         //1.添加cors配置信息
@@ -36,5 +49,11 @@ public class GlobalCorsConfig {
 
         //3.返回新的CorsFilter
         return new CorsFilter(configurationSource);
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(loginInterceptor())
+                .addPathPatterns("/article/**","/menu/**","/category/**");
     }
 }

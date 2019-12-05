@@ -1,7 +1,7 @@
 package com.lingxiao.blog.controller;
 
 import com.lingxiao.blog.bean.Menu;
-import com.lingxiao.blog.global.ResponseResult;
+import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.service.MenuService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -24,4 +24,13 @@ public class ContentValue {
 
     public static final String LOGIN_TOKEN_NAME = "blog_login_token";
     public static final int COOKIE_MAXAGE = 30 * 60;
+
+    /**
+     * 文章状态
+     */
+    public static final int ARTICLE_STATUS_DRAFT = 0; //草稿箱
+    public static final int ARTICLE_STATUS_PUBLISHED = 1; //已发布
+    public static final int ARTICLE_STATUS_DELETED = 2; //已删除
+
+
 }

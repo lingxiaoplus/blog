@@ -2,7 +2,7 @@ package com.lingxiao.blog.controller;
 
 import com.lingxiao.blog.bean.User;
 import com.lingxiao.blog.global.ContentValue;
-import com.lingxiao.blog.global.ResponseResult;
+import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.service.UserService;
 import com.lingxiao.blog.utils.CookieUtils;
 import com.lingxiao.blog.utils.IPUtils;

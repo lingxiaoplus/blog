@@ -1,14 +1,13 @@
 package com.lingxiao.blog.controller;
 
 import com.lingxiao.blog.bean.Category;
-import com.lingxiao.blog.global.ResponseResult;
+import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.service.CategoryService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;

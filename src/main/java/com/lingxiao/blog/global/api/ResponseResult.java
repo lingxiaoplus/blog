@@ -1,4 +1,4 @@
-package com.lingxiao.blog.global;
+package com.lingxiao.blog.global.api;
 
 import lombok.Data;
 
