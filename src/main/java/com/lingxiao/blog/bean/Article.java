@@ -5,15 +5,16 @@ import lombok.Data;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
-@Table(name = "article")
+@Table(name = "articles")
 @Data
 public class Article {
     @Id
     private Long id;
     private Long userId;
-    @NotBlank(message = "分类id不能为空")
+    @NotNull(message = "分类id不能为空")
     private Long categoryId;
     @NotBlank(message = "文章标题不能为空")
     private String title;

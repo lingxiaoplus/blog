@@ -3,6 +3,7 @@ package com.lingxiao.blog.controller;
 import com.lingxiao.blog.bean.Article;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.service.ArticleService;
+import com.lingxiao.blog.vo.ArticleVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -26,13 +27,25 @@ public class ArticleController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteArticle(@PathVariable("id") Long id){
+        articleService.deleteArticle(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Article> getArticle(@PathVariable("id") Long id){
+        return ResponseEntity.ok(articleService.getArticleContent(id));
+    }
+
+
     @ApiImplicitParams({
             @ApiImplicitParam(name = "pageNum",value = "第几页"),
             @ApiImplicitParam(name = "pageSize",value = "每页显示多少")
     })
     @ApiOperation(value = "分页获取文章")
     @GetMapping
-    public ResponseEntity<PageResult<Article>> addArticle(
+    public ResponseEntity<PageResult<ArticleVo>> getArticles(
             @RequestParam(value = "pageNum",defaultValue = "1")int pageNum,
             @RequestParam(value = "pageSize",defaultValue = "5")int pageSize){
         return ResponseEntity.ok(articleService.getArticles(pageNum,pageSize));
