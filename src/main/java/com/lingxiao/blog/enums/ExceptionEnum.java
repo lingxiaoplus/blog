@@ -29,6 +29,7 @@ public enum ExceptionEnum {
     CATEGORY_INSERT_ERROR(500,"添加分类失败"),
     ARTICLE_DELETE_ERROR(500,"删除文章失败"),
     ARTICLE_SELECT_ERROR(404,"未找到该文章"),
+    ARTICLE_UPDATE_ERROR(400,"更新文章失败"),
     ;
     private int code;
     private String msg;

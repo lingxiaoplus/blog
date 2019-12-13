@@ -16,6 +16,7 @@ import com.lingxiao.blog.mapper.CategoryMapper;
 import com.lingxiao.blog.mapper.UserMapper;
 import com.lingxiao.blog.service.ArticleService;
 import com.lingxiao.blog.utils.UIDUtil;
+import com.lingxiao.blog.vo.ArticleDetailVo;
 import com.lingxiao.blog.vo.ArticleVo;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -39,6 +40,11 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public void addArticle(Article article) {
+        if (null != article.getId()){
+            //更新文章
+            updateArticle(article);
+            return;
+        }
         UserInfo userInfo = LoginInterceptor.getUserInfo();
         long id = UIDUtil.nextId();
         article.setId(id);
@@ -49,22 +55,54 @@ public class ArticleServiceImpl implements ArticleService {
         if (count != 1) {
             throw new BlogException(ExceptionEnum.CATEGORY_INSERT_ERROR);
         }
-        log.info("文章，{}",article);
+        log.info("文章，{}", article);
     }
 
     @Override
     public void updateArticle(Article article) {
+        if (null == articleMapper.selectByPrimaryKey(article.getId())){
+            throw new BlogException(ExceptionEnum.ARTICLE_SELECT_ERROR);
+        }
+        article.setCreateAt(null);
+        article.setUserId(null);
         article.setUpdateAt(new Date());
+        int count = articleMapper.updateByPrimaryKeySelective(article);
+        if (count != 1) {
+            throw new BlogException(ExceptionEnum.ARTICLE_UPDATE_ERROR);
+        }
     }
 
 
     @Override
-    public Article getArticleContent(Long id) {
+    public ArticleDetailVo getArticleContent(Long id) {
         Article article = articleMapper.selectByPrimaryKey(id);
         if (article == null){
             throw new BlogException(ExceptionEnum.ARTICLE_SELECT_ERROR);
         }
-        return article;
+
+        return transformArticle(article);
+    }
+
+    private ArticleDetailVo transformArticle(Article article){
+        ArticleDetailVo articleDetail = new ArticleDetailVo();
+        articleDetail.setId(String.valueOf(article.getId()));
+        articleDetail.setUserId(String.valueOf(article.getUserId()));
+        articleDetail.setCategoryId(String.valueOf(article.getCategoryId()));
+        articleDetail.setTitle(article.getTitle());
+        articleDetail.setContent(article.getContent());
+        articleDetail.setHeadImage(article.getHeadImage());
+
+        DateTime createTime = new DateTime(article.getCreateAt());
+        String createString = createTime.toString("yyyy-MM-dd HH:mm:ss");
+        articleDetail.setCreateAt(createString);
+        DateTime updateTime = new DateTime(article.getUpdateAt());
+        String updateString = updateTime.toString("yyyy-MM-dd HH:mm:ss");
+        articleDetail.setUpdateAt(updateString);
+
+        articleDetail.setCommentCount(article.getCommentCount());
+        articleDetail.setLikeCount(article.getLikeCount());
+        articleDetail.setWatchCount(article.getWatchCount());
+        return articleDetail;
     }
 
     @Override
@@ -79,15 +117,15 @@ public class ArticleServiceImpl implements ArticleService {
                 .filter((item)-> ContentValue.ARTICLE_STATUS_DELETED != item.getStatus())
                 .map((item) -> {
                     ArticleVo articleVo = new ArticleVo();
-                    articleVo.setId(item.getId());
+                    articleVo.setId(String.valueOf(item.getId()));
                     articleVo.setTitle(item.getTitle());
                     DateTime dateTime = new DateTime(item.getUpdateAt());
                     String dateString = dateTime.toString("yyyy-MM-dd");
                     articleVo.setUpdateTime(dateString);
                     User user = userMapper.selectByPrimaryKey(item.getUserId());
                     articleVo.setAuthor(user.getUsername());
-                    Category category = categoryMapper.selectByPrimaryKey(item.getCategoryId());
-                    articleVo.setCategoryName(category.getName());
+                    //Category category = categoryMapper.selectByPrimaryKey(item.getCategoryId());
+                    articleVo.setCategoryId(String.valueOf(item.getCategoryId()));
                     return articleVo;
                 })
                 .collect(Collectors.toList());

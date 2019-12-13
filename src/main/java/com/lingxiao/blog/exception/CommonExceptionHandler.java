@@ -33,7 +33,7 @@ public class CommonExceptionHandler {
         });
         ExceptionResult exceptionResult = new ExceptionResult(ExceptionEnum.ILLEGA_ARGUMENT.getCode(),
                 stringBuilder.toString());
-        return ResponseEntity.status(200).body(exceptionResult);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResult);
     }
 
     /**
@@ -44,7 +44,7 @@ public class CommonExceptionHandler {
     @ExceptionHandler(Exception.class)  //捕获的异常类型
     @ResponseBody
     public ResponseEntity<ExceptionResult> handlerException(Exception e){
-        ExceptionResult apiResult = new ExceptionResult(500, e.getMessage());
+        ExceptionResult apiResult = new ExceptionResult(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResult);
     }
 }

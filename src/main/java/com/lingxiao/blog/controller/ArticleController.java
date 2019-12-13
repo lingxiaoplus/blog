@@ -2,7 +2,9 @@ package com.lingxiao.blog.controller;
 
 import com.lingxiao.blog.bean.Article;
 import com.lingxiao.blog.global.api.PageResult;
+import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.service.ArticleService;
+import com.lingxiao.blog.vo.ArticleDetailVo;
 import com.lingxiao.blog.vo.ArticleVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -34,8 +36,9 @@ public class ArticleController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Article> getArticle(@PathVariable("id") Long id){
-        return ResponseEntity.ok(articleService.getArticleContent(id));
+    public ResponseEntity<ResponseResult<ArticleDetailVo>> getArticle(@PathVariable("id") Long id){
+        ResponseResult responseResult = new ResponseResult<ArticleDetailVo>(articleService.getArticleContent(id));
+        return ResponseEntity.ok(responseResult);
     }
 
 
