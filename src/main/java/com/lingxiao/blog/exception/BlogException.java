@@ -11,4 +11,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class BlogException extends RuntimeException{
     private ExceptionEnum exceptionEnum;
+
+    @Override
+    public String toString() {
+        return "BlogException{" +
+                "exceptionEnum=" + exceptionEnum.getMsg() +
+                '}';
+    }
 }

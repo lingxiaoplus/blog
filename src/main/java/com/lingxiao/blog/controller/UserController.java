@@ -1,6 +1,8 @@
 package com.lingxiao.blog.controller;
 
+import com.lingxiao.blog.annotation.OperationLogDetail;
 import com.lingxiao.blog.bean.User;
+import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.service.UserService;
@@ -30,6 +32,7 @@ public class UserController {
     @ApiOperation(value = "用户注册，注册成功返回token",notes = "注册")
     @ApiImplicitParam(name = "user",value = "user对象")
     @PostMapping(value = "/register")
+    @OperationLogDetail(detail = "用户注册",operationType = OperationType.LOGIN)
     public ResponseEntity<String> register(@RequestBody @Valid User user,
                                            HttpServletRequest request,
                                            HttpServletResponse response){
@@ -42,6 +45,7 @@ public class UserController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "loginType",value = "登录类型(1: 用户名，2: 邮箱，3: 电话)")
     })
+    @OperationLogDetail(detail = "用户登录",operationType = OperationType.LOGIN)
     @PostMapping(value = "/login")
     public ResponseEntity<String> login(
             @RequestParam(name = "account") String account,
@@ -56,6 +60,7 @@ public class UserController {
 
     @ApiOperation(value = "验证用户是否登录，返回用户信息",notes = "登录状态")
     @GetMapping(value = "/verify")
+    @OperationLogDetail(detail = "验证用户是否登录",operationType = OperationType.LOGIN)
     public ResponseEntity<ResponseResult<User>> verify(
             @CookieValue(value = ContentValue.LOGIN_TOKEN_NAME,required = false) String cookieToken,
             @RequestParam(name = "token",required = false) String token,

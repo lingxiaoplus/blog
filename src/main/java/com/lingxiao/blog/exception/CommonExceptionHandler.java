@@ -17,6 +17,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 @ControllerAdvice
+@Slf4j
 public class CommonExceptionHandler {
     @ExceptionHandler(BlogException.class)
     public ResponseEntity<ExceptionResult> handleException(BlogException e){
@@ -45,6 +46,7 @@ public class CommonExceptionHandler {
     @ResponseBody
     public ResponseEntity<ExceptionResult> handlerException(Exception e){
         ExceptionResult apiResult = new ExceptionResult(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
+        e.printStackTrace();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResult);
     }
 }

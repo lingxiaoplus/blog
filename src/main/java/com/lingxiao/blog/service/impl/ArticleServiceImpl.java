@@ -3,7 +3,6 @@ package com.lingxiao.blog.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.lingxiao.blog.bean.Article;
-import com.lingxiao.blog.bean.Category;
 import com.lingxiao.blog.bean.User;
 import com.lingxiao.blog.bean.UserInfo;
 import com.lingxiao.blog.enums.ExceptionEnum;
@@ -16,12 +15,13 @@ import com.lingxiao.blog.mapper.CategoryMapper;
 import com.lingxiao.blog.mapper.UserMapper;
 import com.lingxiao.blog.service.ArticleService;
 import com.lingxiao.blog.utils.UIDUtil;
-import com.lingxiao.blog.vo.ArticleDetailVo;
-import com.lingxiao.blog.vo.ArticleVo;
+import com.lingxiao.blog.bean.vo.ArticleDetailVo;
+import com.lingxiao.blog.bean.vo.ArticleVo;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
 import java.util.List;
@@ -106,15 +106,20 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public PageResult<ArticleVo> getArticles(int pageNum, int pageSize) {
+    public PageResult<ArticleVo> getArticles(String keyword,int pageNum, int pageSize) {
         PageHelper.startPage(pageNum,pageSize);
-        List<Article> articles = articleMapper.selectAll();
+
+        Example example = new Example(Article.class);
+        example.createCriteria()
+                .andNotEqualTo("status",ContentValue.ARTICLE_STATUS_DELETED)
+                .andLike("title","%"+keyword+"%");
+        List<Article> articles = articleMapper.selectByExample(example);
+
         PageInfo<Article> pageInfo = PageInfo.of(articles);
 
 
         List<ArticleVo> articleVoList = pageInfo.getList()
                 .stream()
-                .filter((item)-> ContentValue.ARTICLE_STATUS_DELETED != item.getStatus())
                 .map((item) -> {
                     ArticleVo articleVo = new ArticleVo();
                     articleVo.setId(String.valueOf(item.getId()));

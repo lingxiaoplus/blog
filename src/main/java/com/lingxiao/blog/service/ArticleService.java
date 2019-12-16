@@ -2,8 +2,8 @@ package com.lingxiao.blog.service;
 
 import com.lingxiao.blog.bean.Article;
 import com.lingxiao.blog.global.api.PageResult;
-import com.lingxiao.blog.vo.ArticleDetailVo;
-import com.lingxiao.blog.vo.ArticleVo;
+import com.lingxiao.blog.bean.vo.ArticleDetailVo;
+import com.lingxiao.blog.bean.vo.ArticleVo;
 
 public interface ArticleService {
     /**
@@ -19,7 +19,7 @@ public interface ArticleService {
      */
     ArticleDetailVo getArticleContent(Long id);
 
-    PageResult<ArticleVo> getArticles(int pageNum, int pageSize);
+    PageResult<ArticleVo> getArticles(String keyword,int pageNum, int pageSize);
     /**
      * 发布文章
      */

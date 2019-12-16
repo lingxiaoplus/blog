@@ -1,13 +1,17 @@
 package com.lingxiao.blog.service.impl;
 
+import com.lingxiao.blog.bean.OperationLog;
 import com.lingxiao.blog.bean.User;
 import com.lingxiao.blog.bean.UserInfo;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.global.ContentValue;
+import com.lingxiao.blog.global.LoginInterceptor;
 import com.lingxiao.blog.jwt.JwtProperties;
 import com.lingxiao.blog.jwt.JwtUtils;
+import com.lingxiao.blog.mapper.LogMapper;
 import com.lingxiao.blog.mapper.UserMapper;
+import com.lingxiao.blog.service.OperationLogService;
 import com.lingxiao.blog.service.UserService;
 import com.lingxiao.blog.utils.IPUtils;
 import com.lingxiao.blog.utils.MD5Util;
@@ -28,6 +32,8 @@ public class UserserviceImpl implements UserService {
     private UserMapper userMapper;
     @Autowired
     private JwtProperties jwtProperties;
+    @Autowired
+    private OperationLogService operationLogService;
 
     @Override
     public String login(String account, String password, int loginType) {
@@ -145,7 +151,7 @@ public class UserserviceImpl implements UserService {
         userInfo.setAge(user.getAge());
         userInfo.setStatus(user.getStatus());*/
         try {
-            log.debug("加密前的用户信息: {}",userInfo);
+            log.debug("加密前的用户信息: {}", userInfo);
             String generateToken = JwtUtils.generateToken(userInfo, jwtProperties.getPrivateKey(), jwtProperties.getExpire());
             return generateToken;
         } catch (Exception e) {

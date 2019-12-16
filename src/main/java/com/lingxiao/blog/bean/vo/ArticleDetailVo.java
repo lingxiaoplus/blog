@@ -1,4 +1,4 @@
-package com.lingxiao.blog.vo;
+package com.lingxiao.blog.bean.vo;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

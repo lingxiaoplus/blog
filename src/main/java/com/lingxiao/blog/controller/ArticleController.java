@@ -4,8 +4,8 @@ import com.lingxiao.blog.bean.Article;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.service.ArticleService;
-import com.lingxiao.blog.vo.ArticleDetailVo;
-import com.lingxiao.blog.vo.ArticleVo;
+import com.lingxiao.blog.bean.vo.ArticleDetailVo;
+import com.lingxiao.blog.bean.vo.ArticleVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -49,9 +49,10 @@ public class ArticleController {
     @ApiOperation(value = "分页获取文章")
     @GetMapping
     public ResponseEntity<PageResult<ArticleVo>> getArticles(
+            @RequestParam(value = "keyword",defaultValue = "") String keyword,
             @RequestParam(value = "pageNum",defaultValue = "1")int pageNum,
             @RequestParam(value = "pageSize",defaultValue = "5")int pageSize){
-        return ResponseEntity.ok(articleService.getArticles(pageNum,pageSize));
+        return ResponseEntity.ok(articleService.getArticles(keyword,pageNum,pageSize));
     }
 
 }
