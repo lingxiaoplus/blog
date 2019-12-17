@@ -8,6 +8,7 @@ import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.global.LoginInterceptor;
 import com.lingxiao.blog.mapper.UserMapper;
 import com.lingxiao.blog.service.OperationLogService;
+import com.lingxiao.blog.utils.IPUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -16,6 +17,9 @@ import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 
 @Aspect
 @Component
@@ -26,6 +30,8 @@ public class LogAspect {
     private OperationLogService logService;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private HttpServletRequest request;
     /**
      * 切入点为注解的方式
      */
@@ -58,9 +64,11 @@ public class LogAspect {
             OperationLog operationLog = new OperationLog();
             operationLog.setUsername(user.getUsername());
             operationLog.setNickname(user.getNickname());
-            operationLog.setOperationType(detail.operationType().getValue());
+            operationLog.setOperationType(detail.operationType().getCode());
             operationLog.setOperationContent(detail.detail());
             operationLog.setRunTakes(time);
+            operationLog.setUserIp(IPUtils.ipToNum(IPUtils.getIpAddress(request)));
+            operationLog.setCreateAt(new Date());
             logService.setOperationLog(operationLog);
         } catch (Exception e) {
             e.printStackTrace();

@@ -3,19 +3,20 @@ package com.lingxiao.blog.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.lingxiao.blog.bean.OperationLog;
-import com.lingxiao.blog.bean.User;
-import com.lingxiao.blog.bean.UserInfo;
-import com.lingxiao.blog.global.LoginInterceptor;
+import com.lingxiao.blog.bean.vo.OperationLogVo;
+import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.mapper.LogMapper;
 import com.lingxiao.blog.mapper.UserMapper;
 import com.lingxiao.blog.service.OperationLogService;
-import com.lingxiao.blog.service.UserService;
+import com.lingxiao.blog.utils.IPUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -26,20 +27,39 @@ public class OperationLogServiceImpl implements OperationLogService {
     private UserMapper userMapper;
 
     @Override
-    public PageResult<OperationLog> getLogList(int pageNum, int pageSize){
+    public PageResult<OperationLogVo> getLogList(int pageNum, int pageSize,int operationType){
+
         PageHelper.startPage(pageNum,pageSize);
-        List<OperationLog> logList = logMapper.selectAll();
+        OperationLog operationLog = new OperationLog();
+        operationLog.setOperationType(operationType);
+        List<OperationLog> logList = logMapper.select(operationLog);
         PageInfo<OperationLog> pageInfo = PageInfo.of(logList);
-        return new PageResult<OperationLog>(pageInfo.getTotal(),pageInfo.getPages(),pageInfo.getList());
+        List<OperationLogVo> logListVo = pageInfo.getList().stream().map((item)->{
+            OperationLogVo logVo = new OperationLogVo();
+            DateTime dateTime = new DateTime(item.getCreateAt());
+            String dateString = dateTime.toString("yyyy-MM-dd");
+            logVo.setCreateAt(dateString);
+            logVo.setId(item.getId());
+            logVo.setUsername(item.getUsername());
+            logVo.setNickname(item.getNickname());
+            logVo.setUserIp(IPUtils.numToIP(item.getUserIp()));
+            logVo.setRunTakes(item.getRunTakes());
+            logVo.setOperationContent(item.getOperationContent());
+            logVo.setOperationType(ContentValue.LOG_LOGIN == operationType?"登录日志":"操作日志");
+            return logVo;
+        }).collect(Collectors.toList());
+
+
+
+        return new PageResult<OperationLogVo>(pageInfo.getTotal(),pageInfo.getPages(),logListVo);
     }
 
     @Override
     public void setOperationLog(OperationLog operationLog){
-
-        logMapper.insertSelective(operationLog);
         int count = logMapper.insertSelective(operationLog);
         if (count != 1){
-            log.error("记录日志失败,{}",operationLog);
+            log.error("记录日志失败,{}", operationLog);
         }
+        log.error("记录日志成功,{}", operationLog);
     }
 }

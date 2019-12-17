@@ -9,6 +9,7 @@ public class ArticleDetailVo {
     private String id;
     private String userId;
     private String categoryId;
+    private String categoryName;
     private String title;
     private String content;
 

@@ -60,7 +60,7 @@ public class UserController {
 
     @ApiOperation(value = "验证用户是否登录，返回用户信息",notes = "登录状态")
     @GetMapping(value = "/verify")
-    @OperationLogDetail(detail = "验证用户是否登录",operationType = OperationType.LOGIN)
+    //@OperationLogDetail(detail = "验证用户是否登录",operationType = OperationType.LOGIN)
     public ResponseEntity<ResponseResult<User>> verify(
             @CookieValue(value = ContentValue.LOGIN_TOKEN_NAME,required = false) String cookieToken,
             @RequestParam(name = "token",required = false) String token,

@@ -1,6 +1,8 @@
 package com.lingxiao.blog.controller;
 
+import com.lingxiao.blog.annotation.OperationLogDetail;
 import com.lingxiao.blog.bean.Article;
+import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.service.ArticleService;
@@ -24,12 +26,18 @@ public class ArticleController {
     private ArticleService articleService;
 
     @PostMapping
+    @ApiOperation(value = "添加文章")
+    @ApiImplicitParam(name = "Article",value = "文章实体")
+    @OperationLogDetail(detail = "添加文章",operationType = OperationType.INSERT)
     public ResponseEntity<Void> addArticle(@RequestBody @Valid Article article){
         articleService.addArticle(article);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
+    @ApiOperation(value = "删除文章")
+    @ApiImplicitParam(name = "id",value = "文章id")
+    @OperationLogDetail(detail = "删除文章",operationType = OperationType.DELETE)
     public ResponseEntity<Void> deleteArticle(@PathVariable("id") Long id){
         articleService.deleteArticle(id);
         return ResponseEntity.ok().build();
@@ -44,9 +52,11 @@ public class ArticleController {
 
     @ApiImplicitParams({
             @ApiImplicitParam(name = "pageNum",value = "第几页"),
-            @ApiImplicitParam(name = "pageSize",value = "每页显示多少")
+            @ApiImplicitParam(name = "pageSize",value = "每页显示多少"),
+            @ApiImplicitParam(name = "keyword",value = "关键词")
     })
     @ApiOperation(value = "分页获取文章")
+    @OperationLogDetail(detail = "分页获取文章",operationType = OperationType.SELECT)
     @GetMapping
     public ResponseEntity<PageResult<ArticleVo>> getArticles(
             @RequestParam(value = "keyword",defaultValue = "") String keyword,

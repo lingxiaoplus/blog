@@ -17,7 +17,7 @@ public class OperationLog {
     private String nickname;
     private Long userIp;
     private Long runTakes;
-    private String operationType;
+    private Integer operationType;
     private String operationContent;
     private Date createAt;
 }

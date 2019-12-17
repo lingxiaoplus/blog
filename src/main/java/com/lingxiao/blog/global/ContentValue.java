@@ -33,4 +33,7 @@ public class ContentValue {
     public static final int ARTICLE_STATUS_DELETED = 2; //已删除
 
 
+    public static final int LOG_LOGIN = 0;
+    public static final int LOG_OPERATION = 1;
+
 }

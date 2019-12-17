@@ -3,6 +3,7 @@ package com.lingxiao.blog.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.lingxiao.blog.bean.Article;
+import com.lingxiao.blog.bean.Category;
 import com.lingxiao.blog.bean.User;
 import com.lingxiao.blog.bean.UserInfo;
 import com.lingxiao.blog.enums.ExceptionEnum;
@@ -88,6 +89,7 @@ public class ArticleServiceImpl implements ArticleService {
         articleDetail.setId(String.valueOf(article.getId()));
         articleDetail.setUserId(String.valueOf(article.getUserId()));
         articleDetail.setCategoryId(String.valueOf(article.getCategoryId()));
+
         articleDetail.setTitle(article.getTitle());
         articleDetail.setContent(article.getContent());
         articleDetail.setHeadImage(article.getHeadImage());
@@ -131,6 +133,8 @@ public class ArticleServiceImpl implements ArticleService {
                     articleVo.setAuthor(user.getUsername());
                     //Category category = categoryMapper.selectByPrimaryKey(item.getCategoryId());
                     articleVo.setCategoryId(String.valueOf(item.getCategoryId()));
+                    Category category = categoryMapper.selectByPrimaryKey(item.getCategoryId());
+                    articleVo.setCategoryName(category.getName());
                     return articleVo;
                 })
                 .collect(Collectors.toList());

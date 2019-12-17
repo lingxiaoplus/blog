@@ -62,4 +62,7 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
     public static UserInfo getUserInfo(){
         return threadLocal.get();
     }
+    public static void setUserInfo(UserInfo userInfo){
+        threadLocal.set(userInfo);
+    }
 }
