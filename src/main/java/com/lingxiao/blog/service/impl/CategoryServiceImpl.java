@@ -5,11 +5,11 @@ import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.mapper.CategoryMapper;
 import com.lingxiao.blog.service.CategoryService;
-import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -21,6 +21,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void addCategory(Category category) {
+        category.setCreateAt(new Date());
         int count = categoryMapper.insertSelective(category);
         if (count != 1){
             throw new BlogException(ExceptionEnum.CATEGORY_INSERT_ERROR);
