@@ -4,9 +4,11 @@ import lombok.Data;
 
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.List;
 
 @Table(name = "articles")
 @Data
@@ -28,5 +30,8 @@ public class Article {
     private Date updateAt;
     private Long likeCount;
     private Integer status;
+
+    @Transient
+    private List<Long> labelIds;
 }
 

@@ -5,6 +5,8 @@ import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.bean.vo.ArticleDetailVo;
 import com.lingxiao.blog.bean.vo.ArticleVo;
 
+import java.util.List;
+
 public interface ArticleService {
     /**
      * 添加文章到草稿箱IntoDraft

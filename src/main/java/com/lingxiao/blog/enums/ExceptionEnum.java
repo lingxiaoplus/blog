@@ -28,6 +28,7 @@ public enum ExceptionEnum {
     CATEGORY_UPDATE_ERROR(500,"更新分类失败"),
     CATEGORY_INSERT_ERROR(500,"添加分类失败"),
     LABEL_INSERT_ERROR(500,"添加标签失败"),
+    ARTICLE_LABEL_INSERT_ERROR(500,"给文章添加标签失败"),
     LABEL_UPDATE_ERROR(500,"更新标签失败"),
     LABEL_DELETE_ERROR(500,"删除标签失败"),
     ARTICLE_DELETE_ERROR(500,"删除文章失败"),

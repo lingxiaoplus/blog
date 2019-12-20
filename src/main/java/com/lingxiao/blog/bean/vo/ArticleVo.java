@@ -13,6 +13,6 @@ public class ArticleVo {
     private String author;
     private String categoryId;
     private String categoryName;
-    private List<String> tables;
+    private List<String> lables;
     private String updateTime;
 }

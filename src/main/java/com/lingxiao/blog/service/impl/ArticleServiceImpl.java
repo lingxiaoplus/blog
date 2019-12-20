@@ -2,18 +2,13 @@ package com.lingxiao.blog.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.lingxiao.blog.bean.Article;
-import com.lingxiao.blog.bean.Category;
-import com.lingxiao.blog.bean.User;
-import com.lingxiao.blog.bean.UserInfo;
+import com.lingxiao.blog.bean.*;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.LoginInterceptor;
 import com.lingxiao.blog.global.api.PageResult;
-import com.lingxiao.blog.mapper.ArticleMapper;
-import com.lingxiao.blog.mapper.CategoryMapper;
-import com.lingxiao.blog.mapper.UserMapper;
+import com.lingxiao.blog.mapper.*;
 import com.lingxiao.blog.service.ArticleService;
 import com.lingxiao.blog.utils.UIDUtil;
 import com.lingxiao.blog.bean.vo.ArticleDetailVo;
@@ -22,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
@@ -38,7 +35,12 @@ public class ArticleServiceImpl implements ArticleService {
     private UserMapper userMapper;
     @Autowired
     private CategoryMapper categoryMapper;
+    @Autowired
+    private LabelMapper labelMapper;
+    @Autowired
+    private ArticleLabelMapper articleLabelMapper;
 
+    @Transactional
     @Override
     public void addArticle(Article article) {
         if (null != article.getId()){
@@ -56,7 +58,23 @@ public class ArticleServiceImpl implements ArticleService {
         if (count != 1) {
             throw new BlogException(ExceptionEnum.CATEGORY_INSERT_ERROR);
         }
+        if (CollectionUtils.isEmpty(article.getLabelIds())){
+            addLabels(article.getId(),article.getLabelIds());
+        }
         log.info("文章，{}", article);
+    }
+
+    private void addLabels(long aId, List<Long> ids){
+        List<ArticleLabel> labels = ids.stream().map((labelId) -> {
+            ArticleLabel articleLabel = new ArticleLabel();
+            articleLabel.setArticleId(aId);
+            articleLabel.setLabelId(labelId);
+            return articleLabel;
+        }).collect(Collectors.toList());
+        int labelsCount = articleLabelMapper.insertList(labels);
+        if (labelsCount != labels.size()){
+            throw new BlogException(ExceptionEnum.ARTICLE_LABEL_INSERT_ERROR);
+        }
     }
 
     @Override
