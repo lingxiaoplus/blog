@@ -1,0 +1,74 @@
+package com.lingxiao.blog.service.impl;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.lingxiao.blog.bean.Article;
+import com.lingxiao.blog.bean.Comment;
+import com.lingxiao.blog.bean.User;
+import com.lingxiao.blog.bean.vo.CommentVo;
+import com.lingxiao.blog.global.api.PageResult;
+import com.lingxiao.blog.mapper.ArticleMapper;
+import com.lingxiao.blog.mapper.CommentMapper;
+import com.lingxiao.blog.mapper.UserMapper;
+import com.lingxiao.blog.service.ArticleService;
+import com.lingxiao.blog.service.CommentService;
+import com.lingxiao.blog.utils.IPUtils;
+import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class CommentServiceImpl implements CommentService {
+    @Autowired
+    private CommentMapper commentMapper;
+    @Autowired
+    private ArticleMapper articleMapper;
+    @Autowired
+    private UserMapper userMapper;
+
+    @Override
+    public int getCommentCount(long articleId){
+        Comment comment = new Comment();
+        comment.setArticleId(articleId);
+        return commentMapper.selectCount(comment);
+    }
+
+    @Override
+    public PageResult<CommentVo> getComments(String keyword, int pageNum, int pageSize) {
+        PageHelper.startPage(pageNum,pageSize);
+        Example example = new Example(Comment.class);
+        example.createCriteria()
+                .andLike("content","%"+keyword+"%");
+        List<Comment> comments = commentMapper.selectByExample(example);
+        PageInfo<Comment> pageInfo = PageInfo.of(comments);
+
+        List<CommentVo> commentVoList = pageInfo.getList()
+                .stream()
+                .map((item) -> {
+                    CommentVo commentVo = new CommentVo();
+                    commentVo.setId(String.valueOf(item.getId()));
+                    commentVo.setUserId(String.valueOf(item.getUserId()));
+                    commentVo.setArticleId(String.valueOf(item.getArticleId()));
+                    commentVo.setLikeCount(String.valueOf(item.getLikeCount()));
+                    commentVo.setContent(item.getContent());
+
+                    User user = userMapper.selectByPrimaryKey(item.getUserId());
+                    commentVo.setUsername(user.getUsername());
+                    commentVo.setUserEmail(user.getEmail());
+                    commentVo.setUserIP(IPUtils.numToIP(user.getUserIp()));
+                    Article article = articleMapper.selectByPrimaryKey(item.getArticleId());
+                    commentVo.setArticleTitle(article.getTitle());
+                    commentVo.setStatus(item.getStatus());
+                    DateTime dateTime = new DateTime(item.getCreateAt());
+                    String dateString = dateTime.toString("yyyy-MM-dd");
+                    commentVo.setCreateAt(dateString);
+                    return commentVo;
+                })
+                .collect(Collectors.toList());
+        return new PageResult<CommentVo>(pageInfo.getTotal(),pageInfo.getPages(),commentVoList);
+    }
+}
