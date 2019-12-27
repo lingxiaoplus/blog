@@ -15,4 +15,5 @@ public class ArticleVo {
     private String categoryName;
     private List<String> lables;
     private String updateTime;
+    private String headImage;
 }
