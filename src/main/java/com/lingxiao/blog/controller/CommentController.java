@@ -1,6 +1,7 @@
 package com.lingxiao.blog.controller;
 
 import com.lingxiao.blog.annotation.OperationLogDetail;
+import com.lingxiao.blog.bean.Comment;
 import com.lingxiao.blog.bean.vo.CommentVo;
 import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.global.api.PageResult;
@@ -11,10 +12,9 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @Api(value = "评论接口")
 @RestController
@@ -40,7 +40,14 @@ public class CommentController {
         return ResponseEntity.ok(commentService.getComments(keyword,pageNum,pageSize));
     }
 
-
+    @ApiImplicitParam(name = "comment",value = "评论实体类")
+    @ApiOperation(value = "添加评论")
+    @OperationLogDetail(detail = "添加评论",operationType = OperationType.INSERT)
+    @PostMapping
+    public ResponseEntity<Void> addComment(@RequestBody @Valid Comment comment){
+        commentService.addComment(comment);
+        return ResponseEntity.ok().build();
+    }
 
 
 }

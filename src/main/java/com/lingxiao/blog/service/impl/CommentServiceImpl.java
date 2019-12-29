@@ -6,6 +6,10 @@ import com.lingxiao.blog.bean.Article;
 import com.lingxiao.blog.bean.Comment;
 import com.lingxiao.blog.bean.User;
 import com.lingxiao.blog.bean.vo.CommentVo;
+import com.lingxiao.blog.enums.CommentState;
+import com.lingxiao.blog.enums.ExceptionEnum;
+import com.lingxiao.blog.exception.BlogException;
+import com.lingxiao.blog.global.LoginInterceptor;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.mapper.ArticleMapper;
 import com.lingxiao.blog.mapper.CommentMapper;
@@ -13,12 +17,16 @@ import com.lingxiao.blog.mapper.UserMapper;
 import com.lingxiao.blog.service.ArticleService;
 import com.lingxiao.blog.service.CommentService;
 import com.lingxiao.blog.utils.IPUtils;
+import com.lingxiao.blog.utils.IdWorker;
+import com.lingxiao.blog.utils.UIDUtil;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +43,18 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = new Comment();
         comment.setArticleId(articleId);
         return commentMapper.selectCount(comment);
+    }
+
+    @Override
+    public void addComment(Comment comment) {
+        comment.setId(UIDUtil.nextId());
+        comment.setStatus(CommentState.UNDER_APPROVAL.getState());
+        comment.setCreateAt(new Date());
+        //comment.setUserId(LoginInterceptor.getUserInfo().getId());
+        int count = commentMapper.insertSelective(comment);
+        if (count != 1) {
+            throw new BlogException(ExceptionEnum.COMMENT_INSERT_ERROR);
+        }
     }
 
     @Override
