@@ -12,6 +12,7 @@ public class CommentVo {
     private String createAt;
     private String content;
     private String username;
+    private String nickname;
     private String userIP;
     private String userEmail;
     private String articleTitle;

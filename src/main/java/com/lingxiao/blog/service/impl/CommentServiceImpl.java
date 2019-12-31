@@ -80,12 +80,16 @@ public class CommentServiceImpl implements CommentService {
                     commentVo.setUsername(user.getUsername());
                     commentVo.setUserEmail(user.getEmail());
                     commentVo.setUserIP(IPUtils.numToIP(user.getUserIp()));
+                    commentVo.setNickname(user.getNickname());
+
+
                     Article article = articleMapper.selectByPrimaryKey(item.getArticleId());
                     commentVo.setArticleTitle(article.getTitle());
                     commentVo.setStatus(item.getStatus());
                     DateTime dateTime = new DateTime(item.getCreateAt());
                     String dateString = dateTime.toString("yyyy-MM-dd");
                     commentVo.setCreateAt(dateString);
+
                     return commentVo;
                 })
                 .collect(Collectors.toList());
