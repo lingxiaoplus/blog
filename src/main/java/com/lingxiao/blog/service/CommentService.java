@@ -7,8 +7,9 @@ import com.lingxiao.blog.global.api.PageResult;
 
 public interface CommentService {
     PageResult<CommentVo> getComments(String keyword, int pageNum, int pageSize);
-    int getCommentCount(long articleId);
 
+    PageResult<CommentVo> getCommentsByArticleId(int pageNum, int pageSize,long id);
+    int getCommentCount(long articleId);
     /**
      * 添加评论
      * @param comment  评论内容

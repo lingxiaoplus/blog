@@ -58,7 +58,7 @@ public class ArticleServiceImpl implements ArticleService {
         if (count != 1) {
             throw new BlogException(ExceptionEnum.CATEGORY_INSERT_ERROR);
         }
-        if (CollectionUtils.isEmpty(article.getLabelIds())){
+        if (!CollectionUtils.isEmpty(article.getLabelIds())){
             addLabels(article.getId(),article.getLabelIds());
         }
         log.info("文章，{}", article);

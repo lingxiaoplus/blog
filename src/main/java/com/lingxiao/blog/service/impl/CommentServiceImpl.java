@@ -22,6 +22,7 @@ import com.lingxiao.blog.utils.UIDUtil;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
@@ -68,31 +69,59 @@ public class CommentServiceImpl implements CommentService {
 
         List<CommentVo> commentVoList = pageInfo.getList()
                 .stream()
-                .map((item) -> {
-                    CommentVo commentVo = new CommentVo();
-                    commentVo.setId(String.valueOf(item.getId()));
-                    commentVo.setUserId(String.valueOf(item.getUserId()));
-                    commentVo.setArticleId(String.valueOf(item.getArticleId()));
-                    commentVo.setLikeCount(String.valueOf(item.getLikeCount()));
-                    commentVo.setContent(item.getContent());
-
-                    User user = userMapper.selectByPrimaryKey(item.getUserId());
-                    commentVo.setUsername(user.getUsername());
-                    commentVo.setUserEmail(user.getEmail());
-                    commentVo.setUserIP(IPUtils.numToIP(user.getUserIp()));
-                    commentVo.setNickname(user.getNickname());
-
-
-                    Article article = articleMapper.selectByPrimaryKey(item.getArticleId());
-                    commentVo.setArticleTitle(article.getTitle());
-                    commentVo.setStatus(item.getStatus());
-                    DateTime dateTime = new DateTime(item.getCreateAt());
-                    String dateString = dateTime.toString("yyyy-MM-dd");
-                    commentVo.setCreateAt(dateString);
-
-                    return commentVo;
-                })
+                .map((this::parseComment))
                 .collect(Collectors.toList());
         return new PageResult<CommentVo>(pageInfo.getTotal(),pageInfo.getPages(),commentVoList);
+    }
+
+    @Override
+    public PageResult<CommentVo> getCommentsByArticleId(int pageNum, int pageSize, long id) {
+        PageHelper.startPage(pageNum,pageSize);
+        Comment comment = new Comment();
+        comment.setArticleId(id);
+        List<Comment> comments = commentMapper.select(comment);
+        PageInfo<Comment> pageInfo = PageInfo.of(comments);
+
+        List<CommentVo> commentVoList = pageInfo.getList()
+                .stream()
+                .map(this::parseComment)
+                .collect(Collectors.toList());
+
+        return new PageResult<CommentVo>(pageInfo.getTotal(),pageInfo.getPages(),commentVoList);
+    }
+
+    private CommentVo parseComment(Comment item){
+
+
+
+        CommentVo commentVo = new CommentVo();
+        commentVo.setId(String.valueOf(item.getId()));
+        commentVo.setUserId(String.valueOf(item.getUserId()));
+        commentVo.setArticleId(String.valueOf(item.getArticleId()));
+        commentVo.setLikeCount(String.valueOf(item.getLikeCount()));
+        commentVo.setContent(item.getContent());
+
+
+        Comment childrenComment = new Comment();
+        childrenComment.setParentId(item.getId());
+        List<Comment> children = commentMapper.selectByExample(childrenComment);
+        if (!CollectionUtils.isEmpty(children)){
+            //commentVo.setChildren(parseComment(children));
+        }
+
+        User user = userMapper.selectByPrimaryKey(item.getUserId());
+        commentVo.setUsername(user.getUsername());
+        commentVo.setUserEmail(user.getEmail());
+        commentVo.setUserIP(IPUtils.numToIP(user.getUserIp()));
+        commentVo.setNickname(user.getNickname());
+
+        Article article = articleMapper.selectByPrimaryKey(item.getArticleId());
+        commentVo.setArticleTitle(article.getTitle());
+        commentVo.setStatus(item.getStatus());
+        DateTime dateTime = new DateTime(item.getCreateAt());
+        String dateString = dateTime.toString("yyyy-MM-dd");
+        commentVo.setCreateAt(dateString);
+
+        return commentVo;
     }
 }

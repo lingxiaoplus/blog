@@ -2,6 +2,8 @@ package com.lingxiao.blog.bean.vo;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class CommentVo {
     private String id;
@@ -17,5 +19,7 @@ public class CommentVo {
     private String userEmail;
     private String articleTitle;
     private Integer status;
+
+    private List<CommentVo> children;
 
 }
