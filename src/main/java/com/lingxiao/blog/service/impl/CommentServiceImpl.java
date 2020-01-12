@@ -5,17 +5,18 @@ import com.github.pagehelper.PageInfo;
 import com.lingxiao.blog.bean.Article;
 import com.lingxiao.blog.bean.Comment;
 import com.lingxiao.blog.bean.User;
+import com.lingxiao.blog.bean.vo.ArticleDetailVo;
 import com.lingxiao.blog.bean.vo.CommentVo;
 import com.lingxiao.blog.enums.CommentState;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.global.LoginInterceptor;
 import com.lingxiao.blog.global.api.PageResult;
-import com.lingxiao.blog.mapper.ArticleMapper;
 import com.lingxiao.blog.mapper.CommentMapper;
 import com.lingxiao.blog.mapper.UserMapper;
 import com.lingxiao.blog.service.ArticleService;
 import com.lingxiao.blog.service.CommentService;
+import com.lingxiao.blog.service.UserService;
 import com.lingxiao.blog.utils.IPUtils;
 import com.lingxiao.blog.utils.IdWorker;
 import com.lingxiao.blog.utils.UIDUtil;
@@ -34,8 +35,12 @@ import java.util.stream.Collectors;
 public class CommentServiceImpl implements CommentService {
     @Autowired
     private CommentMapper commentMapper;
+
     @Autowired
-    private ArticleMapper articleMapper;
+    private ArticleService articleService;
+
+    @Autowired
+    private UserService userService;
     @Autowired
     private UserMapper userMapper;
 
@@ -86,42 +91,43 @@ public class CommentServiceImpl implements CommentService {
                 .stream()
                 .map(this::parseComment)
                 .collect(Collectors.toList());
-
         return new PageResult<CommentVo>(pageInfo.getTotal(),pageInfo.getPages(),commentVoList);
     }
 
     private CommentVo parseComment(Comment item){
-
-
-
         CommentVo commentVo = new CommentVo();
         commentVo.setId(String.valueOf(item.getId()));
-        commentVo.setUserId(String.valueOf(item.getUserId()));
-        commentVo.setArticleId(String.valueOf(item.getArticleId()));
-        commentVo.setLikeCount(String.valueOf(item.getLikeCount()));
         commentVo.setContent(item.getContent());
+        commentVo.setParentId(String.valueOf(item.getParentId()));
+        commentVo.setStatus(item.getStatus());
+        DateTime createDate = new DateTime(item.getCreateAt());
+        String createString = createDate.toString("yyyy-MM-dd");
+        commentVo.setCreateAt(createString);
 
+        User user = userMapper.selectByPrimaryKey(item.getUserId());
+        user.setUIp(IPUtils.numToIP(user.getUserIp()));
+        user.setUId(String.valueOf(user.getUserId()));
+        user.setUserId(null);
+        user.setUserIp(null);
+        commentVo.setMember(user);
+
+        ArticleDetailVo articleContent = articleService.getArticleContent(item.getArticleId());
+        articleContent.setContent(null);
+        commentVo.setArticle(articleContent);
 
         Comment childrenComment = new Comment();
         childrenComment.setParentId(item.getId());
-        List<Comment> children = commentMapper.selectByExample(childrenComment);
-        if (!CollectionUtils.isEmpty(children)){
-            //commentVo.setChildren(parseComment(children));
+        List<Comment> children = commentMapper.select(childrenComment);
+        if (CollectionUtils.isEmpty(children)){
+            //递归结束条件
+            return commentVo;
         }
-
-        User user = userMapper.selectByPrimaryKey(item.getUserId());
-        commentVo.setUsername(user.getUsername());
-        commentVo.setUserEmail(user.getEmail());
-        commentVo.setUserIP(IPUtils.numToIP(user.getUserIp()));
-        commentVo.setNickname(user.getNickname());
-
-        Article article = articleMapper.selectByPrimaryKey(item.getArticleId());
-        commentVo.setArticleTitle(article.getTitle());
-        commentVo.setStatus(item.getStatus());
-        DateTime dateTime = new DateTime(item.getCreateAt());
-        String dateString = dateTime.toString("yyyy-MM-dd");
-        commentVo.setCreateAt(dateString);
-
+        //这个地方要做一个优化   楼中楼分页
+        List<CommentVo> collect = children
+                .stream()
+                .map((co) -> parseComment(co))
+                .collect(Collectors.toList());
+        commentVo.setReplies(collect);
         return commentVo;
     }
 }

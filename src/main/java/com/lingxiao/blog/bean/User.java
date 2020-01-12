@@ -42,4 +42,9 @@ public class User {
 
     @Transient
     private List<Role> roles;
+    @Transient
+    private String uId;
+    @Transient
+    private String uIp;
+
 }

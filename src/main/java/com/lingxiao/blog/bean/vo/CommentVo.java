@@ -1,5 +1,6 @@
 package com.lingxiao.blog.bean.vo;
 
+import com.lingxiao.blog.bean.User;
 import lombok.Data;
 
 import java.util.List;
@@ -8,18 +9,12 @@ import java.util.List;
 public class CommentVo {
     private String id;
     private String parentId;
-    private String userId;
-    private String articleId;
-    private String likeCount;
     private String createAt;
     private String content;
-    private String username;
-    private String nickname;
-    private String userIP;
-    private String userEmail;
-    private String articleTitle;
     private Integer status;
 
-    private List<CommentVo> children;
+    private User member;  //这条评论的所属者
+    private ArticleDetailVo article;  //文章
+    private List<CommentVo> replies;  //这条评论的回复
 
 }
