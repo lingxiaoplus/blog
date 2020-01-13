@@ -35,6 +35,8 @@ public enum ExceptionEnum {
     ARTICLE_SELECT_ERROR(404,"未找到该文章"),
     ARTICLE_UPDATE_ERROR(400,"更新文章失败"),
     COMMENT_INSERT_ERROR(500,"添加评论失败"),
+    COMMENT_DELETE_ERROR(500,"删除评论失败"),
+    COMMENT_UPDATE_ERROR(500,"修改评论状态失败"),
     ;
     private int code;
     private String msg;

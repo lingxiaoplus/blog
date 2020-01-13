@@ -99,6 +99,10 @@ public class UserserviceImpl implements UserService {
             UserInfo userInfo = JwtUtils.getInfoFromToken(token, jwtProperties.getPublicKey());
             log.debug("解密得到用户信息: {}",userInfo);
             User user = userMapper.selectByPrimaryKey(userInfo.getId());
+            user.setUId(String.valueOf(user.getUserId()));
+            user.setUIp(IPUtils.numToIP(user.getUserIp()));
+            user.setUserId(null);
+            user.setUserIp(null);
             return user;
         } catch (Exception e) {
             log.error("解密失败", e);

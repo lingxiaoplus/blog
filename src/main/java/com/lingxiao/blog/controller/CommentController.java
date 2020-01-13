@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URLDecoder;
+import java.util.List;
 
 @Api(value = "评论接口")
 @RestController
@@ -50,5 +51,21 @@ public class CommentController {
         return ResponseEntity.ok().build();
     }
 
+    @ApiImplicitParam(name = "ids",value = "评论id列表")
+    @ApiOperation(value = "删除评论")
+    @OperationLogDetail(detail = "删除评论",operationType = OperationType.DELETE)
+    @DeleteMapping
+    public ResponseEntity<Void> deleteComment(@RequestParam("ids") List<Long> ids){
+        commentService.deleteComments(ids);
+        return ResponseEntity.ok().build();
+    }
 
+    @ApiImplicitParam(name = "ids",value = "评论id列表")
+    @ApiOperation(value = "删除评论")
+    @OperationLogDetail(detail = "删除评论",operationType = OperationType.DELETE)
+    @PutMapping
+    public ResponseEntity<Void> deleteComment(@RequestParam("ids") List<Long> ids,@RequestParam("type") Integer type){
+        commentService.setCommentStatus(ids,type);
+        return ResponseEntity.ok().build();
+    }
 }
