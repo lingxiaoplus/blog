@@ -50,8 +50,21 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void addComment(Comment comment) {
         comment.setId(UIDUtil.nextId());
-        comment.setStatus(CommentState.UNDER_APPROVAL.getState());
         comment.setCreateAt(new Date());
+        comment.setStatus(CommentState.UNDER_APPROVAL.getState());
+
+        if(null != comment.getParentId()){
+            Comment parent = commentMapper.selectByPrimaryKey(comment.getParentId());
+            if (CommentState.UNDER_APPROVAL.getState() == parent.getStatus()){
+                //当前这条父评论还是待审核的 但是能收到子评论 说明是管理员回复的
+                comment.setStatus(CommentState.APPROVAL.getState());
+                parent.setStatus(CommentState.APPROVAL.getState());
+                int count = commentMapper.updateByPrimaryKeySelective(parent);
+                if (count != 1) {
+                    throw new BlogException(ExceptionEnum.COMMENT_INSERT_ERROR);
+                }
+            }
+        }
         //comment.setUserId(LoginInterceptor.getUserInfo().getId());
         int count = commentMapper.insertSelective(comment);
         if (count != 1) {
@@ -70,6 +83,7 @@ public class CommentServiceImpl implements CommentService {
 
         List<CommentVo> commentVoList = pageInfo.getList()
                 .stream()
+                .filter((item)-> item.getParentId() == 0) //去掉楼中楼
                 .map((this::parseComment))
                 .collect(Collectors.toList());
         return new PageResult<CommentVo>(pageInfo.getTotal(),pageInfo.getPages(),commentVoList);
@@ -86,6 +100,7 @@ public class CommentServiceImpl implements CommentService {
 
         List<CommentVo> commentVoList = pageInfo.getList()
                 .stream()
+                .filter((item)-> item.getParentId() == 0) //去掉楼中楼
                 .map(this::parseComment)
                 .collect(Collectors.toList());
         return new PageResult<CommentVo>(pageInfo.getTotal(),pageInfo.getPages(),commentVoList);
