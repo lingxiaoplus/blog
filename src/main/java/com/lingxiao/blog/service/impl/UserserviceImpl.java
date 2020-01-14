@@ -11,6 +11,7 @@ import com.lingxiao.blog.jwt.JwtProperties;
 import com.lingxiao.blog.jwt.JwtUtils;
 import com.lingxiao.blog.mapper.UserMapper;
 import com.lingxiao.blog.service.UserService;
+import com.lingxiao.blog.utils.EmailUtil;
 import com.lingxiao.blog.utils.IPUtils;
 import com.lingxiao.blog.utils.MD5Util;
 import com.lingxiao.blog.utils.UIDUtil;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import java.util.Date;
 
 @Service
@@ -158,5 +160,21 @@ public class UserserviceImpl implements UserService {
             log.error("生成token失败 ", e);
         }
         return null;
+    }
+
+    @Override
+    public void sendEmail(String receiver){
+        EmailUtil.EmailConfigure emailConfigure = new EmailUtil.EmailConfigure();
+        emailConfigure.setSendAddress("651121818@qq.com");
+        emailConfigure.setReceiveAddress(receiver);
+        emailConfigure.setAuthCode("bwrhaeijtgvybfha");
+        emailConfigure.setTitle("验证码");
+        emailConfigure.setContent("这是验证码的内容");
+        try {
+            EmailUtil.sendEmail(emailConfigure);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            throw new BlogException(ExceptionEnum.SEND_EMAIL_ERROR);
+        }
     }
 }

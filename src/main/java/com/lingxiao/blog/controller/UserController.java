@@ -62,17 +62,26 @@ public class UserController {
     @GetMapping(value = "/verify")
     //@OperationLogDetail(detail = "验证用户是否登录",operationType = OperationType.LOGIN)
     public ResponseEntity<ResponseResult<User>> verify(
-            @CookieValue(value = ContentValue.LOGIN_TOKEN_NAME,required = false) String cookieToken,
-            @RequestParam(name = "token",required = false) String token,
-            HttpServletRequest request,
-            HttpServletResponse response
+                @CookieValue(value = ContentValue.LOGIN_TOKEN_NAME,required = false) String cookieToken,
+                @RequestParam(name = "token",required = false) String token,
+                HttpServletRequest request,
+                HttpServletResponse response
             ){
-        if (!StringUtils.isBlank(cookieToken)){
-            token = cookieToken;
-        }
-        User user = userService.verify(token);
-        CookieUtils.setCookie(request,response, ContentValue.LOGIN_TOKEN_NAME,token,ContentValue.COOKIE_MAXAGE);
-        ResponseResult<User> result = new ResponseResult<>(user);
-        return ResponseEntity.ok(result);
+            if (!StringUtils.isBlank(cookieToken)){
+                token = cookieToken;
+            }
+            User user = userService.verify(token);
+            CookieUtils.setCookie(request,response, ContentValue.LOGIN_TOKEN_NAME,token,ContentValue.COOKIE_MAXAGE);
+            ResponseResult<User> result = new ResponseResult<>(user);
+            return ResponseEntity.ok(result);
+    }
+
+    @ApiOperation(value = "发送验证码",notes = "验证邮箱")
+    @ApiImplicitParam(name = "address",value = "邮箱地址")
+    @PostMapping(value = "/email/{address}")
+    @OperationLogDetail(detail = "发送邮箱验证码",operationType = OperationType.UNKNOWN)
+    public ResponseEntity<Void> sendEmail(@PathVariable(value = "address") String address){
+        userService.sendEmail(address);
+        return ResponseEntity.ok().build();
     }
 }

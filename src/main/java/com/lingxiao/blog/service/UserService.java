@@ -41,4 +41,6 @@ public interface UserService {
      * 初始化系统管理员
      */
     void initAdmin();
+
+    void sendEmail(String receiver);
 }
