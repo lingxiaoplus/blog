@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 @Controller
@@ -33,7 +34,7 @@ public class UserController {
     @ApiImplicitParam(name = "user",value = "user对象")
     @PostMapping(value = "/register")
     @OperationLogDetail(detail = "用户注册",operationType = OperationType.LOGIN)
-    public ResponseEntity<String> register(@RequestBody @Valid User user,
+    public ResponseEntity<String> register(@RequestBody @Valid  User user,
                                            HttpServletRequest request,
                                            HttpServletResponse response){
         String token = userService.register(user,IPUtils.getIpAddress(request));

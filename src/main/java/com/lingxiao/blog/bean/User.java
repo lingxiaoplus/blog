@@ -18,14 +18,14 @@ public class User {
     private Long userIp;
     @NotEmpty(message = "用户名不能为空")
     private String username;
-    @JsonIgnore
+
     @NotEmpty(message = "密码不能为空")
     private String password;
     @NotEmpty(message = "邮箱不能为空")
     private String email;
     private String headPortrait;
     private Integer age;
-    @NotEmpty(message = "电话号码不能为空")
+    //  @NotEmpty(message = "电话号码不能为空")
     private String phoneNumber;
     @NotEmpty(message = "昵称不能为空")
     private String nickname;
@@ -46,5 +46,6 @@ public class User {
     private String uId;
     @Transient
     private String uIp;
-
+    @Transient
+    private String verifyCode;
 }

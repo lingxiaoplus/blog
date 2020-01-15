@@ -4,6 +4,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.lingxiao.blog.bean.OperationLog;
 import com.lingxiao.blog.bean.vo.OperationLogVo;
+import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.mapper.LogMapper;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,11 +30,20 @@ public class OperationLogServiceImpl implements OperationLogService {
 
     @Override
     public PageResult<OperationLogVo> getLogList(int pageNum, int pageSize,int operationType){
-
         PageHelper.startPage(pageNum,pageSize);
         OperationLog operationLog = new OperationLog();
         operationLog.setOperationType(operationType);
-        List<OperationLog> logList = logMapper.select(operationLog);
+        //List<OperationLog> logList = logMapper.select(operationLog);
+        List<OperationLog> logList;
+        if(operationType < 0){
+            //查除了 登录日志的其他所有
+            Example example = new Example(OperationLog.class);
+            example.createCriteria().andNotEqualTo("operationType",OperationType.LOGIN.getCode());
+            logList = logMapper.selectByExample(example);
+        }else {
+            logList = logMapper.select(operationLog);
+        }
+
         PageInfo<OperationLog> pageInfo = PageInfo.of(logList);
         List<OperationLogVo> logListVo = pageInfo.getList().stream().map((item)->{
             OperationLogVo logVo = new OperationLogVo();

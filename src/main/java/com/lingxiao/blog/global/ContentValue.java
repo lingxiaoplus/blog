@@ -36,4 +36,8 @@ public class ContentValue {
     public static final int LOG_LOGIN = 0;
     public static final int LOG_OPERATION = 1;
 
+
+    public static final int EMAIL_DISABLE = 0;
+    public static final int EMAIL_ENABLE = 1;
+
 }

@@ -38,9 +38,12 @@ public enum ExceptionEnum {
     COMMENT_DELETE_ERROR(500,"删除评论失败"),
     COMMENT_UPDATE_ERROR(500,"修改评论状态失败"),
     SEND_EMAIL_ERROR(500,"发送邮箱验证码失败"),
+    SELECT_EMAIL_ERROR(404,"查找启用的邮箱失败"),
     ADD_EMAIL_ERROR(500,"添加邮箱失败"),
     DELETE_EMAIL_ERROR(500,"删除邮箱失败"),
     UPDATE_EMAIL_ERROR(500,"更新邮箱失败"),
+    INVALID_EMAIL_CODE_ERROR(400,"邮箱验证码失效，请重新发送"),
+    NOTEQUAL_EMAIL_CODE_ERROR(500,"邮箱验证码对比失败"),
     ;
     private int code;
     private String msg;

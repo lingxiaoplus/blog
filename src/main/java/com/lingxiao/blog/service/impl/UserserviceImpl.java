@@ -1,5 +1,6 @@
 package com.lingxiao.blog.service.impl;
 
+import com.lingxiao.blog.bean.Email;
 import com.lingxiao.blog.bean.OperationLog;
 import com.lingxiao.blog.bean.User;
 import com.lingxiao.blog.bean.UserInfo;
@@ -7,9 +8,11 @@ import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.LoginInterceptor;
+import com.lingxiao.blog.global.TaskConfig;
 import com.lingxiao.blog.jwt.JwtProperties;
 import com.lingxiao.blog.jwt.JwtUtils;
 import com.lingxiao.blog.mapper.UserMapper;
+import com.lingxiao.blog.service.EmailService;
 import com.lingxiao.blog.service.UserService;
 import com.lingxiao.blog.utils.EmailUtil;
 import com.lingxiao.blog.utils.IPUtils;
@@ -19,10 +22,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
+import javax.servlet.http.HttpSession;
 import java.util.Date;
+import java.util.Random;
 
 @Service
 @EnableConfigurationProperties(JwtProperties.class)
@@ -32,6 +38,16 @@ public class UserserviceImpl implements UserService {
     private UserMapper userMapper;
     @Autowired
     private JwtProperties jwtProperties;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private HttpSession httpSession;
+    public static final String PREFIX = "email_code: ";
+    @Autowired
+    private EmailUtil emailUtil;
+
     @Override
     public String login(String account, String password, int loginType) {
         if (StringUtils.isBlank(account) || StringUtils.isBlank(password)) {
@@ -71,6 +87,16 @@ public class UserserviceImpl implements UserService {
         }
         if (userMapper.countByPhone(user.getUsername()) > 0){
             throw new BlogException(ExceptionEnum.REGISTER_PHONE_ERROR);
+        }
+
+        Object attribute = httpSession.getAttribute(PREFIX + user.getEmail());
+        if (attribute == null){
+            throw new BlogException(ExceptionEnum.INVALID_EMAIL_CODE_ERROR);
+        }else {
+            String code = (String) attribute;
+            if (!code.equals(user.getVerifyCode())){
+                throw new BlogException(ExceptionEnum.NOTEQUAL_EMAIL_CODE_ERROR);
+            }
         }
 
         user.setCreateAt(new Date());
@@ -165,16 +191,36 @@ public class UserserviceImpl implements UserService {
     @Override
     public void sendEmail(String receiver){
         EmailUtil.EmailConfigure emailConfigure = new EmailUtil.EmailConfigure();
-        emailConfigure.setSendAddress("651121818@qq.com");
+        Email enableEmail = emailService.getEnableEmail();
+        emailConfigure.setSendAddress(enableEmail.getEmail());
         emailConfigure.setReceiveAddress(receiver);
-        emailConfigure.setAuthCode("bwrhaeijtgvybfha");
-        emailConfigure.setTitle("验证码");
-        emailConfigure.setContent("这是验证码的内容");
+        emailConfigure.setAuthCode(enableEmail.getAuthCode());
+        emailConfigure.setTitle("注册博客");
+        int minute = 60*60*3;
+        emailConfigure.setMinute(minute);
+        String randomCode = randomCode();
+        StringBuilder builder = new StringBuilder();
+        builder.append("您正在注册博客，验证码为：")
+                .append(randomCode)
+                .append("  ，有效时间为3分钟");
+        emailConfigure.setVerifyCode(randomCode);
+        //emailConfigure.setContent(builder.toString());
+        httpSession.setAttribute(PREFIX + receiver, randomCode);
+        httpSession.setMaxInactiveInterval(minute);
         try {
-            EmailUtil.sendEmail(emailConfigure);
+            emailUtil.sendEmail(emailConfigure);
         } catch (MessagingException e) {
             e.printStackTrace();
             throw new BlogException(ExceptionEnum.SEND_EMAIL_ERROR);
         }
+    }
+
+    private static String randomCode() {
+        StringBuilder str = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < 6; i++) {
+            str.append(random.nextInt(10));
+        }
+        return str.toString();
     }
 }

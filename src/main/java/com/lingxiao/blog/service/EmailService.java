@@ -11,4 +11,6 @@ public interface EmailService {
     void deleteEmail(List<Long> ids);
     void updateEmail(Email email);
     PageResult<Email> getEmails(int pageNum, int pageSize);
+
+    Email getEnableEmail();
 }
