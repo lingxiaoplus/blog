@@ -131,6 +131,7 @@ public class UserserviceImpl implements UserService {
             user.setUIp(IPUtils.numToIP(user.getUserIp()));
             user.setUserId(null);
             user.setUserIp(null);
+            user.setPassword(null);
             return user;
         } catch (Exception e) {
             log.error("解密失败", e);
