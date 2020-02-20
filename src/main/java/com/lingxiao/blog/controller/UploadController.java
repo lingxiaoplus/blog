@@ -1,6 +1,8 @@
 package com.lingxiao.blog.controller;
 
+import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.service.UploadService;
+import com.qiniu.storage.model.FileInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -46,5 +48,23 @@ public class UploadController {
             e.printStackTrace();
         }
         return ResponseEntity.ok(imageAddr);
+    }
+
+    @ApiOperation(value = "oss文件列表")
+    @GetMapping("/list")
+    public ResponseEntity<PageResult<FileInfo>> getFileList(
+            @RequestParam(value = "fileName",defaultValue = "") String fileName,
+            @RequestParam(value = "date",defaultValue = "") String date,
+            @RequestParam(value = "pageNum",defaultValue = "1") int pageNum,
+            @RequestParam(value = "pageSize",defaultValue = "5") int pageSize){
+        return ResponseEntity.ok(uploadService.getFileList(fileName, date, pageNum, pageSize));
+    }
+
+    @ApiOperation(value = "删除oss文件")
+    @ApiImplicitParam(name = "fileName",value = "文件名")
+    @DeleteMapping("/{fileName}")
+    public ResponseEntity<Void> deleteFile(String fileName){
+        uploadService.deleteFile(fileName);
+        return ResponseEntity.ok().build();
     }
 }
