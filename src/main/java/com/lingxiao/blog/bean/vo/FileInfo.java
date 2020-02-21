@@ -10,4 +10,5 @@ public class FileInfo {
     private String time;
     private String mimeType;
     private String endUser;
+    private String bucket;
 }

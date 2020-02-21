@@ -45,6 +45,7 @@ public enum ExceptionEnum {
     INVALID_EMAIL_CODE_ERROR(400,"邮箱验证码失效，请重新发送"),
     NOTEQUAL_EMAIL_CODE_ERROR(500,"邮箱验证码对比失败"),
     DELETE_OSS_FILE_ERROR(500,"删除oss上的文件失败"),
+    MOVE_OR_RENAME_OSS_FILE_ERROR(500,"移动/重命名oss上的文件失败"),
     ;
     private int code;
     private String msg;

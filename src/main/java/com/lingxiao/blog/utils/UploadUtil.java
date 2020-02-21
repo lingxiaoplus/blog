@@ -20,6 +20,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,38 +41,27 @@ public class UploadUtil {
         mAuth = Auth.create(ossProperties.getAccessKey(), ossProperties.getSecretKey());
     }
     /**
-     *
-     * @param filePath 上传文件的路径
-     * @param fileName 上传到七牛后保存的文件名
      * @return 返回图片链接
      */
-    public String upload(String filePath, String fileName){
+    public com.lingxiao.blog.bean.vo.FileInfo upload(File file) throws QiniuException{
         //第二种方式: 自动识别要上传的空间(bucket)的存储区域是华东、华北、华南。
         Zone z = Zone.autoZone();
         Configuration c = new Configuration(z);
         //创建上传对象
         UploadManager uploadManager = new UploadManager(c);
-        try {
-            //调用put方法上传
-            Response res = uploadManager.put(filePath, fileName, getUpToken(mAuth));
-            //打印返回的信息
-            System.out.println(res.bodyString());
-            StringMap jsonToMap = res.jsonToMap();
-            String key = (String) jsonToMap.get("key");
-            String url = ossProperties.getPrefixImg() + key;
-            return url;
-        } catch (QiniuException e) {
-            Response r = e.response;
-            // 请求失败时打印的异常的信息
-            System.out.println(r.toString());
-            try {
-                //响应的文本信息
-                System.out.println(r.bodyString());
-            } catch (QiniuException e1) {
-                //ignore
-            }
-        }
-        return null;
+
+        //调用put方法上传
+        Response res = uploadManager.put(file.getPath(), file.getName(), getUpToken(mAuth));
+        //打印返回的信息
+        log.debug("文件上传返回信息: {}",res.bodyString());
+        StringMap jsonToMap = res.jsonToMap();
+        String key = (String) jsonToMap.get("key");
+        String url = ossProperties.getPrefixImg() + key;
+        com.lingxiao.blog.bean.vo.FileInfo fileInfo = new com.lingxiao.blog.bean.vo.FileInfo();
+        fileInfo.setName(key);
+        fileInfo.setPath(url);
+        fileInfo.setSize(FileUtil.getFileSize(file.length()));
+        return fileInfo;
     }
 
     /**
@@ -121,19 +112,13 @@ public class UploadUtil {
      * @param toBucket  需要移动到的新空间  如果为空默认不移动 只是重命名
      * @param newName
      */
-    public boolean moveOrRenameFile(String oldName, String toBucket, String newName){
+    public void moveOrRenameFile(String oldName, String newName, String toBucket) throws QiniuException{
+        if(StringUtils.isBlank(newName)) newName = oldName;
+        if(StringUtils.isBlank(toBucket)) toBucket = ossProperties.getBucketName();
         //构造一个带指定 Region 对象的配置类
         Configuration cfg = new Configuration(Region.region0());
         BucketManager bucketManager = new BucketManager(mAuth, cfg);
-        try {
-            if (StringUtils.isBlank(toBucket)) toBucket = ossProperties.getBucketName();
-            bucketManager.move(ossProperties.getBucketName(), oldName, toBucket, newName);
-            return true;
-        } catch (QiniuException ex) {
-            //如果遇到异常，说明移动失败
-            log.error("移动/重命名文件错误：错误码：{}，错误详细: {}",ex.code(),ex.response.toString());
-        }
-        return false;
+        bucketManager.move(ossProperties.getBucketName(), oldName, toBucket, newName);
     }
 
     public void deleteFile(String fileKey) throws QiniuException {
@@ -145,15 +130,14 @@ public class UploadUtil {
     /**
      * 返回文件列表
      * @param prefix 文件名前缀
+     * @param limit 每次迭代的长度限制，最大1000，推荐值 1000
      * @return
      */
-    public List<com.lingxiao.blog.bean.vo.FileInfo> getFileList(String prefix){
+    public List<com.lingxiao.blog.bean.vo.FileInfo> getFileList(String prefix,int limit){
         List<com.lingxiao.blog.bean.vo.FileInfo> infoList = new ArrayList<>();
         //构造一个带指定 Region 对象的配置类
         Configuration cfg = new Configuration(Region.region0());
         BucketManager bucketManager = new BucketManager(mAuth, cfg);
-        //每次迭代的长度限制，最大1000，推荐值 1000
-        int limit = 1;
         //指定目录分隔符，列出所有公共前缀（模拟列出目录效果）。缺省值为空字符串
         String delimiter = "";
         //列举空间文件列表
@@ -185,12 +169,29 @@ public class UploadUtil {
                                 DateTime dateTime = new DateTime(item.putTime/10000);
                                 String dateString = dateTime.toString("yyyy-MM-dd HH:mm:ss");
                                 fileInfo.setTime(dateString);
+                                fileInfo.setBucket(ossProperties.getBucketName());
+                                log.debug("文件：{}",fileInfo);
                                 return fileInfo;
                             })
                             .collect(Collectors.toList());
             infoList.addAll(collect);
         }
         return infoList;
+    }
+
+
+    /**
+     * 对于配置了镜像存储的空间，如果镜像源站更新了文件内容，则默认情况下，七牛不会再主动从客户镜像源站同步新的副本，
+     * 这个时候就需要利用这个prefetch接口来主动地将空间中的文件和更新后的源站副本进行同步
+     * @param fileName
+     * @throws QiniuException
+     */
+    private void updateFileContent(String fileName) throws QiniuException{
+        //构造一个带指定 Region 对象的配置类
+        Configuration cfg = new Configuration(Region.region0());
+        Auth auth = Auth.create(ossProperties.getAccessKey(), ossProperties.getSecretKey());
+        BucketManager bucketManager = new BucketManager(auth, cfg);
+        bucketManager.prefetch(ossProperties.getBucketName(), fileName);
     }
 
     //简单上传，使用默认策略，只需要设置上传的空间名就可以了
