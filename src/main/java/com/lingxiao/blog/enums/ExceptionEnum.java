@@ -46,6 +46,12 @@ public enum ExceptionEnum {
     NOTEQUAL_EMAIL_CODE_ERROR(500,"邮箱验证码对比失败"),
     DELETE_OSS_FILE_ERROR(500,"删除oss上的文件失败"),
     MOVE_OR_RENAME_OSS_FILE_ERROR(500,"移动/重命名oss上的文件失败"),
+    SAVE_THEME_ERROR(500,"保存主题信息失败"),
+    SAVE_DEFAULT_THEME_ERROR(500,"不能修改默认主题信息，请指定用户id"),
+    SELECT_LINK_ERROR(404,"查找友链失败"),
+    ADD_LINK_ERROR(500,"添加友链失败"),
+    DELETE_LINK_ERROR(500,"删除友链失败"),
+    UPDATE_LINK_ERROR(500,"更新友链失败"),
     ;
     private int code;
     private String msg;
