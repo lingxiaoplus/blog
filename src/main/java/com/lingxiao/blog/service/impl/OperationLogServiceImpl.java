@@ -12,6 +12,7 @@ import com.lingxiao.blog.mapper.UserMapper;
 import com.lingxiao.blog.service.OperationLogService;
 import com.lingxiao.blog.utils.IPUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class OperationLogServiceImpl implements OperationLogService {
     private UserMapper userMapper;
 
     @Override
-    public PageResult<OperationLogVo> getLogList(int pageNum, int pageSize,int operationType){
+    public PageResult<OperationLogVo> getLogList(int pageNum, int pageSize,int operationType, String keyword){
         PageHelper.startPage(pageNum,pageSize);
         OperationLog operationLog = new OperationLog();
         operationLog.setOperationType(operationType);
@@ -38,7 +39,10 @@ public class OperationLogServiceImpl implements OperationLogService {
         if(operationType < 0){
             //查除了 登录日志的其他所有
             Example example = new Example(OperationLog.class);
-            example.createCriteria().andNotEqualTo("operationType",OperationType.LOGIN.getCode());
+            example
+                    .createCriteria()
+                    .andNotEqualTo("operationType", OperationType.LOGIN.getCode())
+                    .andLike("username",keyword+"%");
             logList = logMapper.selectByExample(example);
         }else {
             logList = logMapper.select(operationLog);

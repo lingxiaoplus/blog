@@ -3,6 +3,7 @@ package com.lingxiao.blog.service.impl;
 import com.lingxiao.blog.bean.vo.FileInfo;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
+import com.lingxiao.blog.global.OssProperties;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.service.UploadService;
 import com.lingxiao.blog.utils.UploadUtil;
@@ -44,6 +45,13 @@ public class UploadServiceImpl implements UploadService {
             }
         }
         return null;
+    }
+
+    @Override
+    public OssProperties getOssProperties() {
+        OssProperties ossProperties = uploadUtil.getOssProperties();
+        ossProperties.setSecretKey("***********");
+        return ossProperties;
     }
 
     @Override

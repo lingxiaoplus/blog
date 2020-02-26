@@ -40,6 +40,10 @@ public class UploadUtil {
     private void init(){
         mAuth = Auth.create(ossProperties.getAccessKey(), ossProperties.getSecretKey());
     }
+
+    public OssProperties getOssProperties(){
+        return ossProperties;
+    }
     /**
      * @return 返回图片链接
      */

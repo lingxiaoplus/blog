@@ -24,10 +24,11 @@ public class OperationLogController {
 
     @GetMapping
     public ResponseEntity<PageResult<OperationLogVo>> getLogList(
-                                                               @RequestParam(value = "pageNum",defaultValue = "1")int pageNum,
-                                                               @RequestParam(value = "pageSize",defaultValue = "5")int pageSize,
-                                                               @RequestParam(value = "logType",defaultValue = "0") int logType){
-        PageResult<OperationLogVo> logList = operationLogService.getLogList(pageNum, pageSize, logType);
+            @RequestParam(value = "pageNum",defaultValue = "1")int pageNum,
+            @RequestParam(value = "pageSize",defaultValue = "5")int pageSize,
+            @RequestParam(value = "logType",defaultValue = "0") int logType,
+            @RequestParam(value = "keyword",defaultValue = "") String keyword){
+        PageResult<OperationLogVo> logList = operationLogService.getLogList(pageNum, pageSize, logType,keyword);
         return ResponseEntity.ok(logList);
     }
 

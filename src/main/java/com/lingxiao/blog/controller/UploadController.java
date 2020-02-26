@@ -1,7 +1,9 @@
 package com.lingxiao.blog.controller;
 
 import com.lingxiao.blog.bean.vo.FileInfo;
+import com.lingxiao.blog.global.OssProperties;
 import com.lingxiao.blog.global.api.PageResult;
+import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.service.UploadService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -82,5 +84,10 @@ public class UploadController {
             @RequestParam(value = "toBucket",defaultValue = "") String toBucket){
         uploadService.moveOrRenameFile(fileName, newName, toBucket);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/oss_properties")
+    public ResponseEntity<ResponseResult<OssProperties>> getOssProperties(){
+        return ResponseEntity.ok(new ResponseResult<>(uploadService.getOssProperties()));
     }
 }
