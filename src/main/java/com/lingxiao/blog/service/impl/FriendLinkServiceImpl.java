@@ -19,7 +19,7 @@ public class FriendLinkServiceImpl implements FriendLinkService {
 
     @Autowired
     private FriendLinkMapper friendLinkMapper;
-    
+
     @Override
     public void addLink(FriendLink friendLink) {
         if (null == friendLink.getEnabled()) friendLink.setEnabled(ContentValue.EMAIL_ENABLE);

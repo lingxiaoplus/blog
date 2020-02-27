@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lingxiao.blog.mapper.ArticleMapper">
+    <resultMap id="columnMap" type="com.lingxiao.blog.bean.statistics.WeekData">
+        <result column="count" property="count" javaType="java.lang.Integer"/>
+        <result column="time" property="time" />
+    </resultMap>
+    <select id="weekIncreased" resultMap="columnMap">
+        SELECT date_format(create_at,'%Y-%m-%d') `time`, count(id) `count` FROM articles
+        WHERE YEARWEEK(date_format(create_at,'%Y-%m-%d'),1) = YEARWEEK(now(),1)
+        GROUP BY date_format(create_at,'%Y-%m-%d')
+    </select>
+</mapper>

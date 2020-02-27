@@ -21,4 +21,11 @@ public interface UserMapper extends Mapper<User> {
     int countByEmail(@Param("email") String email);
     @Select("select count(user_id) from user where phone_number=#{phoneNumber}")
     int countByPhone(@Param("phoneNumber") String phoneNumber);
+
+    /**
+     * 今日新增用户
+     * @return
+     */
+    @Select("select count(user_id) from `user` where to_days(create_at) = to_days(now())")
+    int todayIncreased();
 }
