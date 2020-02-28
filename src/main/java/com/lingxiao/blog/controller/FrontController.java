@@ -2,6 +2,7 @@ package com.lingxiao.blog.controller;
 
 import com.lingxiao.blog.annotation.OperationLogDetail;
 import com.lingxiao.blog.bean.Category;
+import com.lingxiao.blog.bean.FriendLink;
 import com.lingxiao.blog.bean.vo.ArticleDetailVo;
 import com.lingxiao.blog.bean.vo.ArticleVo;
 import com.lingxiao.blog.bean.vo.CommentVo;
@@ -11,6 +12,7 @@ import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.service.ArticleService;
 import com.lingxiao.blog.service.CategoryService;
 import com.lingxiao.blog.service.CommentService;
+import com.lingxiao.blog.service.FriendLinkService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -31,6 +33,8 @@ public class FrontController {
     private ArticleService articleService;
     @Autowired
     private CommentService commentService;
+    @Autowired
+    private FriendLinkService linkService;
 
     @ApiOperation(value = "获取所有分类", notes = "获取分类列表")
     @GetMapping("/category")
@@ -69,5 +73,14 @@ public class FrontController {
             @PathVariable("id") Long id
     ){
         return ResponseEntity.ok(commentService.getCommentsByArticleId(pageNum,pageSize,id));
+    }
+
+    @GetMapping("/link")
+    public ResponseEntity<PageResult<FriendLink>> getLink(
+            @RequestParam(value = "pageNum",defaultValue = "1")int pageNum,
+            @RequestParam(value = "pageSize",defaultValue = "5")int pageSize
+    ){
+        PageResult<FriendLink> result = linkService.getLinks(pageNum, pageSize);
+        return ResponseEntity.ok(result);
     }
 }

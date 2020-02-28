@@ -98,8 +98,10 @@ public class ArticleServiceImpl implements ArticleService {
         if (article == null){
             throw new BlogException(ExceptionEnum.ARTICLE_SELECT_ERROR);
         }
-
-        return transformArticle(article);
+        article.setWatchCount(article.getWatchCount()+1);
+        ArticleDetailVo articleDetailVo = transformArticle(article);
+        articleMapper.updateByPrimaryKeySelective(article);
+        return articleDetailVo;
     }
 
     private ArticleDetailVo transformArticle(Article article){
@@ -154,6 +156,7 @@ public class ArticleServiceImpl implements ArticleService {
                     articleVo.setCategoryId(String.valueOf(item.getCategoryId()));
                     Category category = categoryMapper.selectByPrimaryKey(item.getCategoryId());
                     articleVo.setCategoryName(category.getName());
+                    articleVo.setWatchCount(item.getWatchCount());
                     return articleVo;
                 })
                 .collect(Collectors.toList());

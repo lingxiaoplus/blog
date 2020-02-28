@@ -19,4 +19,5 @@ public class FriendLink {
     @NotBlank(message = "链接不能为空")
     private String link;
     private Integer enabled;
+    private String description;
 }
