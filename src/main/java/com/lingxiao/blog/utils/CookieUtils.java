@@ -1,5 +1,6 @@
 package com.lingxiao.blog.utils;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +16,7 @@ import java.net.URLEncoder;
  * Cookie 工具类
  *
  */
+@Slf4j
 public final class CookieUtils {
 
 	protected static final Logger logger = LoggerFactory.getLogger(CookieUtils.class);
@@ -148,6 +150,7 @@ public final class CookieUtils {
 				cookie.setDomain(getDomainName(request));
 			cookie.setPath("/");
 			response.addCookie(cookie);
+			log.info("cookie的域名：{}，cookie的value：{}",cookie.getDomain(),cookie.getValue());
 		} catch (Exception e) {
 			logger.error("Cookie Encode Error.", e);
 		}

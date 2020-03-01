@@ -121,6 +121,7 @@ public class UserserviceImpl implements UserService {
     @Override
     public User verify(String token) {
         if (StringUtils.isBlank(token)){
+            log.error("登录的cookie为空");
             throw new BlogException(ExceptionEnum.VERIFY_USER_LOGIN_ERROR);
         }
         try {

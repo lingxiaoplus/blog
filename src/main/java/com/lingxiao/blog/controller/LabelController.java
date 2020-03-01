@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -26,7 +27,7 @@ public class LabelController {
     @ApiImplicitParam(name = "label",value = "标签实体类")
     @OperationLogDetail(detail = "添加标签",operationType = OperationType.INSERT)
     @PostMapping
-    public ResponseEntity<Void> addLabel(@RequestBody Label label){
+    public ResponseEntity<Void> addLabel(@RequestBody @Valid Label label){
         labelService.addLabel(label);
         return ResponseEntity.ok().build();
     }
@@ -35,7 +36,7 @@ public class LabelController {
     @ApiImplicitParam(name = "label",value = "标签实体类")
     @OperationLogDetail(detail = "更新标签",operationType = OperationType.UPDATE)
     @PutMapping
-    public ResponseEntity<Void> updateLabel(@RequestBody Label label){
+    public ResponseEntity<Void> updateLabel(@RequestBody @Valid Label label){
         labelService.updateLabel(label);
         return ResponseEntity.ok().build();
     }

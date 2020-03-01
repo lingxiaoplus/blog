@@ -87,6 +87,10 @@ public class RsaUtils {
     private static void writeFile(String destPath, byte[] bytes) throws IOException {
         File dest = new File(destPath);
         if (!dest.exists()) {
+            //判断父目录是否存在，如果不存在，则创建
+            if (dest.getParentFile() != null && !dest.getParentFile().exists()) {
+                dest.getParentFile().mkdirs();
+            }
             dest.createNewFile();
         }
         Files.write(dest.toPath(), bytes);

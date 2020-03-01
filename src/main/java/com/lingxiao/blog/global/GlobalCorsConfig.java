@@ -28,6 +28,10 @@ public class GlobalCorsConfig implements WebMvcConfigurer {
         //.1 允许的域，不要写*
         config.addAllowedOrigin("http://blog.lingxiaomz.top");
         config.addAllowedOrigin("http://www.lingxiaomz.top");
+        config.addAllowedOrigin("http://api.lingxiaomz.top");
+        config.addAllowedOrigin("https://blog.lingxiaomz.top");
+        config.addAllowedOrigin("https://www.lingxiaomz.top");
+        config.addAllowedOrigin("https://api.lingxiaomz.top");
         //.2是否发送cookie信息
         config.setAllowCredentials(true);
         //.3允许的请求方式

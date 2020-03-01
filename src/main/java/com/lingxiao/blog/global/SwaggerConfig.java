@@ -17,7 +17,7 @@ public class SwaggerConfig {
     @Bean
     public Docket api(){
         return new Docket(DocumentationType.SWAGGER_2)
-                .host("http://blog.lingxiaomz.top")
+                .host("http://api.lingxiaomz.top")
                 .apiInfo(apiInfo())
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.lingxiao.blog.controller"))

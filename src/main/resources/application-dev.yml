@@ -19,6 +19,7 @@ mybatis:
 logging:
   level:
     root: debug
+  config: classpath:logback.xml
 jwt:
   secret: blog@Login(Auth}*^31)&lingxiao% # 登录校验的密钥
   pubKeyPath: rsakey/rsa.pub  # 公钥地址
