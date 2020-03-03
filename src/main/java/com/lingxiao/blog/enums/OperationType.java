@@ -4,7 +4,9 @@ public enum OperationType {
     /**
      * 操作类型
      */
-    UNKNOWN(5,"未知"),
+
+    UNKNOWN(6,"未知"),
+    EXCEPTION(5,"异常"),
     DELETE(4,"删除"),
     SELECT(3,"查询"),
     UPDATE(2,"更新"),

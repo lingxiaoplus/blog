@@ -61,6 +61,8 @@ public class OperationLogServiceImpl implements OperationLogService {
             logVo.setRunTakes(item.getRunTakes());
             logVo.setOperationContent(item.getOperationContent());
             logVo.setOperationType(ContentValue.LOG_LOGIN == operationType?"登录日志":"操作日志");
+            logVo.setBrowser(item.getBrowser());
+            logVo.setExceptionInfo(item.getExceptionInfo());
             return logVo;
         }).collect(Collectors.toList());
 

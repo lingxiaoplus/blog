@@ -14,4 +14,6 @@ public class OperationLogVo {
     private String operationType;
     private String operationContent;
     private String createAt;
+    private String browser;
+    private String exceptionInfo;
 }

@@ -4,6 +4,7 @@ import com.lingxiao.blog.annotation.OperationLogDetail;
 import com.lingxiao.blog.bean.OperationLog;
 import com.lingxiao.blog.bean.User;
 import com.lingxiao.blog.bean.UserInfo;
+import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.global.LoginInterceptor;
 import com.lingxiao.blog.mapper.UserMapper;
@@ -68,6 +69,7 @@ public class LogAspect {
             operationLog.setOperationContent(detail.detail());
             operationLog.setRunTakes(time);
             operationLog.setUserIp(IPUtils.ipToNum(IPUtils.getIpAddress(request)));
+            operationLog.setBrowser(IPUtils.getBrowserName(request));
             operationLog.setCreateAt(new Date());
             logService.setOperationLog(operationLog);
         } catch (Exception e) {
@@ -79,9 +81,25 @@ public class LogAspect {
 
     @AfterThrowing(value = "operationLog()", throwing = "throwable")
     public void afterThrowing(JoinPoint joinPoint, Throwable throwable){
-        OperationLogDetail detail = getOperationLogDetail(joinPoint);
-
-        log.debug("方法执行异常。操作：{},异常：{}",detail.detail(),throwable);
+        OperationLogDetail detail = null;
+        try {
+            UserInfo userInfo = LoginInterceptor.getUserInfo();
+            User user = userMapper.selectByPrimaryKey(userInfo.getId());
+            detail = getOperationLogDetail(joinPoint);
+            OperationLog operationLog = new OperationLog();
+            operationLog.setUsername(user.getUsername());
+            operationLog.setNickname(user.getNickname());
+            operationLog.setOperationType(OperationType.EXCEPTION.getCode());
+            operationLog.setOperationContent(detail.detail());
+            operationLog.setUserIp(IPUtils.ipToNum(IPUtils.getIpAddress(request)));
+            operationLog.setCreateAt(new Date());
+            operationLog.setExceptionInfo(throwable.toString());
+            operationLog.setBrowser(IPUtils.getBrowserName(request));
+            logService.setOperationLog(operationLog);
+            log.debug("方法执行异常。操作：{},异常：{}",detail.detail(),throwable);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @After("operationLog()")

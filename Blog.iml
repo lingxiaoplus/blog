@@ -139,5 +139,6 @@
     <orderEntry type="library" name="Maven: javax.activation:activation:1.1.1" level="project" />
     <orderEntry type="library" name="Maven: javax.mail:javax.mail-api:1.5.5" level="project" />
     <orderEntry type="library" name="Maven: com.sun.mail:javax.mail:1.5.5" level="project" />
+    <orderEntry type="library" name="Maven: nl.bitwalker:UserAgentUtils:1.2.4" level="project" />
   </component>
 </module>

@@ -20,4 +20,6 @@ public class OperationLog {
     private Integer operationType;
     private String operationContent;
     private Date createAt;
+    private String exceptionInfo;
+    private String browser;
 }

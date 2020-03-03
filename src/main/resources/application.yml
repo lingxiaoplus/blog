@@ -9,8 +9,8 @@ spring:
   jackson:
     default-property-inclusion: non_null
   # 环境 dev:开发环境|test:测试环境|prod:生产环境
-  profiles:
-    active: dev
+    # profiles:
+  #   active: dev
 
 
 mybatis:
