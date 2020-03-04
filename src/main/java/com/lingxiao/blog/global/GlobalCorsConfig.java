@@ -58,6 +58,6 @@ public class GlobalCorsConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(loginInterceptor())
-                .addPathPatterns("/article/**","/menu/**","/category/**","/email/**");
+                .addPathPatterns("/article/**","/menu/**","/category/**","/email/**","/system/**");
     }
 }

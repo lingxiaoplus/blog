@@ -36,6 +36,7 @@ public class LabelServiceImpl implements LabelService {
     }
     @Override
     public void updateLabel(Label label){
+        label.setCreateAt(new Date());
         int count = labelMapper.updateByPrimaryKey(label);
         if (count != 1) {
             throw new BlogException(ExceptionEnum.LABEL_UPDATE_ERROR);

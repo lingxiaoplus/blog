@@ -38,6 +38,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void updateCategory(Category category) {
+        category.setCreateAt(new Date());
         int count = categoryMapper.updateByPrimaryKeySelective(category);
         if (count != 1) {
             throw new BlogException(ExceptionEnum.CATEGORY_UPDATE_ERROR);

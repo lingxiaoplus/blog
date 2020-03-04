@@ -20,6 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Date;
 
 @Aspect
@@ -93,8 +96,21 @@ public class LogAspect {
             operationLog.setOperationContent(detail.detail());
             operationLog.setUserIp(IPUtils.ipToNum(IPUtils.getIpAddress(request)));
             operationLog.setCreateAt(new Date());
-            operationLog.setExceptionInfo(throwable.toString());
             operationLog.setBrowser(IPUtils.getBrowserName(request));
+
+            Writer writer = new StringWriter();
+            PrintWriter printWriter = new PrintWriter(writer);
+            throwable.printStackTrace(printWriter);
+            Throwable cause = throwable.getCause();
+            while (cause != null) {
+                cause.printStackTrace(printWriter);
+                cause = cause.getCause();
+            }
+            String result = writer.toString();
+            operationLog.setExceptionInfo(result);
+            printWriter.close();
+            writer.close();
+
             logService.setOperationLog(operationLog);
             log.debug("方法执行异常。操作：{},异常：{}",detail.detail(),throwable);
         } catch (Exception e) {
