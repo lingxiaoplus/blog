@@ -33,4 +33,11 @@ public class SystemInfoServiceImpl implements SystemInfoService {
         ResponseResult result = new ResponseResult<Map<String, Object>>(map);
         return result;
     }
+
+    @Override
+    public ResponseResult<SystemUtil.NetworkData> getNetworkState() {
+        SystemUtil.NetworkData networkState = systemUtil.getNetworkState();
+        ResponseResult result = new ResponseResult<>(networkState);
+        return result;
+    }
 }

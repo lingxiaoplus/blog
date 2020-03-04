@@ -2,14 +2,16 @@ package com.lingxiao.blog.utils;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 import oshi.SystemInfo;
-import oshi.hardware.CentralProcessor;
-import oshi.hardware.GlobalMemory;
-import oshi.hardware.NetworkIF;
+import oshi.hardware.*;
 
 import java.text.DecimalFormat;
+import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -71,16 +73,23 @@ public class SystemUtil {
         return memoryInfo;
     }
 
-    public void getSysInfo() {
-        System.out.println("----------------操作系统信息----------------");
-        Properties props = System.getProperties();
-        //系统名称
-        String osName = props.getProperty("os.name");
-        //架构名称
-        String osArch = props.getProperty("os.arch");
-        System.out.println("操作系统名 = " + osName);
-        System.out.println("系统架构 = " + osArch);
+    public void getDiskStore(){
+        HWDiskStore[] diskStores = SYSTEM_INFO.getHardware().getDiskStores();
+        for (HWDiskStore diskStore : diskStores) {
+            long size = diskStore.getSize();
+            String name = diskStore.getName();
+            long writeBytes = diskStore.getWriteBytes();
+
+            HWPartition[] partitions = diskStore.getPartitions();
+            log.debug("名字：{}，大小：{},reads: {}",name,formatByte(size),formatByte(writeBytes));
+            for (HWPartition partition : partitions) {
+                String partitionName = partition.getName();
+                long partitionSize = partition.getSize();
+                log.debug("名字2：{}，大小2：{}",partitionName,formatByte(partitionSize));
+            }
+        }
     }
+
     public String getOsName(){
         Properties props = System.getProperties();
         //系统名称
@@ -144,11 +153,36 @@ public class SystemUtil {
         }
     }
 
-    public void getNetworkState(){
+
+    private NetworkData networkData = new NetworkData();
+    public NetworkData getNetworkState(){
         NetworkIF[] networkIFs = SYSTEM_INFO.getHardware().getNetworkIFs();
+        BlockingQueue<String> xAxis = networkData.getXAxis();
+        BlockingQueue<Double> series = networkData.getSeries();
         for (NetworkIF networkIF : networkIFs) {
+            long bytesSent = networkIF.getPacketsSent();
             log.debug("时间：{},速度：{} /秒",networkIF.getTimeStamp(),formatByte(networkIF.getSpeed()));
+            DateTime dateTime = new DateTime(networkIF.getTimeStamp());
+            String x = dateTime.toString("HH:mm:ss");
+            double y = bytesSent/1024.0;
+            if (series.size() >= 8){
+                if (series.poll() != null){
+                    series.offer(y);
+                }
+            }else {
+                series.offer(y);
+            }
+
+            if (xAxis.size() >= 8){
+                if (xAxis.poll() != null){
+                    xAxis.offer(x);
+                }
+            }else {
+                xAxis.offer(x);
+            }
+
         }
+        return networkData;
     }
 
     public String formatByte(long byteNumber) {
@@ -170,21 +204,17 @@ public class SystemUtil {
         return new DecimalFormat("#.##TB").format(tbNumber);
     }
 
-   /* public static void main(String[] args) {
+    public static void main(String[] args) {
         while (true){
             try {
-                SystemUtil.getInstance().printlnCpuInfo();
-                SystemUtil.getInstance().MemInfo();
-                SystemUtil.getInstance().getThread();
-                SystemUtil.getInstance().setSysInfo();
-                SystemUtil.getInstance().setJvmInfo();
-                SystemUtil.getInstance().getNetworkState();
+                SystemUtil systemUtil = new SystemUtil();
+                systemUtil.getDiskStore();
                 TimeUnit.SECONDS.sleep(5);
             }catch (Exception e){
                 e.printStackTrace();
             }
         }
-    }*/
+    }
 
     @Data
     public class CpuInfo{
@@ -208,5 +238,13 @@ public class SystemUtil {
         private String acaliable; //jvm剩余内存
         private String usageRate; //jvm内存使用率
         private String version; //java版本
+    }
+
+    @Data
+    public class NetworkData {
+        private BlockingQueue<String> xAxis = new ArrayBlockingQueue<>(8);
+        private int[] yAxis = new int[]{0,5,10,15,20,25,30};
+        private BlockingQueue<Double> series = new ArrayBlockingQueue<>(8);
+
     }
 }

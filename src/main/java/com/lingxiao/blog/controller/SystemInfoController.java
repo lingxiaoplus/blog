@@ -2,6 +2,7 @@ package com.lingxiao.blog.controller;
 
 import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.service.SystemInfoService;
+import com.lingxiao.blog.utils.SystemUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,5 +24,11 @@ public class SystemInfoController {
     @GetMapping("/load")
     public ResponseEntity<ResponseResult<Map<String, Object>>> getSystemLoad(){
         return ResponseEntity.ok(systemInfoService.getSystemLoad());
+    }
+
+    @ApiOperation(value = "获取网络情况")
+    @GetMapping("/network")
+    public ResponseEntity<ResponseResult<SystemUtil.NetworkData>> getNetworkState(){
+        return ResponseEntity.ok(systemInfoService.getNetworkState());
     }
 }
