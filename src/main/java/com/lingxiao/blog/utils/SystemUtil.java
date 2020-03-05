@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import oshi.SystemInfo;
 import oshi.hardware.*;
 
+import java.io.File;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Properties;
@@ -73,8 +74,9 @@ public class SystemUtil {
         return memoryInfo;
     }
 
-    public void getDiskStore(){
-        HWDiskStore[] diskStores = SYSTEM_INFO.getHardware().getDiskStores();
+    public DiskStoreInfo getDiskStore(){
+        /*HWDiskStore[] diskStores = SYSTEM_INFO.getHardware().getDiskStores();
+        long totalSize = 0L;
         for (HWDiskStore diskStore : diskStores) {
             long size = diskStore.getSize();
             String name = diskStore.getName();
@@ -82,12 +84,29 @@ public class SystemUtil {
 
             HWPartition[] partitions = diskStore.getPartitions();
             log.debug("名字：{}，大小：{},reads: {}",name,formatByte(size),formatByte(writeBytes));
+            totalSize += size;
             for (HWPartition partition : partitions) {
                 String partitionName = partition.getName();
                 long partitionSize = partition.getSize();
                 log.debug("名字2：{}，大小2：{}",partitionName,formatByte(partitionSize));
             }
+        }*/
+        long freeSize = 0L;
+        long usedSize = 0L;
+        long totalSize = 0L;
+        File[] disks = File.listRoots();
+        for(File file : disks)
+        {
+            freeSize += file.getFreeSpace();
+            usedSize += file.getUsableSpace();
+            totalSize += file.getTotalSpace();
         }
+        DiskStoreInfo diskStoreInfo = new DiskStoreInfo();
+        diskStoreInfo.setUsed(formatByte(usedSize));
+        diskStoreInfo.setAcaliable(formatByte(freeSize));
+        diskStoreInfo.setTotal(formatByte(totalSize));
+        diskStoreInfo.setUsageRate(mFormat.format(usedSize*1.0/totalSize));
+        return diskStoreInfo;
     }
 
     public String getOsName(){
@@ -161,13 +180,18 @@ public class SystemUtil {
         BlockingQueue<Double> series = networkData.getSeries();
         for (NetworkIF networkIF : networkIFs) {
             long bytesSent = networkIF.getPacketsSent();
-            log.debug("时间：{},速度：{} /秒",networkIF.getTimeStamp(),formatByte(networkIF.getSpeed()));
+            double y = bytesSent/1024.0;
+            if (y == 0){
+                break;
+            }
             DateTime dateTime = new DateTime(networkIF.getTimeStamp());
             String x = dateTime.toString("HH:mm:ss");
-            double y = bytesSent/1024.0;
+
+            log.debug("时间：{},速度：{} /秒",x,y);
             if (series.size() >= 8){
                 if (series.poll() != null){
                     series.offer(y);
+                    log.debug("删除series元素：{}",series);
                 }
             }else {
                 series.offer(y);
@@ -176,6 +200,7 @@ public class SystemUtil {
             if (xAxis.size() >= 8){
                 if (xAxis.poll() != null){
                     xAxis.offer(x);
+                    log.debug("删除xAxis元素：{}",xAxis);
                 }
             }else {
                 xAxis.offer(x);
@@ -238,6 +263,14 @@ public class SystemUtil {
         private String acaliable; //jvm剩余内存
         private String usageRate; //jvm内存使用率
         private String version; //java版本
+    }
+
+    @Data
+    public class DiskStoreInfo{
+        private String total; //总量
+        private String used; //已使用
+        private String acaliable; //剩余
+        private String usageRate; //使用率
     }
 
     @Data

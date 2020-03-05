@@ -24,6 +24,8 @@ public class SystemInfoServiceImpl implements SystemInfoService {
         map.put("memoryInfo",memInfo);
         SystemUtil.JvmInfo jvmInfo = systemUtil.getJvmInfo();
         map.put("jvmInfo",jvmInfo);
+        SystemUtil.DiskStoreInfo diskStore = systemUtil.getDiskStore();
+        map.put("diskStore",diskStore);
         try {
             SystemUtil.CpuInfo cpuInfo = systemUtil.getCpuInfo();
             map.put("cpuInfo",cpuInfo);
