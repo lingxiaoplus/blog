@@ -37,7 +37,7 @@ public class UserController {
     public ResponseEntity<String> register(@RequestBody @Valid  User user,
                                            HttpServletRequest request,
                                            HttpServletResponse response){
-        String token = userService.register(user,IPUtils.getIpAddress(request));
+        String token = userService.register(user,IPUtils.getIpAddress2(request));
         CookieUtils.setCookie(request,response, ContentValue.LOGIN_TOKEN_NAME,token,ContentValue.COOKIE_MAXAGE);
         return ResponseEntity.ok(token);
     }

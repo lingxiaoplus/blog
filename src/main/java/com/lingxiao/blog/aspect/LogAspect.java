@@ -71,7 +71,7 @@ public class LogAspect {
             operationLog.setOperationType(detail.operationType().getCode());
             operationLog.setOperationContent(detail.detail());
             operationLog.setRunTakes(time);
-            operationLog.setUserIp(IPUtils.ipToNum(IPUtils.getIpAddress(request)));
+            operationLog.setUserIp(IPUtils.ipToNum(IPUtils.getIpAddress2(request)));
             operationLog.setBrowser(IPUtils.getBrowserName(request));
             operationLog.setCreateAt(new Date());
             logService.setOperationLog(operationLog);
@@ -94,7 +94,7 @@ public class LogAspect {
             operationLog.setNickname(user.getNickname());
             operationLog.setOperationType(OperationType.EXCEPTION.getCode());
             operationLog.setOperationContent(detail.detail());
-            operationLog.setUserIp(IPUtils.ipToNum(IPUtils.getIpAddress(request)));
+            operationLog.setUserIp(IPUtils.ipToNum(IPUtils.getIpAddress2(request)));
             operationLog.setCreateAt(new Date());
             operationLog.setBrowser(IPUtils.getBrowserName(request));
 
