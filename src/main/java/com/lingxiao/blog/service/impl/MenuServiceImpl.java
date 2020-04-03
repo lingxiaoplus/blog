@@ -67,11 +67,26 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     public List<Menu> selectAll() {
-        List<Menu> menus = menuMapper.selectAll();
+        Menu selectmenu = new Menu();
+        selectmenu.setParentId(0L);
+        List<Menu> menus = menuMapper.select(selectmenu);
         if (menus == null) {
             throw new BlogException(ExceptionEnum.MENU_SELECT_ERROR);
         }
+        menus.forEach(this::getChildrenMenu);
         return menus;
+    }
+
+    /**
+     * 只有两级 就不用做递归了
+     * @param menu
+     */
+    private void getChildrenMenu(Menu menu){
+        long parentId = menu.getId();
+        Menu selectMenu = new Menu();
+        selectMenu.setParentId(parentId);
+        List<Menu> children = menuMapper.select(selectMenu);
+        menu.setChildren(children);
     }
 
     @Override

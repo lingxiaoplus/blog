@@ -1,10 +1,11 @@
 package com.lingxiao.blog.controller;
 
+import com.lingxiao.blog.bean.BingImageData;
 import com.lingxiao.blog.bean.vo.FileInfo;
 import com.lingxiao.blog.global.OssProperties;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.global.api.ResponseResult;
-import com.lingxiao.blog.service.UploadService;
+import com.lingxiao.blog.service.FileService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -23,10 +24,10 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/upload")
 @Api("文件上传")
-public class UploadController {
+public class FileController {
     @Autowired
-    private UploadService uploadService;
-    private Logger logger = LoggerFactory.getLogger(UploadController.class);
+    private FileService uploadService;
+    private Logger logger = LoggerFactory.getLogger(FileController.class);
 
     @ApiOperation(value = "上传文件，上传成功返回文件链接")
     @ApiImplicitParam(name = "file",value = "文件")
@@ -89,5 +90,11 @@ public class UploadController {
     @GetMapping("/oss_properties")
     public ResponseEntity<ResponseResult<OssProperties>> getOssProperties(){
         return ResponseEntity.ok(new ResponseResult<>(uploadService.getOssProperties()));
+    }
+
+
+    @GetMapping("/bing_image")
+    public ResponseEntity<ResponseResult<BingImageData>> getBingImages(){
+        return ResponseEntity.ok(new ResponseResult<>(uploadService.getBingImages()));
     }
 }
