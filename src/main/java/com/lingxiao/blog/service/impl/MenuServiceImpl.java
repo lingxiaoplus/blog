@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,6 +35,7 @@ public class MenuServiceImpl implements MenuService {
     public void addMenu(Menu menu) {
         //验证当前用户是否有修改菜单的权利
         menu.setId(null);
+        menu.setCreateAt(new Date());
         int count = menuMapper.insertSelective(menu);
         if (count != 1){
             throw new BlogException(ExceptionEnum.MENU_ADD_ERROR);

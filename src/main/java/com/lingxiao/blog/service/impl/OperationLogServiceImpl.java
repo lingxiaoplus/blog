@@ -32,20 +32,19 @@ public class OperationLogServiceImpl implements OperationLogService {
     @Override
     public PageResult<OperationLogVo> getLogList(int pageNum, int pageSize,int operationType, String keyword){
         PageHelper.startPage(pageNum,pageSize);
-        OperationLog operationLog = new OperationLog();
-        operationLog.setOperationType(operationType);
-        //List<OperationLog> logList = logMapper.select(operationLog);
         List<OperationLog> logList;
+        //查除了 登录日志的其他所有
+        Example example = new Example(OperationLog.class);
+        example.setOrderByClause("create_at desc");
         if(operationType < 0){
-            //查除了 登录日志的其他所有
-            Example example = new Example(OperationLog.class);
             example
                     .createCriteria()
                     .andNotEqualTo("operationType", OperationType.LOGIN.getCode())
                     .andLike("username",keyword+"%");
             logList = logMapper.selectByExample(example);
         }else {
-            logList = logMapper.select(operationLog);
+            example.createCriteria().andEqualTo("operationType",operationType);
+            logList = logMapper.selectByExample(example);
         }
 
         PageInfo<OperationLog> pageInfo = PageInfo.of(logList);

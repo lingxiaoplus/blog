@@ -152,7 +152,7 @@ public class ArticleServiceImpl implements ArticleService {
                     User user = userMapper.selectByPrimaryKey(item.getUserId());
                     articleVo.setAuthor(user.getUsername());
                     articleVo.setHeadImage(item.getHeadImage());
-                    //Category category = categoryMapper.selectByPrimaryKey(item.getCategoryId());
+
                     articleVo.setCategoryId(String.valueOf(item.getCategoryId()));
                     Category category = categoryMapper.selectByPrimaryKey(item.getCategoryId());
                     articleVo.setCategoryName(category.getName());

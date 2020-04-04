@@ -1,8 +1,10 @@
 package com.lingxiao.blog.bean.vo;
 
+import com.lingxiao.blog.bean.Label;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.Transient;
 import java.util.List;
 
 @Data
@@ -17,4 +19,5 @@ public class ArticleVo {
     private String updateTime;
     private String headImage;
     private Long watchCount;
+    private List<Label> labels;
 }
