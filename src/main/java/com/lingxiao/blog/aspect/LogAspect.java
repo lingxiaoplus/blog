@@ -87,11 +87,13 @@ public class LogAspect {
         OperationLogDetail detail = null;
         try {
             UserInfo userInfo = LoginInterceptor.getUserInfo();
-            User user = userMapper.selectByPrimaryKey(userInfo.getId());
-            detail = getOperationLogDetail(joinPoint);
             OperationLog operationLog = new OperationLog();
-            operationLog.setUsername(user.getUsername());
-            operationLog.setNickname(user.getNickname());
+            if (userInfo != null){
+                User user = userMapper.selectByPrimaryKey(userInfo.getId());
+                operationLog.setUsername(user.getUsername());
+                operationLog.setNickname(user.getNickname());
+            }
+            detail = getOperationLogDetail(joinPoint);
             operationLog.setOperationType(OperationType.EXCEPTION.getCode());
             operationLog.setOperationContent(detail.detail());
             operationLog.setUserIp(IPUtils.ipToNum(IPUtils.getIpAddress2(request)));

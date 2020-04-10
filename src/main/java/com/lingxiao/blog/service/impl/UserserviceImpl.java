@@ -1,9 +1,7 @@
 package com.lingxiao.blog.service.impl;
 
-import com.lingxiao.blog.bean.Email;
-import com.lingxiao.blog.bean.OperationLog;
-import com.lingxiao.blog.bean.User;
-import com.lingxiao.blog.bean.UserInfo;
+import com.lingxiao.blog.bean.*;
+import com.lingxiao.blog.bean.vo.UserVo;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.global.ContentValue;
@@ -11,7 +9,9 @@ import com.lingxiao.blog.global.LoginInterceptor;
 import com.lingxiao.blog.global.TaskConfig;
 import com.lingxiao.blog.jwt.JwtProperties;
 import com.lingxiao.blog.jwt.JwtUtils;
+import com.lingxiao.blog.mapper.RoleMapper;
 import com.lingxiao.blog.mapper.UserMapper;
+import com.lingxiao.blog.mapper.UserRoleMapper;
 import com.lingxiao.blog.service.EmailService;
 import com.lingxiao.blog.service.UserService;
 import com.lingxiao.blog.utils.EmailUtil;
@@ -23,17 +23,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpSession;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Service
 @EnableConfigurationProperties(JwtProperties.class)
 @Slf4j
-public class UserserviceImpl implements UserService {
+public class UserserviceImpl implements UserService{
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -47,6 +53,11 @@ public class UserserviceImpl implements UserService {
     public static final String PREFIX = "email_code: ";
     @Autowired
     private EmailUtil emailUtil;
+
+    @Autowired
+    private UserRoleMapper userRoleMapper;
+    @Autowired
+    private RoleMapper roleMapper;
 
     @Override
     public String login(String account, String password, int loginType) {
@@ -104,11 +115,16 @@ public class UserserviceImpl implements UserService {
         user.setUserId(UIDUtil.nextId());
         user.setUserIp(IPUtils.ipToNum(ip));
         //密码加密
-        byte[] saltByte = MD5Util.createSalt();
+       /* byte[] saltByte = MD5Util.createSalt();
         String salt = MD5Util.byteToHexString(saltByte);
         String encryptedPwd = MD5Util.getEncryptedPwd(user.getPassword(), saltByte);
         user.setPassword(encryptedPwd);
-        user.setSalt(salt);
+        user.setSalt(salt);*/
+
+        String encryptedPwd = PasswordEncoderFactories
+                .createDelegatingPasswordEncoder()
+                .encode(user.getPassword());
+        user.setPassword(encryptedPwd);
 
         int count = userMapper.insertSelective(user);
         if (count != 1) {
@@ -130,9 +146,6 @@ public class UserserviceImpl implements UserService {
             User user = userMapper.selectByPrimaryKey(userInfo.getId());
             user.setUId(String.valueOf(user.getUserId()));
             user.setUIp(IPUtils.numToIP(user.getUserIp()));
-            user.setUserId(null);
-            user.setUserIp(null);
-            user.setPassword(null);
             return user;
         } catch (Exception e) {
             log.error("解密失败", e);
@@ -224,5 +237,19 @@ public class UserserviceImpl implements UserService {
             str.append(random.nextInt(10));
         }
         return str.toString();
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userMapper.loginByName(username);
+        if (user == null){
+            throw new BlogException(ExceptionEnum.LOGIN_NAME_ERROR);
+        }
+        UserRole userRole = new UserRole();
+        userRole.setUserId(user.getUserId());
+        List<Long> roleIds = userRoleMapper.select(userRole).stream().map(UserRole::getRoleId).collect(Collectors.toList());
+        List<Role> roles = roleMapper.selectByIdList(roleIds);
+        user.setRoles(roles);
+        return user;
     }
 }

@@ -22,7 +22,7 @@ public class Menu {
     private Long parentId;
     @NotBlank(message = "菜单路径不能为空")
     private String url;
-    @NotBlank(message = "组件名字不能为空")
+    //@NotBlank(message = "组件名字不能为空")
     private String component;
     @NotBlank(message = "菜单名字不能为空")
     private String name;

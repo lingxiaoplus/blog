@@ -11,4 +11,7 @@ public class ResponseResult<T> {
     public ResponseResult(T data){
         this.data = data;
     }
+
+    public ResponseResult() {
+    }
 }

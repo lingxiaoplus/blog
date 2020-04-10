@@ -15,5 +15,7 @@ public class Role {
     private Long id;
     @NotBlank(message = "角色名不能为空")
     private String roleName;
+    @NotBlank(message = "角色类型不能为空")
+    private String roleTag;
     private String roleDescription;
 }

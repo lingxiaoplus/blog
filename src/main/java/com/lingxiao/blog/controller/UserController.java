@@ -2,6 +2,7 @@ package com.lingxiao.blog.controller;
 
 import com.lingxiao.blog.annotation.OperationLogDetail;
 import com.lingxiao.blog.bean.User;
+import com.lingxiao.blog.bean.vo.UserVo;
 import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.api.ResponseResult;
@@ -62,7 +63,7 @@ public class UserController {
     @ApiOperation(value = "验证用户是否登录，返回用户信息",notes = "登录状态")
     @GetMapping(value = "/verify")
     //@OperationLogDetail(detail = "验证用户是否登录",operationType = OperationType.LOGIN)
-    public ResponseEntity<ResponseResult<User>> verify(
+    public ResponseEntity<ResponseResult<UserVo>> verify(
                 @CookieValue(value = ContentValue.LOGIN_TOKEN_NAME,required = false) String cookieToken,
                 @RequestParam(name = "token",required = false) String token,
                 HttpServletRequest request,
@@ -72,8 +73,12 @@ public class UserController {
                 token = cookieToken;
             }
             User user = userService.verify(token);
+            UserVo userVo = new UserVo();
+            userVo.setUserId(String.valueOf(user.getUserId()));
+            userVo.setUserIp(IPUtils.numToIP(user.getUserIp()));
+            userVo.setNickname(user.getNickname());
             CookieUtils.setCookie(request,response, ContentValue.LOGIN_TOKEN_NAME,token,ContentValue.COOKIE_MAXAGE);
-            ResponseResult<User> result = new ResponseResult<>(user);
+            ResponseResult<UserVo> result = new ResponseResult<>(userVo);
             return ResponseEntity.ok(result);
     }
 
