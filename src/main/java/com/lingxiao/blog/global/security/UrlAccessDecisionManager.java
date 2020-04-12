@@ -52,6 +52,7 @@ public class UrlAccessDecisionManager implements AccessDecisionManager {
         }
     }
 
+
     @Override
     public boolean supports(ConfigAttribute attribute) {
         return true;

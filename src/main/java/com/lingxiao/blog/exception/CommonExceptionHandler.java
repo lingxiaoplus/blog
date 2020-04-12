@@ -3,17 +3,17 @@ package com.lingxiao.blog.exception;
 
 import com.lingxiao.blog.bean.OperationLog;
 import com.lingxiao.blog.bean.User;
-import com.lingxiao.blog.bean.UserInfo;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.enums.OperationType;
-import com.lingxiao.blog.global.LoginInterceptor;
 import com.lingxiao.blog.mapper.UserMapper;
-import com.lingxiao.blog.service.OperationLogService;
+import com.lingxiao.blog.service.system.OperationLogService;
 import com.lingxiao.blog.utils.IPUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.List;
 
@@ -72,9 +71,9 @@ public class CommonExceptionHandler {
 
         try {
             OperationLog operationLog = new OperationLog();
-            UserInfo userInfo = LoginInterceptor.getUserInfo();
-            if (userInfo != null) {
-                User user = userMapper.selectByPrimaryKey(userInfo.getId());
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication.getPrincipal() != null){
+                User user = (User) authentication.getPrincipal();
                 operationLog.setUsername(user.getUsername());
                 operationLog.setNickname(user.getNickname());
             }

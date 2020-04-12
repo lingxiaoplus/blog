@@ -17,10 +17,10 @@ public class GlobalCorsConfig implements WebMvcConfigurer {
 
     @Autowired
     private JwtProperties jwtProperties;
-    @Bean
+    /*@Bean
     public LoginInterceptor loginInterceptor(){
         return new LoginInterceptor(jwtProperties);
-    }
+    }*/
     @Bean
     public CorsFilter corsFilter(){
         //1.添加cors配置信息
@@ -55,9 +55,9 @@ public class GlobalCorsConfig implements WebMvcConfigurer {
         return new CorsFilter(configurationSource);
     }
 
-    @Override
+    /*@Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(loginInterceptor())
                 .addPathPatterns("/article/**","/menu/**","/category/**","/email/**","/system/**");
-    }
+    }*/
 }

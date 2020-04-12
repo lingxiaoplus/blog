@@ -3,20 +3,20 @@ package com.lingxiao.blog.aspect;
 import com.lingxiao.blog.annotation.OperationLogDetail;
 import com.lingxiao.blog.bean.OperationLog;
 import com.lingxiao.blog.bean.User;
-import com.lingxiao.blog.bean.UserInfo;
 import com.lingxiao.blog.enums.OperationType;
-import com.lingxiao.blog.exception.BlogException;
-import com.lingxiao.blog.global.LoginInterceptor;
+import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.mapper.UserMapper;
-import com.lingxiao.blog.service.OperationLogService;
+import com.lingxiao.blog.service.system.OperationLogService;
+import com.lingxiao.blog.service.user.UserService;
 import com.lingxiao.blog.utils.IPUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,6 +36,8 @@ public class LogAspect {
     private UserMapper userMapper;
     @Autowired
     private HttpServletRequest request;
+    @Autowired
+    private UserService userService;
     /**
      * 切入点为注解的方式
      */
@@ -59,37 +61,40 @@ public class LogAspect {
         long time = System.currentTimeMillis();
         res =  joinPoint.proceed();
         time = System.currentTimeMillis() - time;
+        OperationLog operationLog = new OperationLog();
         try {
             //方法执行完成后增加日志
             OperationLogDetail detail = getOperationLogDetail(joinPoint);
             log.debug("方法执行环绕后 ,{}",detail.detail());
-            UserInfo userInfo = LoginInterceptor.getUserInfo();
-            User user = userMapper.selectByPrimaryKey(userInfo.getId());
-            OperationLog operationLog = new OperationLog();
-            operationLog.setUsername(user.getUsername());
-            operationLog.setNickname(user.getNickname());
             operationLog.setOperationType(detail.operationType().getCode());
             operationLog.setOperationContent(detail.detail());
             operationLog.setRunTakes(time);
             operationLog.setUserIp(IPUtils.ipToNum(IPUtils.getIpAddress2(request)));
             operationLog.setBrowser(IPUtils.getBrowserName(request));
             operationLog.setCreateAt(new Date());
-            logService.setOperationLog(operationLog);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            //anonymousUser
+            if (!ContentValue.ANONYMOUSUSER.equals(authentication.getPrincipal())){
+                User user = (User) authentication.getPrincipal();
+                operationLog.setUsername(user.getUsername());
+                operationLog.setNickname(user.getNickname());
+            }
         } catch (Exception e) {
             e.printStackTrace();
+        }finally {
+            logService.setOperationLog(operationLog);
         }
-
         return res;
     }
 
     @AfterThrowing(value = "operationLog()", throwing = "throwable")
     public void afterThrowing(JoinPoint joinPoint, Throwable throwable){
         OperationLogDetail detail = null;
+        OperationLog operationLog = new OperationLog();
         try {
-            UserInfo userInfo = LoginInterceptor.getUserInfo();
-            OperationLog operationLog = new OperationLog();
-            if (userInfo != null){
-                User user = userMapper.selectByPrimaryKey(userInfo.getId());
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (!ContentValue.ANONYMOUSUSER.equals(authentication.getPrincipal())){
+                User user = (User) authentication.getPrincipal();
                 operationLog.setUsername(user.getUsername());
                 operationLog.setNickname(user.getNickname());
             }
@@ -112,11 +117,11 @@ public class LogAspect {
             operationLog.setExceptionInfo(result);
             printWriter.close();
             writer.close();
-
-            logService.setOperationLog(operationLog);
             log.debug("方法执行异常。操作：{},异常：{}",detail.detail(),throwable);
         } catch (Exception e) {
             e.printStackTrace();
+        }finally {
+            logService.setOperationLog(operationLog);
         }
     }
 

@@ -1,11 +1,11 @@
 package com.lingxiao.blog.global.security;
 
 import com.lingxiao.blog.global.security.filter.UrlMetadataSourceFilter;
-import com.lingxiao.blog.global.security.handler.AuthenticationSuccessHandler;
+import com.lingxiao.blog.global.security.handler.AuthFailHandler;
+import com.lingxiao.blog.global.security.handler.AuthSuccessHandler;
 import com.lingxiao.blog.global.security.handler.RestAccessDeniedHandler;
-import com.lingxiao.blog.service.UserService;
+import com.lingxiao.blog.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,7 +15,6 @@ import org.springframework.security.web.access.intercept.FilterSecurityIntercept
 import org.springframework.security.web.header.Header;
 import org.springframework.security.web.header.writers.StaticHeadersWriter;
 
-import java.io.PrintWriter;
 import java.util.Arrays;
 
 /**
@@ -33,7 +32,9 @@ public class UrlAccessConfigure extends WebSecurityConfigurerAdapter {
     private RestAccessDeniedHandler handler;
 
     @Autowired
-    private AuthenticationSuccessHandler successHandler;
+    private AuthSuccessHandler successHandler;
+    @Autowired
+    private AuthFailHandler failHandler;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -66,7 +67,7 @@ public class UrlAccessConfigure extends WebSecurityConfigurerAdapter {
                 .and() //拦截OPTIONS请求，直接返回header
                 //.addFilterAfter(new OptionRequestFilter(), CorsFilter.class)
                 //添加登录filter
-                .apply(new LoginConfigure<>()).loginSuccessHandler(successHandler).and()
+                .apply(new LoginConfigure<>()).loginHandler(successHandler,failHandler).and()
                 .logout().permitAll()
                 .and()
                 .csrf().disable() //CRSF禁用，因为不使用session

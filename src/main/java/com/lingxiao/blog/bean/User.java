@@ -7,6 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.util.CollectionUtils;
 
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -70,6 +71,7 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();
+        if (CollectionUtils.isEmpty(roles)) return authorities;
         for (Role role : roles) {
             authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getRoleTag()));
         }

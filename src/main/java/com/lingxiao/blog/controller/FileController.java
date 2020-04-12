@@ -5,7 +5,7 @@ import com.lingxiao.blog.bean.vo.FileInfo;
 import com.lingxiao.blog.global.OssProperties;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.global.api.ResponseResult;
-import com.lingxiao.blog.service.FileService;
+import com.lingxiao.blog.service.file.FileService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;

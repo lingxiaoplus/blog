@@ -1,7 +1,6 @@
 package com.lingxiao.blog.global.security.handler;
 
-import com.lingxiao.blog.jwt.JwtUtils;
-import com.lingxiao.blog.service.UserService;
+import com.lingxiao.blog.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;

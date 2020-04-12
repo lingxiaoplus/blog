@@ -1,8 +1,8 @@
 package com.lingxiao.blog.global.security;
 
-import com.lingxiao.blog.global.security.filter.AuthenticationFilter;
-import com.lingxiao.blog.global.security.handler.AuthenticationFailHandler;
-import com.lingxiao.blog.global.security.handler.AuthenticationSuccessHandler;
+import com.lingxiao.blog.global.security.filter.LoginAuthFilter;
+import com.lingxiao.blog.global.security.handler.AuthFailHandler;
+import com.lingxiao.blog.global.security.handler.AuthSuccessHandler;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -11,10 +11,11 @@ import org.springframework.security.web.authentication.session.NullAuthenticated
 
 public class LoginConfigure<T extends LoginConfigure<T, B>, B extends HttpSecurityBuilder<B>> extends AbstractHttpConfigurer<T,B> {
 
-    private AuthenticationFilter filter;
+
+    private LoginAuthFilter filter;
 
     public LoginConfigure() {
-        this.filter = new AuthenticationFilter();
+        this.filter = new LoginAuthFilter();
     }
 
     @Override
@@ -22,18 +23,19 @@ public class LoginConfigure<T extends LoginConfigure<T, B>, B extends HttpSecuri
         //super.configure(http);
         //设置Filter使用的AuthenticationManager,这里取公共的即可
         filter.setAuthenticationManager(http.getSharedObject(AuthenticationManager.class));
-        //设置失败的Handler
-        filter.setAuthenticationFailureHandler(new AuthenticationFailHandler());
+
         //不将认证后的context放入session
         filter.setSessionAuthenticationStrategy(new NullAuthenticatedSessionStrategy());
 
-        AuthenticationFilter authenticationFilter = postProcess(filter);
+        LoginAuthFilter authenticationFilter = postProcess(filter);
         //指定Filter的位置 在logout之后
         http.addFilterAfter(authenticationFilter, LogoutFilter.class);
     }
 
-    public LoginConfigure<T,B> loginSuccessHandler(AuthenticationSuccessHandler successHandler){
+    public LoginConfigure<T,B> loginHandler(AuthSuccessHandler successHandler, AuthFailHandler failHandler){
         filter.setAuthenticationSuccessHandler(successHandler);
+        //设置失败的Handler
+        filter.setAuthenticationFailureHandler(failHandler);
         return this;
     }
 

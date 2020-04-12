@@ -21,7 +21,6 @@ public enum ExceptionEnum {
     MENU_DELETE_ERROR(500,"删除菜单失败"),
     MENU_UPDATE_ERROR(500,"更新菜单失败"),
     MENU_SELECT_ERROR(404,"查询菜单失败"),
-    ROLE_SELECT_ERROR(404,"查询角色失败"),
     ACCESS_DENIED_ERROR(403,"权限不足"),
     CATEGORY_DELETE_ERROR(500,"删除分类失败"),
     CATEGORY_SELECT_ERROR(404,"查询分类失败"),
@@ -52,6 +51,10 @@ public enum ExceptionEnum {
     ADD_LINK_ERROR(500,"添加友链失败"),
     DELETE_LINK_ERROR(500,"删除友链失败"),
     UPDATE_LINK_ERROR(500,"更新友链失败"),
+    ROLE_ADD_ERROR(500,"角色添加失败"),
+    ROLE_DELETE_ERROR(500,"角色删除失败"),
+    ROLE_UPDATE_ERROR(500,"角色修改失败"),
+    ROLE_SELECT_ERROR(404,"角色查询失败"),
     ;
     private int code;
     private String msg;

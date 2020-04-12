@@ -1,14 +1,12 @@
 package com.lingxiao.blog.global.security.filter;
 
 import com.lingxiao.blog.bean.User;
-import com.lingxiao.blog.bean.UserInfo;
 import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.security.JwtAuthenticationToken;
-import com.lingxiao.blog.global.security.handler.AuthenticationFailHandler;
-import com.lingxiao.blog.global.security.handler.AuthenticationSuccessHandler;
+import com.lingxiao.blog.global.security.handler.AuthFailHandler;
+import com.lingxiao.blog.global.security.handler.JwtRefreshSuccessHandler;
 import com.lingxiao.blog.jwt.JwtProperties;
-import com.lingxiao.blog.jwt.JwtUtils;
-import com.lingxiao.blog.service.UserService;
+import com.lingxiao.blog.service.user.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -39,16 +37,16 @@ import java.util.List;
 public class JwtRequestAuthFilter extends OncePerRequestFilter {
 
     private final RequestHeaderRequestMatcher requestHeaderRequestMatcher;
-    @Autowired
-    private JwtProperties jwtProperties;
 
     @Autowired
     private UserService userService;
 
+    /*@Autowired
+    private AuthSuccessHandler successHandler;*/
     @Autowired
-    private AuthenticationSuccessHandler successHandler;
+    private AuthFailHandler failHandler;
     @Autowired
-    private AuthenticationFailHandler failHandler;
+    private JwtRefreshSuccessHandler successHandler;
 
     private AuthenticationManager authenticationManager;
 
@@ -67,7 +65,7 @@ public class JwtRequestAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         //header没带token的，直接放过，因为部分url匿名用户也可以访问
         //如果需要不支持匿名用户的请求没带token，这里放过也没问题，因为SecurityContext中没有认证信息，后面会被权限控制模块拦截
-        if (!requiresAuthentication(request)){
+        if (!requestHeaderRequestMatcher.matches(request)){
             filterChain.doFilter(request,response);
             return;
         }
@@ -103,9 +101,6 @@ public class JwtRequestAuthFilter extends OncePerRequestFilter {
         this.authenticationManager = authenticationManager;
     }
 
-    protected boolean requiresAuthentication(HttpServletRequest request) {
-        return requestHeaderRequestMatcher.matches(request);
-    }
 
     protected boolean permissiveRequest(HttpServletRequest request) {
         if(permissiveRequestMatchers == null)
@@ -116,4 +111,5 @@ public class JwtRequestAuthFilter extends OncePerRequestFilter {
         }
         return false;
     }
+
 }

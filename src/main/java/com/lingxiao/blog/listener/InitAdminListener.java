@@ -1,6 +1,6 @@
 package com.lingxiao.blog.listener;
 
-import com.lingxiao.blog.service.UserService;
+import com.lingxiao.blog.service.user.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
