@@ -1,12 +1,19 @@
 package com.lingxiao.blog.utils;
 
+import com.google.gson.Gson;
+import com.lingxiao.blog.bean.Address;
 import lombok.extern.slf4j.Slf4j;
 import nl.bitwalker.useragentutils.Browser;
 import nl.bitwalker.useragentutils.UserAgent;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.URL;
 import java.net.UnknownHostException;
 
 @Slf4j
@@ -37,7 +44,10 @@ public class IPUtils {
      * @return
      */
     public static String getIpAddress(HttpServletRequest request) {
-        String ip = request.getHeader("x-forwarded-for");
+        String ip = request.getHeader("X-Real-IP");
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("x-forwarded-for");
+        }
         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getHeader("Proxy-Client-IP");
         }
@@ -111,6 +121,44 @@ public class IPUtils {
         return ip;
     }
 
+
+    public static Address getRealAddrFromIp(String ip){
+        HttpURLConnection connection = null;
+        try {
+            String apiUrl = "http://whois.pconline.com.cn/ipJson.jsp?ip="+ ip +"&json=true";
+            URL url = new URL(apiUrl);
+            //得到connection对象。
+            connection = (HttpURLConnection) url.openConnection();
+            //设置请求方式
+            connection.setRequestMethod("GET");
+            //连接
+            connection.connect();
+            //得到响应码
+            int responseCode = connection.getResponseCode();
+            if(responseCode == HttpURLConnection.HTTP_OK){
+                //得到响应流
+                InputStream inputStream = connection.getInputStream();
+                //将响应流转换成字符串
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                StringBuffer sb = new StringBuffer();
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                String reponse = sb.toString();
+                Address address = new Gson().fromJson(reponse, Address.class);
+                System.out.println("结果" + address.toString());
+                return address;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            if (connection != null){
+                connection.disconnect();
+            }
+        }
+        return null;
+    }
 
 
     public static String getBrowserName(HttpServletRequest request) {

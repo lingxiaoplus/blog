@@ -45,4 +45,6 @@ public interface UserService extends UserDetailsService{
     void initAdmin();
 
     void sendEmail(String receiver);
+
+    UserVo getUserVo(User user);
 }

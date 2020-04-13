@@ -1,7 +1,10 @@
 package com.lingxiao.blog.service.user.impl;
 
+import com.lingxiao.blog.annotation.OperationLogDetail;
 import com.lingxiao.blog.bean.*;
+import com.lingxiao.blog.bean.vo.UserVo;
 import com.lingxiao.blog.enums.ExceptionEnum;
+import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.jwt.JwtProperties;
@@ -149,6 +152,21 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public UserVo getUserVo(User user){
+        UserVo userVo = new UserVo();
+        userVo.setUserId(String.valueOf(user.getUserId()));
+        userVo.setUserIp(IPUtils.numToIP(user.getUserIp()));
+        userVo.setNickname(user.getNickname());
+        userVo.setAge(user.getAge());
+        userVo.setBirthday(user.getBirthday());
+        userVo.setEmail(user.getEmail());
+        userVo.setHeadPortrait(user.getHeadPortrait());
+        userVo.setPhoneNumber(user.getPhoneNumber());
+        user.setStatus(user.getStatus());
+        return userVo;
+    }
+
+    @Override
     public void changeUser(User user) {
         user.setUpdateAt(new Date());
         user.setPassword(null);
@@ -233,6 +251,7 @@ public class UserServiceImpl implements UserService{
         }
         return str.toString();
     }
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

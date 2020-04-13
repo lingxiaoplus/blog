@@ -69,7 +69,7 @@ public class LogAspect {
             operationLog.setOperationType(detail.operationType().getCode());
             operationLog.setOperationContent(detail.detail());
             operationLog.setRunTakes(time);
-            operationLog.setUserIp(IPUtils.ipToNum(IPUtils.getIpAddress2(request)));
+            operationLog.setUserIp(IPUtils.ipToNum(IPUtils.getIpAddress(request)));
             operationLog.setBrowser(IPUtils.getBrowserName(request));
             operationLog.setCreateAt(new Date());
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -101,7 +101,7 @@ public class LogAspect {
             detail = getOperationLogDetail(joinPoint);
             operationLog.setOperationType(OperationType.EXCEPTION.getCode());
             operationLog.setOperationContent(detail.detail());
-            operationLog.setUserIp(IPUtils.ipToNum(IPUtils.getIpAddress2(request)));
+            operationLog.setUserIp(IPUtils.ipToNum(IPUtils.getIpAddress(request)));
             operationLog.setCreateAt(new Date());
             operationLog.setBrowser(IPUtils.getBrowserName(request));
 

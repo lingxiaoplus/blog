@@ -79,7 +79,7 @@ public class CommonExceptionHandler {
             }
             operationLog.setOperationType(OperationType.EXCEPTION.getCode());
             operationLog.setOperationContent("unknow exception");
-            operationLog.setUserIp(IPUtils.ipToNum(IPUtils.getIpAddress2(request)));
+            operationLog.setUserIp(IPUtils.ipToNum(IPUtils.getIpAddress(request)));
             operationLog.setCreateAt(new Date());
             operationLog.setBrowser(IPUtils.getBrowserName(request));
             Writer writer = new StringWriter();

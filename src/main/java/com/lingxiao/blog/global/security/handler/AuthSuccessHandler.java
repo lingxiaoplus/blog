@@ -1,11 +1,16 @@
 package com.lingxiao.blog.global.security.handler;
 
 import com.google.gson.Gson;
+import com.lingxiao.blog.annotation.OperationLogDetail;
+import com.lingxiao.blog.bean.OperationLog;
 import com.lingxiao.blog.bean.User;
+import com.lingxiao.blog.bean.vo.UserVo;
+import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.service.user.UserService;
 import com.lingxiao.blog.utils.CookieUtils;
+import com.lingxiao.blog.utils.IPUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -17,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Date;
 
 @Slf4j
 @Component
@@ -24,6 +30,7 @@ public class AuthSuccessHandler extends SavedRequestAwareAuthenticationSuccessHa
     @Autowired
     private UserService userService;
 
+    @OperationLogDetail(detail = "用户登录",operationType = OperationType.LOGIN)
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
         User user = (User) authentication.getPrincipal();
@@ -34,7 +41,7 @@ public class AuthSuccessHandler extends SavedRequestAwareAuthenticationSuccessHa
 
         //登录成功将用户信息返回
         PrintWriter out = response.getWriter();
-        ResponseResult result = new ResponseResult(user);
+        ResponseResult<UserVo> result = new ResponseResult<>(userService.getUserVo(user));
         String userJson = new Gson().toJson(result, ResponseResult.class);
         out.write(userJson);
         out.flush();

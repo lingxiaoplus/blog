@@ -37,7 +37,7 @@ public class UserController {
     public ResponseEntity<String> register(@RequestBody @Valid  User user,
                                            HttpServletRequest request,
                                            HttpServletResponse response){
-        String token = userService.register(user,IPUtils.getIpAddress2(request));
+        String token = userService.register(user,IPUtils.getIpAddress(request));
         CookieUtils.setCookie(request,response, ContentValue.LOGIN_TOKEN_NAME,token,ContentValue.COOKIE_MAXAGE);
         return ResponseEntity.ok(token);
     }
@@ -70,14 +70,12 @@ public class UserController {
             ){
             if (!StringUtils.isBlank(cookieToken)){
                 token = cookieToken;
+            }else {
+                token = request.getHeader(ContentValue.LOGIN_TOKEN_NAME);
             }
             User user = userService.verify(token);
-            UserVo userVo = new UserVo();
-            userVo.setUserId(String.valueOf(user.getUserId()));
-            userVo.setUserIp(IPUtils.numToIP(user.getUserIp()));
-            userVo.setNickname(user.getNickname());
             CookieUtils.setCookie(request,response, ContentValue.LOGIN_TOKEN_NAME,token,ContentValue.COOKIE_MAXAGE);
-            ResponseResult<UserVo> result = new ResponseResult<>(userVo);
+            ResponseResult<UserVo> result = new ResponseResult<>(userService.getUserVo(user));
             return ResponseEntity.ok(result);
     }
 

@@ -2,6 +2,8 @@ package com.lingxiao.blog.global.security.filter;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.lingxiao.blog.annotation.OperationLogDetail;
+import com.lingxiao.blog.enums.OperationType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -15,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * security是默认使用form提交表单登录的，我们要定义一个Filter来拦截/login
@@ -36,7 +39,7 @@ public class LoginAuthFilter extends AbstractAuthenticationProcessingFilter {
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
         //从json中获取username和password
-        String body = StreamUtils.copyToString(request.getInputStream(), Charset.forName("UTF-8"));
+        String body = StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8);
         String username = null, password = null;
         if(StringUtils.hasText(body)) {
             JsonObject jsonObject = new JsonParser().parse(body).getAsJsonObject();
