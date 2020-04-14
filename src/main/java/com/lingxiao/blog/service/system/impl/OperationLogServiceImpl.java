@@ -2,6 +2,7 @@ package com.lingxiao.blog.service.system.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.lingxiao.blog.bean.Address;
 import com.lingxiao.blog.bean.OperationLog;
 import com.lingxiao.blog.bean.vo.OperationLogVo;
 import com.lingxiao.blog.enums.OperationType;
@@ -25,8 +26,6 @@ import java.util.stream.Collectors;
 public class OperationLogServiceImpl implements OperationLogService {
     @Autowired
     private LogMapper logMapper;
-    @Autowired
-    private UserMapper userMapper;
 
     @Override
     public PageResult<OperationLogVo> getLogList(int pageNum, int pageSize,int operationType, String keyword){
@@ -55,7 +54,8 @@ public class OperationLogServiceImpl implements OperationLogService {
             logVo.setId(item.getId());
             logVo.setUsername(item.getUsername());
             logVo.setNickname(item.getNickname());
-            logVo.setUserIp(IPUtils.numToIP(item.getUserIp()));
+            Address address = IPUtils.getRealAddrFromIp(IPUtils.numToIP(item.getUserIp()));
+            if (address != null) logVo.setUserIp(address.getAddr());
             logVo.setRunTakes(item.getRunTakes());
             logVo.setOperationContent(item.getOperationContent());
             logVo.setOperationType(ContentValue.LOG_LOGIN == operationType?"登录日志":"操作日志");

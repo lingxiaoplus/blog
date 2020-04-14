@@ -5,6 +5,7 @@ import com.lingxiao.blog.bean.Address;
 import lombok.extern.slf4j.Slf4j;
 import nl.bitwalker.useragentutils.Browser;
 import nl.bitwalker.useragentutils.UserAgent;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
@@ -15,6 +16,7 @@ import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 public class IPUtils {
@@ -30,7 +32,10 @@ public class IPUtils {
     }
 
 
-    public static String numToIP(long ipNum) {
+    public static String numToIP(Long ipNum) {
+        if (ipNum == null) {
+            return "";
+        }
         String result = String.format("%d.%d.%d.%d", ipNum >>> 24, (ipNum & 0x00FFFFFF) >>> 16, (ipNum & 0x0000FFFF) >>> 8, ipNum & 0x000000FF);
         return result;
     }
@@ -44,21 +49,26 @@ public class IPUtils {
      * @return
      */
     public static String getIpAddress(HttpServletRequest request) {
-        String ip = request.getHeader("X-Real-IP");
+        String ip = request.getHeader("x-forwarded-for");
         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("x-forwarded-for");
+            ip = request.getHeader("X-Real-IP");
+            log.debug("获取用户真实ip - X-Real-IP - String ip=" + ip);
         }
         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getHeader("Proxy-Client-IP");
+            log.debug("获取用户真实ip - Proxy-Client-IP - String ip=" + ip);
         }
         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getHeader("WL-Proxy-Client-IP");
+            log.debug("获取用户真实ip - WL-Proxy-Client-IP - String ip=" + ip);
         }
         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getHeader("HTTP_CLIENT_IP");
+            log.debug("获取用户真实ip - HTTP_CLIENT_IP - String ip=" + ip);
         }
         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+            log.debug("获取用户真实ip - HTTP_X_FORWARDED_FOR - String ip=" + ip);
         }
         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
@@ -71,6 +81,7 @@ public class IPUtils {
                     e.printStackTrace();
                 }
                 ip = inet.getHostAddress();
+                log.debug("获取用户真实ip - 根据网卡取本机配置的IP - String ip=" + ip);
             }
         }
         return ip;
@@ -123,6 +134,9 @@ public class IPUtils {
 
 
     public static Address getRealAddrFromIp(String ip){
+        if(StringUtils.isBlank(ip)){
+            return null;
+        }
         HttpURLConnection connection = null;
         try {
             String apiUrl = "http://whois.pconline.com.cn/ipJson.jsp?ip="+ ip +"&json=true";
@@ -139,11 +153,11 @@ public class IPUtils {
                 //得到响应流
                 InputStream inputStream = connection.getInputStream();
                 //将响应流转换成字符串
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                StringBuffer sb = new StringBuffer();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "GBK"));
+                StringBuilder sb = new StringBuilder();
                 String line = null;
                 while ((line = reader.readLine()) != null) {
-                    sb.append(line + "\n");
+                    sb.append(line).append("\n");
                 }
                 String reponse = sb.toString();
                 Address address = new Gson().fromJson(reponse, Address.class);
