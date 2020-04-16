@@ -31,7 +31,7 @@ jwt:
 oss:
   accessKey: V_ZleIlYzHPjekmAuRvDkkXLdV_MDkk69VZWM12f # 设置好账号的ACCESS_KEY和SECRET_KEY
   secretKey: U8SndxcceqMZGIKvhfPL3gEPkYRN_NhrP75cJlOH
-  bucketName: function  # 要上传的空间
+  bucketName: function  # 要上传的UrlAccessDecisionManager空间
   prefixImg: http://img.lingxiaomz.top/
 
 email:

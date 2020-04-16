@@ -68,13 +68,9 @@ public class UserController {
                 HttpServletRequest request,
                 HttpServletResponse response
             ){
-            if (!StringUtils.isBlank(cookieToken)){
-                token = cookieToken;
-            }else {
-                token = request.getHeader(ContentValue.LOGIN_TOKEN_NAME);
-            }
+            token = request.getHeader(ContentValue.LOGIN_TOKEN_NAME);
             User user = userService.verify(token);
-            CookieUtils.setCookie(request,response, ContentValue.LOGIN_TOKEN_NAME,token,ContentValue.COOKIE_MAXAGE);
+            //CookieUtils.setCookie(request,response, ContentValue.LOGIN_TOKEN_NAME,token,ContentValue.COOKIE_MAXAGE);
             ResponseResult<UserVo> result = new ResponseResult<>(userService.getUserVo(user));
             return ResponseEntity.ok(result);
     }

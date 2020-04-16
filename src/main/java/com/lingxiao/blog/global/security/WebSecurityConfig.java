@@ -1,5 +1,6 @@
 package com.lingxiao.blog.global.security;
 
+import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.security.filter.OptionsRequestFilter;
 import com.lingxiao.blog.global.security.filter.UrlMetadataSourceFilter;
 import com.lingxiao.blog.global.security.handler.AuthFailHandler;
@@ -81,7 +82,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 //添加header设置，支持跨域和ajax请求
                 .headers().addHeaderWriter(new StaticHeadersWriter(Arrays.asList(
                 new Header("Access-control-Allow-Origin","*"),
-                new Header("Access-Control-Expose-Headers","Authorization"))))
+                new Header("Access-Control-Expose-Headers", ContentValue.LOGIN_TOKEN_NAME))))
                 .and() //拦截OPTIONS请求，直接返回header
                 .addFilterAfter(optionsRequestFilter, CorsFilter.class)
                 //添加登录filter
