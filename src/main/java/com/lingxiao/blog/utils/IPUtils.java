@@ -17,6 +17,9 @@ import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 public class IPUtils {
@@ -41,6 +44,13 @@ public class IPUtils {
     }
 
 
+    private static boolean checkIpAddressLocal(String ip){
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip) || "127.0.0.1".equals(ip)) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * 获取用户真实IP地址，不使用request.getRemoteAddr();的原因是有可能用户使用了代理软件方式避免真实IP地址。
      * 可是，如果通过了多级反向代理的话，X-Forwarded-For的值并不止一个，而是一串IP值，究竟哪个才是真正的用户端的真实IP呢？
@@ -49,28 +59,29 @@ public class IPUtils {
      * @return
      */
     public static String getIpAddress(HttpServletRequest request) {
+        //Map<String, String> headersInfo = getHeadersInfo(request);
         String ip = request.getHeader("x-forwarded-for");
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+        if (checkIpAddressLocal(ip)) {
             ip = request.getHeader("X-Real-IP");
             log.debug("获取用户真实ip - X-Real-IP - String ip=" + ip);
         }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+        if (checkIpAddressLocal(ip)) {
             ip = request.getHeader("Proxy-Client-IP");
             log.debug("获取用户真实ip - Proxy-Client-IP - String ip=" + ip);
         }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+        if (checkIpAddressLocal(ip)) {
             ip = request.getHeader("WL-Proxy-Client-IP");
             log.debug("获取用户真实ip - WL-Proxy-Client-IP - String ip=" + ip);
         }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+        if (checkIpAddressLocal(ip)) {
             ip = request.getHeader("HTTP_CLIENT_IP");
             log.debug("获取用户真实ip - HTTP_CLIENT_IP - String ip=" + ip);
         }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+        if (checkIpAddressLocal(ip)) {
             ip = request.getHeader("HTTP_X_FORWARDED_FOR");
             log.debug("获取用户真实ip - HTTP_X_FORWARDED_FOR - String ip=" + ip);
         }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+        if (checkIpAddressLocal(ip)) {
             ip = request.getRemoteAddr();
             if ("127.0.0.1".equals(ip) || "0:0:0:0:0:0:0:1".equals(ip)) {
                 //根据网卡取本机配置的IP
@@ -85,6 +96,17 @@ public class IPUtils {
             }
         }
         return ip;
+    }
+
+    private static Map<String, String> getHeadersInfo(HttpServletRequest request) {
+        Map<String, String> map = new HashMap<String, String>();
+        Enumeration headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String key = (String) headerNames.nextElement();
+            String value = request.getHeader(key);
+            map.put(key, value);
+        }
+        return map;
     }
 
 

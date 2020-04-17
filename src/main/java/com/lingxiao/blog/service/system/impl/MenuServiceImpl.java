@@ -8,7 +8,6 @@ import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.mapper.MenuMapper;
 import com.lingxiao.blog.mapper.MenuRoleMapper;
 import com.lingxiao.blog.mapper.RoleMapper;
-import com.lingxiao.blog.mapper.UserMapper;
 import com.lingxiao.blog.service.system.MenuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,8 +21,6 @@ import java.util.stream.Collectors;
 public class MenuServiceImpl implements MenuService {
     @Autowired
     private MenuMapper menuMapper;
-    @Autowired
-    private UserMapper userMapper;
     @Autowired
     private MenuRoleMapper menuRoleMapper;
     @Autowired

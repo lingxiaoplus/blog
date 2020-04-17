@@ -12,10 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 
 @Component
 public class TokenClearLogoutHandler implements LogoutHandler {
-
-    @Autowired
-    private UserService jwtUserService;
-
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         clearToken(authentication);

@@ -71,7 +71,7 @@ public class RoleServiceImpl implements RoleService {
         if (CollectionUtils.isEmpty(roles)){
             throw new BlogException(ExceptionEnum.ROLE_SELECT_ERROR);
         }
-        roles.stream().forEach((item)->{
+        roles.forEach((item)->{
             MenuRole menuRole = new MenuRole();
             menuRole.setRid(item.getId());
             List<Long> mIds = menuRoleMapper
@@ -79,8 +79,8 @@ public class RoleServiceImpl implements RoleService {
                     .stream()
                     .map(MenuRole::getMid)
                     .collect(Collectors.toList());
-            List<Menu> menus = menuMapper.selectByIdList(mIds);
-            item.setMenuList(menus);
+            //List<Menu> menus = menuMapper.selectByIdList(mIds);
+            item.setMenuList(mIds);
         });
         PageInfo<Role> pageInfo = PageInfo.of(roles);
         return new PageResult<Role>(pageInfo.getTotal(),pageInfo.getPages(),pageInfo.getList());
@@ -88,7 +88,36 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public List<Role> getRolesByUser(long uid) {
-
         return null;
+    }
+
+    @Override
+    public void updateRoleMenu(Long roleId,List<Long> menuIds){
+        if (roleId == null || CollectionUtils.isEmpty(menuIds)){
+            throw new BlogException(ExceptionEnum.ILLEGA_ARGUMENT);
+        }
+        MenuRole menuRole = new MenuRole();
+        menuRole.setRid(roleId);
+        List<Long> ids = menuRoleMapper
+                .select(menuRole)
+                .stream()
+                .map(MenuRole::getId)
+                .collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(ids)){
+            int count = menuRoleMapper.deleteByIdList(ids);
+            if (count != ids.size()){
+                throw new BlogException(ExceptionEnum.ROLE_MENU_SECURITY_UPDATE_ERROR);
+            }
+        }
+        List<MenuRole> insertList = menuIds.stream().map((item) -> {
+            MenuRole menuRoleInsert = new MenuRole();
+            menuRoleInsert.setRid(roleId);
+            menuRoleInsert.setMid(item);
+            return menuRoleInsert;
+        }).collect(Collectors.toList());
+        int insertCount = menuRoleMapper.insertList(insertList);
+        if (insertCount != insertList.size()) {
+            throw new BlogException(ExceptionEnum.ROLE_MENU_SECURITY_UPDATE_ERROR);
+        }
     }
 }

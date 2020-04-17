@@ -18,4 +18,6 @@ public interface RoleService {
      * @return
      */
     List<Role> getRolesByUser(long uid);
+
+    void updateRoleMenu(Long roleId,List<Long> menuIds);
 }

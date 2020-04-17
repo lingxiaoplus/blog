@@ -55,6 +55,8 @@ public enum ExceptionEnum {
     ROLE_DELETE_ERROR(500,"角色删除失败"),
     ROLE_UPDATE_ERROR(500,"角色修改失败"),
     ROLE_SELECT_ERROR(404,"角色查询失败"),
+
+    ROLE_MENU_SECURITY_UPDATE_ERROR(500,"修改角色菜单权限失败"),
     ;
     private int code;
     private String msg;

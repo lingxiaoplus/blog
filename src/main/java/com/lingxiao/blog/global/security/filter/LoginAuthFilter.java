@@ -22,6 +22,9 @@ import java.nio.charset.StandardCharsets;
 /**
  * security是默认使用form提交表单登录的，我们要定义一个Filter来拦截/login
  * 从json body中提取用户名和密码
+ *
+ * {@link AbstractAuthenticationProcessingFilter}处理所有HTTP Request和Response对象，并将其封装成AuthenticationMananger可以处理的Authentication
+ *
  */
 public class LoginAuthFilter extends AbstractAuthenticationProcessingFilter {
 
@@ -40,17 +43,12 @@ public class LoginAuthFilter extends AbstractAuthenticationProcessingFilter {
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
         //从json中获取username和password
         String body = StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8);
-        String username = null, password = null;
+        String username = "", password = "";
         if(StringUtils.hasText(body)) {
             JsonObject jsonObject = new JsonParser().parse(body).getAsJsonObject();
             username = jsonObject.get("account").getAsString();
             password = jsonObject.get("password").getAsString();
         }
-
-        if (username == null)
-            username = "";
-        if (password == null)
-            password = "";
         username = username.trim();
         //封装到token中提交
         UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(

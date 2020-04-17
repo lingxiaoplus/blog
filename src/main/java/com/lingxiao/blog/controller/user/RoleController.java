@@ -31,6 +31,16 @@ public class RoleController {
         return ResponseEntity.ok().build();
     }
 
+    @ApiOperation(value = "更新角色绑定的菜单",notes = "更新角色绑定的菜单")
+    @PutMapping("/roleMenu")
+    @OperationLogDetail(detail = "更新角色绑定的菜单",operationType = OperationType.UPDATE)
+    public ResponseEntity<Void> updateRoleMenu(
+            @RequestParam(value = "roleId") Long roleId,
+            @RequestParam(value = "menuIds") List<Long> menuIds){
+        roleService.updateRoleMenu(roleId,menuIds);
+        return ResponseEntity.ok().build();
+    }
+
     @ApiOperation(value = "查询角色",notes = "查询角色")
     @GetMapping("/all")
     @OperationLogDetail(detail = "查询角色",operationType = OperationType.SELECT)
@@ -39,4 +49,13 @@ public class RoleController {
         PageResult<Role> roles = roleService.selectAll(pageNum,pageSize);
         return ResponseEntity.ok(roles);
     }
+
+    @ApiOperation(value = "更新角色",notes = "更新角色")
+    @PutMapping
+    @OperationLogDetail(detail = "更新角色",operationType = OperationType.UPDATE)
+    public ResponseEntity<Void> updateRole(@Valid Role role){
+        roleService.updateRole(role);
+        return ResponseEntity.ok().build();
+    }
+
 }

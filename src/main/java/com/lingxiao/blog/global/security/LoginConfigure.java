@@ -10,10 +10,7 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 
 public class LoginConfigure<T extends LoginConfigure<T, B>, B extends HttpSecurityBuilder<B>> extends AbstractHttpConfigurer<T,B> {
-
-
     private LoginAuthFilter filter;
-
     public LoginConfigure() {
         this.filter = new LoginAuthFilter();
     }
@@ -23,13 +20,12 @@ public class LoginConfigure<T extends LoginConfigure<T, B>, B extends HttpSecuri
         //super.configure(http);
         //设置Filter使用的AuthenticationManager,这里取公共的即可
         filter.setAuthenticationManager(http.getSharedObject(AuthenticationManager.class));
-
         //不将认证后的context放入session
         filter.setSessionAuthenticationStrategy(new NullAuthenticatedSessionStrategy());
 
         LoginAuthFilter authenticationFilter = postProcess(filter);
-        //指定Filter的位置 在logout之后
-        http.addFilterAfter(authenticationFilter, LogoutFilter.class);
+        //指定Filter的位置 在logout之前
+        http.addFilterBefore(authenticationFilter, LogoutFilter.class);
     }
 
     public LoginConfigure<T,B> loginHandler(AuthSuccessHandler successHandler, AuthFailHandler failHandler){

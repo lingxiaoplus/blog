@@ -31,12 +31,12 @@ import java.util.List;
 /**
  * 用户除登录之外的请求，都要求必须携带JWT Token
  * 这个Filter对这些请求做一个拦截  提取header中的token
+ * OncePerRequestFilter过滤器保证一次请求只调用一次doFilterInternal方法;如内部的forward不会再多执行一次
  */
-@Component
-@EnableConfigurationProperties(JwtProperties.class)
+//@Component
 public class JwtRequestAuthFilter extends OncePerRequestFilter {
 
-    private final RequestHeaderRequestMatcher requestHeaderRequestMatcher;
+    private final RequestHeaderRequestMatcher requestHeaderRequestMatcher = new RequestHeaderRequestMatcher(ContentValue.LOGIN_TOKEN_NAME);
 
     @Autowired
     private UserService userService;
@@ -51,10 +51,6 @@ public class JwtRequestAuthFilter extends OncePerRequestFilter {
     private AuthenticationManager authenticationManager;
 
     private List<RequestMatcher> permissiveRequestMatchers = new ArrayList<>();
-
-    public JwtRequestAuthFilter() {
-        this.requestHeaderRequestMatcher = new RequestHeaderRequestMatcher(ContentValue.LOGIN_TOKEN_NAME);
-    }
 
     protected String getJwtToken(HttpServletRequest request){
         String token = request.getHeader(ContentValue.LOGIN_TOKEN_NAME);

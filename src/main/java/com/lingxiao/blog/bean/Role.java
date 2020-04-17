@@ -23,6 +23,6 @@ public class Role {
     private Integer roleLevel;
 
     @Transient
-    private List<Menu> menuList;
+    private List<Long> menuList;
 
 }

@@ -23,7 +23,7 @@ public class ContentValue {
     public static final String ROLE_LOGIN = "ROLE_LOGIN";
     public static final String ANONYMOUSUSER = "anonymousUser";
 
-    public static final String LOGIN_TOKEN_NAME = "blog_login_token";
+    public static final String LOGIN_TOKEN_NAME = "blog-login-token";   //自定义header必须用-不能用下划线
     public static final String STATISTICS_CACHE_NAME = "statistics_cache";
     public static final int COOKIE_MAXAGE = 30 * 60;
 

@@ -72,7 +72,7 @@ public class CommonExceptionHandler {
         try {
             OperationLog operationLog = new OperationLog();
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication.getPrincipal() != null){
+            if (authentication != null && authentication.getPrincipal() != null){
                 User user = (User) authentication.getPrincipal();
                 operationLog.setUsername(user.getUsername());
                 operationLog.setNickname(user.getNickname());

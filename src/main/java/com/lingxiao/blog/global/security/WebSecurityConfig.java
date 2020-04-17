@@ -1,7 +1,6 @@
 package com.lingxiao.blog.global.security;
 
 import com.lingxiao.blog.global.ContentValue;
-import com.lingxiao.blog.global.security.filter.OptionsRequestFilter;
 import com.lingxiao.blog.global.security.filter.UrlMetadataSourceFilter;
 import com.lingxiao.blog.global.security.handler.AuthFailHandler;
 import com.lingxiao.blog.global.security.handler.AuthSuccessHandler;
@@ -15,17 +14,16 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
-import org.springframework.security.web.header.Header;
-import org.springframework.security.web.header.writers.StaticHeadersWriter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-
-import java.util.Arrays;
 
 //@EnableGlobalMethodSecurity(prePostEnabled = true) //开启注解 判断用户对某个控制层的方法是否具有访问权限
 @EnableWebSecurity
@@ -44,8 +42,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private TokenClearLogoutHandler tokenClearLogoutHandler;
     @Autowired
-    private OptionsRequestFilter optionsRequestFilter;
-    @Autowired
     private UrlMetadataSourceFilter metadataSource;
     @Autowired
     private UrlAccessDecisionManager manager;
@@ -57,7 +53,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) throws Exception {
         web.ignoring().antMatchers("/css/**","/js/**",
                 "/index.html","/img/**","/fonts/**","/favicon.ico","/verifyCode",
-                "/image/**","/user/register","/user/email/**","/user/verify/**","/front/**");
+                "/image/**","/user/register","/user/email/**","/front/**");  //静态资源无需认证
     }
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -80,11 +76,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().disable()  //禁用session
                 .formLogin().disable() //禁用form登录
                 //添加header设置，支持跨域和ajax请求
-                .headers().addHeaderWriter(new StaticHeadersWriter(Arrays.asList(
-                new Header("Access-control-Allow-Origin","*"),
-                new Header("Access-Control-Expose-Headers", ContentValue.LOGIN_TOKEN_NAME))))
-                .and() //拦截OPTIONS请求，直接返回header
-                .addFilterAfter(optionsRequestFilter, CorsFilter.class)
+                .addFilterAfter(corsFilter(), CorsFilter.class)
                 //添加登录filter
                 .apply(new LoginConfigure<>()).loginHandler(successHandler,failHandler)
                 .and()
@@ -119,5 +111,41 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         DaoAuthenticationProvider daoProvider = new DaoAuthenticationProvider();
         daoProvider.setUserDetailsService(userService);
         return daoProvider;
+    }
+
+
+    @Bean
+    public CorsFilter corsFilter(){
+        //1.添加cors配置信息
+        CorsConfiguration config = new CorsConfiguration();
+        //.1 允许的域，不要写*
+        config.addAllowedOrigin("http://blog.lingxiaomz.top");
+        config.addAllowedOrigin("http://www.lingxiaomz.top");
+        config.addAllowedOrigin("http://api.lingxiaomz.top");
+        config.addAllowedOrigin("https://blog.lingxiaomz.top");
+        config.addAllowedOrigin("https://www.lingxiaomz.top");
+        config.addAllowedOrigin("https://api.lingxiaomz.top");
+        //.2是否发送cookie信息
+        config.setAllowCredentials(true);
+        //.3允许的请求方式
+        config.addAllowedMethod("OPTIONS");
+        config.addAllowedMethod("HEAD");
+        config.addAllowedMethod("GET");
+        config.addAllowedMethod("POST");
+        config.addAllowedMethod("PUT");
+        config.addAllowedMethod("DELETE");
+        config.addAllowedMethod("PATCH");
+        //.4允许的头信息
+        config.addAllowedHeader("*");
+        config.addExposedHeader(ContentValue.LOGIN_TOKEN_NAME);
+        //.5添加有效时长
+        config.setMaxAge(3600L);
+
+        //2.添加映射路径
+        UrlBasedCorsConfigurationSource configurationSource = new UrlBasedCorsConfigurationSource();
+        configurationSource.registerCorsConfiguration("/**",config);
+
+        //3.返回新的CorsFilter
+        return new CorsFilter(configurationSource);
     }
 }
