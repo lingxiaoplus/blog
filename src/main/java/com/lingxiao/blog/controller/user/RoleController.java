@@ -26,7 +26,7 @@ public class RoleController {
     @ApiImplicitParam(name = "role",value = "role对象")
     @PostMapping
     @OperationLogDetail(detail = "添加角色",operationType = OperationType.INSERT)
-    public ResponseEntity<Void> addRole(@Valid Role role){
+    public ResponseEntity<Void> addRole(@RequestBody @Valid Role role){
         roleService.addRole(role);
         return ResponseEntity.ok().build();
     }
@@ -53,7 +53,7 @@ public class RoleController {
     @ApiOperation(value = "更新角色",notes = "更新角色")
     @PutMapping
     @OperationLogDetail(detail = "更新角色",operationType = OperationType.UPDATE)
-    public ResponseEntity<Void> updateRole(@Valid Role role){
+    public ResponseEntity<Void> updateRole(@RequestBody @Valid Role role){
         roleService.updateRole(role);
         return ResponseEntity.ok().build();
     }

@@ -7,6 +7,7 @@ import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.global.ContentValue;
+import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.jwt.JwtProperties;
 import com.lingxiao.blog.jwt.JwtUtils;
 import com.lingxiao.blog.mapper.RoleMapper;
@@ -136,7 +137,7 @@ public class UserServiceImpl implements UserService{
     public User verify(String token) {
         if (StringUtils.isBlank(token)){
             log.error("登录的cookie为空");
-            throw new BlogException(ExceptionEnum.VERIFY_USER_LOGIN_ERROR);
+            //throw new BlogException(ExceptionEnum.VERIFY_USER_LOGIN_ERROR);
         }
         try {
             UserInfo userInfo = JwtUtils.getInfoFromToken(token, jwtProperties.getPublicKey());
@@ -147,8 +148,9 @@ public class UserServiceImpl implements UserService{
             return user;
         } catch (Exception e) {
             log.error("解密失败", e);
-            throw new BlogException(ExceptionEnum.VERIFY_USER_LOGIN_ERROR);
+            //throw new BlogException(ExceptionEnum.VERIFY_USER_LOGIN_ERROR);
         }
+        return null;
     }
 
     @Override
@@ -213,6 +215,13 @@ public class UserServiceImpl implements UserService{
         } catch (Exception e) {
             log.error("生成token失败 ", e);
         }
+        return null;
+    }
+
+
+    @Override
+    public PageResult<UserVo> getUserList(long userId) {
+        
         return null;
     }
 

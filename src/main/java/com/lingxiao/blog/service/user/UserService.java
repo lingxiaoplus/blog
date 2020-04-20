@@ -2,6 +2,7 @@ package com.lingxiao.blog.service.user;
 
 import com.lingxiao.blog.bean.User;
 import com.lingxiao.blog.bean.vo.UserVo;
+import com.lingxiao.blog.global.api.PageResult;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface UserService extends UserDetailsService{
@@ -47,4 +48,6 @@ public interface UserService extends UserDetailsService{
     void sendEmail(String receiver);
 
     UserVo getUserVo(User user);
+
+    PageResult<UserVo> getUserList(long userId);
 }

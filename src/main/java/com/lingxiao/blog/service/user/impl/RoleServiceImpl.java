@@ -28,11 +28,10 @@ public class RoleServiceImpl implements RoleService {
     private RoleMapper roleMapper;
     @Autowired
     private MenuRoleMapper menuRoleMapper;
-    @Autowired
-    private MenuMapper menuMapper;
 
     @Override
     public void addRole(Role role) {
+        role.setId(null);
         int count = roleMapper.insertSelective(role);
         if (count != 1) {
             throw new BlogException(ExceptionEnum.ROLE_ADD_ERROR);
