@@ -15,6 +15,7 @@ public class BlogApplication {
         SpringApplication
                 .run(BlogApplication.class, args)
                 .addApplicationListener(new InitAdminListener());
+
     }
 
 }

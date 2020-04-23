@@ -1,5 +1,7 @@
 package com.lingxiao.blog.service.user.impl;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.lingxiao.blog.annotation.OperationLogDetail;
 import com.lingxiao.blog.bean.*;
 import com.lingxiao.blog.bean.vo.UserVo;
@@ -14,6 +16,7 @@ import com.lingxiao.blog.mapper.RoleMapper;
 import com.lingxiao.blog.mapper.UserMapper;
 import com.lingxiao.blog.mapper.UserRoleMapper;
 import com.lingxiao.blog.service.system.EmailService;
+import com.lingxiao.blog.service.user.RoleService;
 import com.lingxiao.blog.service.user.UserService;
 import com.lingxiao.blog.utils.EmailUtil;
 import com.lingxiao.blog.utils.IPUtils;
@@ -56,7 +59,7 @@ public class UserServiceImpl implements UserService{
     @Autowired
     private UserRoleMapper userRoleMapper;
     @Autowired
-    private RoleMapper roleMapper;
+    private RoleService roleService;
 
     @Override
     public String login(String account, String password, int loginType) {
@@ -156,6 +159,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public UserVo getUserVo(User user){
         UserVo userVo = new UserVo();
+        userVo.setUsername(user.getUsername());
         userVo.setUserId(String.valueOf(user.getUserId()));
         userVo.setUserIp(IPUtils.numToIP(user.getUserIp()));
         userVo.setNickname(user.getNickname());
@@ -164,7 +168,8 @@ public class UserServiceImpl implements UserService{
         userVo.setEmail(user.getEmail());
         userVo.setHeadPortrait(user.getHeadPortrait());
         userVo.setPhoneNumber(user.getPhoneNumber());
-        user.setStatus(user.getStatus());
+        userVo.setStatus(user.getStatus());
+        userVo.setRoles(user.getRoles());
         return userVo;
     }
 
@@ -220,9 +225,27 @@ public class UserServiceImpl implements UserService{
 
 
     @Override
-    public PageResult<UserVo> getUserList(long userId) {
-        
-        return null;
+    public PageResult<UserVo> getUserList(int pageNum, int pageSize, Long userId) {
+        if (userId == null){
+            throw new BlogException(ExceptionEnum.ILLEGA_ARGUMENT);
+        }
+        PageHelper.startPage(pageNum,pageSize);
+        int maxLevel = userRoleMapper.maxRoleLevel(userId);
+        log.debug("用户的角色最大等级：{}",maxLevel);
+        List<User> users = userMapper.selectAll();
+        PageInfo<User> pageInfo = PageInfo.of(users);
+        List<UserVo> userVoList = pageInfo
+                .getList()
+                .stream()
+                .map((item)->{
+                    List<Role> roles = roleService.getRolesByUser(item.getUserId());
+                    item.setRoles(roles);
+                    return getUserVo(item);
+                })
+                .collect(Collectors.toList());
+        //userRoles.stream()
+        //userRoles.stream().filter(o -> o.getTime() != null).map(TimeTest::getTime).distinct().min(DateUtils::compareDate).get();
+        return new PageResult<>(pageInfo.getTotal(), pageInfo.getPages(), userVoList);
     }
 
     @Override
@@ -268,11 +291,13 @@ public class UserServiceImpl implements UserService{
         if (user == null){
             throw new BlogException(ExceptionEnum.LOGIN_NAME_ERROR);
         }
-        UserRole userRole = new UserRole();
+        /*UserRole userRole = new UserRole();
         userRole.setUserId(user.getUserId());
         List<Long> roleIds = userRoleMapper.select(userRole).stream().map(UserRole::getRoleId).collect(Collectors.toList());
-        List<Role> roles = roleMapper.selectByIdList(roleIds);
+        List<Role> roles = roleMapper.selectByIdList(roleIds);*/
+        List<Role> roles = roleService.getRolesByUser(user.getUserId());
         user.setRoles(roles);
+
         return user;
     }
 }

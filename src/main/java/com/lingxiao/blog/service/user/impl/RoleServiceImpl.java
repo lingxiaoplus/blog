@@ -2,10 +2,7 @@ package com.lingxiao.blog.service.user.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.lingxiao.blog.bean.Comment;
-import com.lingxiao.blog.bean.Menu;
-import com.lingxiao.blog.bean.MenuRole;
-import com.lingxiao.blog.bean.Role;
+import com.lingxiao.blog.bean.*;
 import com.lingxiao.blog.bean.vo.CommentVo;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
@@ -13,6 +10,7 @@ import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.mapper.MenuMapper;
 import com.lingxiao.blog.mapper.MenuRoleMapper;
 import com.lingxiao.blog.mapper.RoleMapper;
+import com.lingxiao.blog.mapper.UserRoleMapper;
 import com.lingxiao.blog.service.system.MenuService;
 import com.lingxiao.blog.service.user.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +26,8 @@ public class RoleServiceImpl implements RoleService {
     private RoleMapper roleMapper;
     @Autowired
     private MenuRoleMapper menuRoleMapper;
+    @Autowired
+    private UserRoleMapper userRoleMapper;
 
     @Override
     public void addRole(Role role) {
@@ -87,7 +87,13 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public List<Role> getRolesByUser(long uid) {
-        return null;
+        UserRole userRole = new UserRole();
+        userRole.setUserId(uid);
+        List<UserRole> select = userRoleMapper.select(userRole);
+        if (CollectionUtils.isEmpty(select)) return null;
+        List<Long> ids = select.stream().map(UserRole::getRoleId).collect(Collectors.toList());
+        List<Role> roles = roleMapper.selectByIdList(ids);
+        return roles;
     }
 
     @Override

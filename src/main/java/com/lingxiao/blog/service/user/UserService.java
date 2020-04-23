@@ -49,5 +49,5 @@ public interface UserService extends UserDetailsService{
 
     UserVo getUserVo(User user);
 
-    PageResult<UserVo> getUserList(long userId);
+    PageResult<UserVo> getUserList(int pageNum, int pageSize, Long userId);
 }

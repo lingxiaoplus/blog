@@ -5,6 +5,7 @@ import com.lingxiao.blog.bean.User;
 import com.lingxiao.blog.bean.vo.UserVo;
 import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.global.ContentValue;
+import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.service.user.UserService;
 import com.lingxiao.blog.utils.CookieUtils;
@@ -86,5 +87,18 @@ public class UserController {
     public ResponseEntity<Void> sendEmail(@PathVariable(value = "address") String address) {
         userService.sendEmail(address);
         return ResponseEntity.ok().build();
+    }
+
+
+
+    @ApiOperation(value = "用户列表", notes = "获取用户列表")
+    @ApiImplicitParam(name = "address", value = "邮箱地址")
+    @GetMapping(value = "/list")
+    @OperationLogDetail(detail = "获取用户列表", operationType = OperationType.SELECT)
+    public ResponseEntity<PageResult<UserVo>> getUserList(@RequestParam(value = "pageNum",defaultValue = "1")int pageNum,
+                                            @RequestParam(value = "pageSize",defaultValue = "5")int pageSize,
+                                            @RequestParam(value = "userId",defaultValue = "")Long userId) {
+        PageResult<UserVo> userList = userService.getUserList(pageNum, pageSize, userId);
+        return ResponseEntity.ok(userList);
     }
 }
