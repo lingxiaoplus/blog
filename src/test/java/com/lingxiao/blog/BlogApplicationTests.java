@@ -11,7 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.UUID;
+import java.util.*;
 
 @SpringBootTest
 class BlogApplicationTests {
@@ -96,6 +96,26 @@ class BlogApplicationTests {
                 connection.disconnect();
             }
         }
+    }
+
+    @Test
+    void testSingleNum(){
+        int[] nums = new int[]{1,2,10,4,1,4,3,3};
+        int[] result = singleNumbers(nums);
+        System.out.println("结果："+Arrays.toString(result));
+    }
+
+    public int[] singleNumbers(int[] nums) {
+        Map<Integer, Integer> hashMap = new HashMap<>();
+        for (int num : nums) {
+            if (hashMap.containsKey(num)){
+                hashMap.remove(num);
+            }else {
+                hashMap.put(num,1);
+            }
+        }
+        Iterator<Integer> iterator = hashMap.keySet().iterator();
+        return new int[]{iterator.next(),iterator.next()};
     }
 
 }

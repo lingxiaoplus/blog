@@ -74,7 +74,7 @@ public class LogAspect {
             operationLog.setCreateAt(new Date());
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             //anonymousUser
-            if (!ContentValue.ANONYMOUSUSER.equals(authentication.getPrincipal())){
+            if (authentication != null && !ContentValue.ANONYMOUSUSER.equals(authentication.getPrincipal())){
                 User user = (User) authentication.getPrincipal();
                 operationLog.setUsername(user.getUsername());
                 operationLog.setNickname(user.getNickname());

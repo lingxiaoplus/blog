@@ -132,12 +132,13 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public PageResult<ArticleVo> getArticles(String keyword,int pageNum, int pageSize) {
-        PageHelper.startPage(pageNum,pageSize);
+        PageHelper.startPage(pageNum,pageSize,"create_at desc");
 
         Example example = new Example(Article.class);
         example.createCriteria()
                 .andNotEqualTo("status",ContentValue.ARTICLE_STATUS_DELETED)
                 .andLike("title","%"+keyword+"%");
+        //example.orderBy("createAt").desc();
         List<Article> articles = articleMapper.selectByExample(example);
 
         PageInfo<Article> pageInfo = PageInfo.of(articles);
@@ -152,6 +153,8 @@ public class ArticleServiceImpl implements ArticleService {
                     DateTime dateTime = new DateTime(item.getUpdateAt());
                     String dateString = dateTime.toString("yyyy-MM-dd");
                     articleVo.setUpdateTime(dateString);
+                    String createString = new DateTime(item.getCreateAt()).toString("yyyy-MM-dd");
+                    articleVo.setCreateTime(createString);
                     User user = userMapper.selectByPrimaryKey(item.getUserId());
                     articleVo.setAuthor(user.getUsername());
                     articleVo.setHeadImage(item.getHeadImage());
