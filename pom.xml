@@ -202,15 +202,17 @@
             </plugin>
 
             <!-- docker的maven插件， 官网: https://github. com/spotify/docker-maven-plugin-->
-            <plugin>
+            <!--<plugin>
                 <groupId>com.spotify</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
                 <version>0.4.13</version>
                 <configuration>
-                    <!--imaname是将要创建的镜像名称-->
-                    <imageName>192.168.73.128:5000/${project.artifactId}:${project.version}
+                    <imageName>47.92.215.253:5000/${project.artifactId}:${project.version}
                     </imageName>
-                    <baseImage>jdk1.8</baseImage>
+                    <imageTags>
+                        <imageTag>latest</imageTag>
+                    </imageTags>
+                    <baseImage>java</baseImage>
                     <entryPoint>["java", "-jar", "/${project.build.finalName}.jar"]
                     </entryPoint>
                     <resources>
@@ -220,9 +222,9 @@
                             <include>${project.build.finalName}.jar</include>
                         </resource>
                     </resources>
-                    <dockerHost>http://192.168.73.128:2375</dockerHost>
+                    <dockerHost>http://47.92.215.253:2375</dockerHost>
                 </configuration>
-            </plugin>
+            </plugin>-->
 
         </plugins>
     </build>

@@ -3,6 +3,8 @@ package com.lingxiao.blog;
 import com.google.gson.Gson;
 import com.lingxiao.blog.bean.Address;
 import com.lingxiao.blog.bean.BingImageData;
+import com.lingxiao.blog.service.file.impl.FileServiceImpl;
+import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -11,11 +13,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.*;
+import java.text.ParseException;
+import java.util.Calendar;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 @SpringBootTest
 class BlogApplicationTests {
-
     @Test
     void contextLoads() {
         String id = UUID.randomUUID().toString();
@@ -98,24 +104,93 @@ class BlogApplicationTests {
         }
     }
 
+
     @Test
-    void testSingleNum(){
-        int[] nums = new int[]{1,2,10,4,1,4,3,3};
-        int[] result = singleNumbers(nums);
-        System.out.println("结果："+Arrays.toString(result));
+    void testSignle() throws ParseException {
+        /*SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dateFormat.format(startDate);
+        System.out.println("时间格式化"+startDate);*/
+        boolean rqSjFormat = isRqFormat("2008-05-12");
+        System.out.println("是否是日期格式"+rqSjFormat);
     }
 
-    public int[] singleNumbers(int[] nums) {
-        Map<Integer, Integer> hashMap = new HashMap<>();
-        for (int num : nums) {
-            if (hashMap.containsKey(num)){
-                hashMap.remove(num);
-            }else {
-                hashMap.put(num,1);
-            }
+    public int[] signleNumbers(int[] nums){
+        int currentNum = nums[0];
+        for (int i = 0; i < nums.length; i++) {
+            currentNum = Math.max(nums[i], currentNum + nums[i]);
+
         }
-        Iterator<Integer> iterator = hashMap.keySet().iterator();
-        return new int[]{iterator.next(),iterator.next()};
+        return null;
     }
 
+
+    /***
+     * 判断字符串是否是yyyyMMddHHmmss格式
+     * @param mes 字符串
+     * @return boolean 是否是日期格式
+     */
+    /***
+     * 判断字符串是否是yyyyMMdd格式
+     * @param mes 字符串
+     * @return boolean 是否是日期格式
+     */
+    public static boolean isRqFormat(String mes){
+        String format = "([0-9]{4})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])";
+        Pattern pattern = Pattern.compile(format);
+        Matcher matcher = pattern.matcher(mes);
+        if (matcher.matches()) {
+            pattern = Pattern.compile("(\\d{4})(\\d{2})(\\d{2})");
+            matcher = pattern.matcher(mes);
+            if (matcher.matches()) {
+                int y = Integer.valueOf(matcher.group(1));
+                int m = Integer.valueOf(matcher.group(2));
+                int d = Integer.valueOf(matcher.group(3));
+                if (d > 28) {
+                    Calendar c = Calendar.getInstance();
+                    c.set(y, m-1, 1);
+                    //每个月的最大天数
+                    int lastDay = c.getActualMaximum(Calendar.DAY_OF_MONTH);
+                    return (lastDay >= d);
+                }
+            }
+            return true;
+        }
+        return false;
+
+    }
+
+    @Test
+    public void reverseString() {
+        /*long beforDayStart = getBeforDayStart(1);
+        Date date = new Date(beforDayStart);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String format = simpleDateFormat.format(date);*/
+        FileServiceImpl fileService = new FileServiceImpl();
+
+    }
+
+    /**
+     * @Description 获取当前时期前 i 天 日期的零点 当前日期 2019-7-8 13:13:13 --> 获取日期 2019-07-07
+     * @Author: szj
+     * @param:  [i]  输入int值 代表天数 00:00:00  UNIX 时间
+     * @Return: int
+     */
+    public static long getBeforDayStart(int i) {
+        Calendar zero = Calendar.getInstance();
+        zero.add(Calendar.DATE, i);
+        zero.set(zero.get(Calendar.YEAR), zero.get(Calendar.MONTH), zero.get(Calendar.DATE), 0, 0, 0);
+        return zero.getTimeInMillis();
+    }
+    /**
+     * @Description 获取当前时期前 i 天 日期的23:59:59 当前日期 2019-7-8 13:13:13 --> 获取日期 2019-7-7 23:59:59 UNIX 时间
+     * @Author: szj
+     * @param:  [i]  输入int值 代表天数
+     * @Return: int
+     */
+    public static long getBeforDayEnd(int i) {
+        Calendar zero = Calendar.getInstance();
+        zero.add(Calendar.DATE, i);
+        zero.set(zero.get(Calendar.YEAR), zero.get(Calendar.MONTH), zero.get(Calendar.DATE), 23, 59, 59);
+        return zero.getTimeInMillis();
+    }
 }
