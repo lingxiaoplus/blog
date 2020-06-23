@@ -2,6 +2,7 @@ package com.lingxiao.blog.service.article.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.lingxiao.blog.BlogApplication;
 import com.lingxiao.blog.bean.*;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
@@ -9,6 +10,7 @@ import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.mapper.*;
 import com.lingxiao.blog.service.article.ArticleService;
+import com.lingxiao.blog.service.article.LabelService;
 import com.lingxiao.blog.utils.UIDUtil;
 import com.lingxiao.blog.bean.vo.ArticleDetailVo;
 import com.lingxiao.blog.bean.vo.ArticleVo;
@@ -37,9 +39,9 @@ public class ArticleServiceImpl implements ArticleService {
     @Autowired
     private CategoryMapper categoryMapper;
     @Autowired
-    private LabelMapper labelMapper;
-    @Autowired
     private ArticleLabelMapper articleLabelMapper;
+    @Autowired
+    private LabelService labelService;
 
     @Transactional
     @Override
@@ -80,6 +82,7 @@ public class ArticleServiceImpl implements ArticleService {
         }
     }
 
+    @Transactional(noRollbackFor = {Exception.class})
     @Override
     public void updateArticle(Article article) {
         if (null == articleMapper.selectByPrimaryKey(article.getId())){
@@ -92,6 +95,8 @@ public class ArticleServiceImpl implements ArticleService {
         if (count != 1) {
             throw new BlogException(ExceptionEnum.ARTICLE_UPDATE_ERROR);
         }
+        //List<Label> originalLabels = labelService.getLabelByArticleId(article.getId());
+        //List<Long> labelIds = article.getLabelIds();
     }
 
 
@@ -127,6 +132,10 @@ public class ArticleServiceImpl implements ArticleService {
         articleDetail.setCommentCount(article.getCommentCount());
         articleDetail.setLikeCount(article.getLikeCount());
         articleDetail.setWatchCount(article.getWatchCount());
+
+        List<Label> labels = labelService.getLabelByArticleId(article.getId());
+        articleDetail.setLabels(labels);
+
         return articleDetail;
     }
 
@@ -163,6 +172,10 @@ public class ArticleServiceImpl implements ArticleService {
                     Category category = categoryMapper.selectByPrimaryKey(item.getCategoryId());
                     articleVo.setCategoryName(category.getName());
                     articleVo.setWatchCount(item.getWatchCount());
+
+                    List<Label> labels = labelService.getLabelByArticleId(item.getId());
+                    articleVo.setLabels(labels);
+
                     return articleVo;
                 })
                 .collect(Collectors.toList());

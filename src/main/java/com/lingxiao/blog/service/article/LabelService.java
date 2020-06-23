@@ -10,4 +10,8 @@ public interface LabelService{
     void deleteLabel(List<Long> ids);
     void updateLabel(Label label);
     PageResult<Label> getLabels(String keyword, int pageNum, int pageSize);
+
+    List<Label> getLabelByArticleId(long id);
+
+    void updateArticleLabelByArticleId(long id);
 }

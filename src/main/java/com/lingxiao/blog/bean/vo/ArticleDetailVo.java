@@ -1,7 +1,10 @@
 package com.lingxiao.blog.bean.vo;
 
+import com.lingxiao.blog.bean.Label;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -20,4 +23,5 @@ public class ArticleDetailVo {
     private String updateAt;
     private Long likeCount;
     private Integer status;
+    private List<Label> labels;
 }

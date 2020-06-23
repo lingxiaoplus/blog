@@ -166,31 +166,6 @@ class BlogApplicationTests {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String format = simpleDateFormat.format(date);*/
         FileServiceImpl fileService = new FileServiceImpl();
-
     }
 
-    /**
-     * @Description 获取当前时期前 i 天 日期的零点 当前日期 2019-7-8 13:13:13 --> 获取日期 2019-07-07
-     * @Author: szj
-     * @param:  [i]  输入int值 代表天数 00:00:00  UNIX 时间
-     * @Return: int
-     */
-    public static long getBeforDayStart(int i) {
-        Calendar zero = Calendar.getInstance();
-        zero.add(Calendar.DATE, i);
-        zero.set(zero.get(Calendar.YEAR), zero.get(Calendar.MONTH), zero.get(Calendar.DATE), 0, 0, 0);
-        return zero.getTimeInMillis();
-    }
-    /**
-     * @Description 获取当前时期前 i 天 日期的23:59:59 当前日期 2019-7-8 13:13:13 --> 获取日期 2019-7-7 23:59:59 UNIX 时间
-     * @Author: szj
-     * @param:  [i]  输入int值 代表天数
-     * @Return: int
-     */
-    public static long getBeforDayEnd(int i) {
-        Calendar zero = Calendar.getInstance();
-        zero.add(Calendar.DATE, i);
-        zero.set(zero.get(Calendar.YEAR), zero.get(Calendar.MONTH), zero.get(Calendar.DATE), 23, 59, 59);
-        return zero.getTimeInMillis();
-    }
 }
