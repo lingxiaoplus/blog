@@ -96,7 +96,8 @@ public class ArticleServiceImpl implements ArticleService {
             throw new BlogException(ExceptionEnum.ARTICLE_UPDATE_ERROR);
         }
         //List<Label> originalLabels = labelService.getLabelByArticleId(article.getId());
-        //List<Long> labelIds = article.getLabelIds();
+        List<Long> labelIds = article.getLabelIds();
+        labelService.updateArticleLabelByArticleId(article.getId(),labelIds);
     }
 
 

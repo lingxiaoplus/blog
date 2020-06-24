@@ -13,5 +13,5 @@ public interface LabelService{
 
     List<Label> getLabelByArticleId(long id);
 
-    void updateArticleLabelByArticleId(long id);
+    void updateArticleLabelByArticleId(long id, List<Long> labelIds);
 }

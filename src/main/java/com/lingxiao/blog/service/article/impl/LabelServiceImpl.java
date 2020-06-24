@@ -12,6 +12,7 @@ import com.lingxiao.blog.mapper.LabelMapper;
 import com.lingxiao.blog.service.article.LabelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
@@ -70,15 +71,24 @@ public class LabelServiceImpl implements LabelService {
         return labels;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
-    public void updateArticleLabelByArticleId(long id){
-        ArticleLabel articleLabel = new ArticleLabel();
-        articleLabel.setArticleId(id);
-        int deleteCount = articleLabelMapper.delete(articleLabel);
-
-
-        //List<Long> idList = articleLabels.stream().map(ArticleLabel::getLabelId).collect(Collectors.toList());
-        //List<Label> labels = labelMapper.selectByIdList(idList);
+    public void updateArticleLabelByArticleId(long id, List<Long> labelIds){
+        ArticleLabel deleteArticle = new ArticleLabel();
+        deleteArticle.setArticleId(id);
+        //int count = articleLabelMapper.selectCount(deleteArticle);
+        //int deleteCount = articleLabelMapper.delete(deleteArticle);
+        articleLabelMapper.delete(deleteArticle);
+        List<ArticleLabel> insertList = labelIds.stream().map((labelId) -> {
+            ArticleLabel articleLabel = new ArticleLabel();
+            articleLabel.setArticleId(id);
+            articleLabel.setLabelId(labelId);
+            return articleLabel;
+        }).collect(Collectors.toList());
+        int insertCount = articleLabelMapper.insertList(insertList);
+        if (insertCount != insertList.size()){
+            throw new BlogException(ExceptionEnum.ILLEGA_ARGUMENT);
+        }
     }
 
 }
