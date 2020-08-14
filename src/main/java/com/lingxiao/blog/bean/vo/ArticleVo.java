@@ -19,5 +19,6 @@ public class ArticleVo {
     private String createTime;
     private String headImage;
     private Long watchCount;
+    private String content;
     private List<Label> labels;
 }

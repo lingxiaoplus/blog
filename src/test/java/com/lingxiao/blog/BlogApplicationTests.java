@@ -1,6 +1,7 @@
 package com.lingxiao.blog;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.lingxiao.blog.bean.Address;
 import com.lingxiao.blog.bean.BingImageData;
 import com.lingxiao.blog.service.file.impl.FileServiceImpl;
@@ -166,6 +167,45 @@ class BlogApplicationTests {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String format = simpleDateFormat.format(date);*/
         FileServiceImpl fileService = new FileServiceImpl();
+    }
+
+
+
+    @Test
+    void getBanner(){
+        HttpURLConnection connection = null;
+        try {
+            String apiUrl = "https://gank.io/api/v2/banners";
+            URL url = new URL(apiUrl);
+            //得到connection对象。
+            connection = (HttpURLConnection) url.openConnection();
+            //设置请求方式
+            connection.setRequestMethod("GET");
+            //连接
+            connection.connect();
+            //得到响应码
+            int responseCode = connection.getResponseCode();
+            if(responseCode == HttpURLConnection.HTTP_OK){
+                //得到响应流
+                InputStream inputStream = connection.getInputStream();
+                //将响应流转换成字符串
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                StringBuffer sb = new StringBuffer();
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                String reponse = sb.toString();
+                Banner banner = new Gson().fromJson(reponse, Banner.class);
+                System.out.println("结果" + banner.toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            if (connection != null){
+                connection.disconnect();
+            }
+        }
     }
 
 }

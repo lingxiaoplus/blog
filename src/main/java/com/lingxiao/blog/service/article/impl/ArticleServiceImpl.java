@@ -15,6 +15,7 @@ import com.lingxiao.blog.utils.UIDUtil;
 import com.lingxiao.blog.bean.vo.ArticleDetailVo;
 import com.lingxiao.blog.bean.vo.ArticleVo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -173,7 +174,11 @@ public class ArticleServiceImpl implements ArticleService {
                     Category category = categoryMapper.selectByPrimaryKey(item.getCategoryId());
                     articleVo.setCategoryName(category.getName());
                     articleVo.setWatchCount(item.getWatchCount());
-
+                    if (item.getContent().length() > 100){
+                        articleVo.setContent(StringUtils.substring(item.getContent(),0,100));
+                    }else {
+                        articleVo.setContent(item.getContent());
+                    }
                     List<Label> labels = labelService.getLabelByArticleId(item.getId());
                     articleVo.setLabels(labels);
 
