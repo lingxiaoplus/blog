@@ -11,12 +11,18 @@ spring:
   # 环境 dev:开发环境|test:测试环境|prod:生产环境
   profiles:
     active: dev
+  cache:
+    type: ehcache
+    ehcache:
+      config: classpath:cache/ehcache.xml
 
 
 mybatis:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true   # 开启mybatis驼峰式命名规则
+    cache-enabled: true
+    default-statement-timeout: 30
   mapper-locations: classpath:mapper/*.xml
 
 logging:

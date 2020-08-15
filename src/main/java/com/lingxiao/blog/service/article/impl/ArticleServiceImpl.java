@@ -4,20 +4,25 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.lingxiao.blog.BlogApplication;
 import com.lingxiao.blog.bean.*;
+import com.lingxiao.blog.bean.vo.HomePageVo;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.api.PageResult;
+import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.mapper.*;
 import com.lingxiao.blog.service.article.ArticleService;
 import com.lingxiao.blog.service.article.LabelService;
+import com.lingxiao.blog.service.system.ThemeService;
 import com.lingxiao.blog.utils.UIDUtil;
 import com.lingxiao.blog.bean.vo.ArticleDetailVo;
 import com.lingxiao.blog.bean.vo.ArticleVo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.session.RowBounds;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -43,6 +48,8 @@ public class ArticleServiceImpl implements ArticleService {
     private ArticleLabelMapper articleLabelMapper;
     @Autowired
     private LabelService labelService;
+    @Autowired
+    private ThemeService themeService;
 
     @Transactional
     @Override
@@ -155,7 +162,42 @@ public class ArticleServiceImpl implements ArticleService {
         PageInfo<Article> pageInfo = PageInfo.of(articles);
 
 
-        List<ArticleVo> articleVoList = pageInfo.getList()
+        List<ArticleVo> articleVoList = articleVoConvert(pageInfo.getList());
+        return new PageResult<ArticleVo>(pageInfo.getTotal(),pageInfo.getPages(),articleVoList);
+    }
+
+    @Override
+    public List<Article> getRankArticle(int size){
+        Example example = new Example(Article.class);
+        example.setOrderByClause("watch_count desc");
+        List<Article> articles = articleMapper.selectByExampleAndRowBounds(example,new RowBounds(0,size));
+        return articles;
+    }
+
+    @Cacheable(value = "banners")
+    @Override
+    public ResponseResult<HomePageVo> getHomePageBanner(int bannerSize){
+        List<Article> articles = getRankArticle(bannerSize);
+        List<ArticleVo> banners = articleVoConvert(articles);
+        Hitokoto hitokoto = themeService.getHitokoto();
+        HomePageVo homePageVo = new HomePageVo();
+        homePageVo.setBanners(banners);
+        homePageVo.setHitokoto(hitokoto);
+        ResponseResult<HomePageVo> result = new ResponseResult<>();
+        result.setData(homePageVo);
+        return result;
+    }
+
+    @Override
+    public void deleteArticle(Long id) {
+        int count = articleMapper.updateArticleStatus(id, ContentValue.ARTICLE_STATUS_DELETED);
+        if (count != 1){
+            throw new BlogException(ExceptionEnum.ARTICLE_DELETE_ERROR);
+        }
+    }
+
+    private List<ArticleVo> articleVoConvert(List<Article> articles){
+        List<ArticleVo> articleVoList = articles
                 .stream()
                 .map((item) -> {
                     ArticleVo articleVo = new ArticleVo();
@@ -185,14 +227,6 @@ public class ArticleServiceImpl implements ArticleService {
                     return articleVo;
                 })
                 .collect(Collectors.toList());
-        return new PageResult<ArticleVo>(pageInfo.getTotal(),pageInfo.getPages(),articleVoList);
-    }
-
-    @Override
-    public void deleteArticle(Long id) {
-        int count = articleMapper.updateArticleStatus(id, ContentValue.ARTICLE_STATUS_DELETED);
-        if (count != 1){
-            throw new BlogException(ExceptionEnum.ARTICLE_DELETE_ERROR);
-        }
+        return articleVoList;
     }
 }

@@ -1,20 +1,26 @@
 package com.lingxiao.blog.service.system.impl;
 
+import com.lingxiao.blog.bean.Hitokoto;
 import com.lingxiao.blog.bean.Theme;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
+import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.mapper.ThemeMapper;
 import com.lingxiao.blog.service.system.ThemeService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @Slf4j
 public class ThemeServiceImpl implements ThemeService {
     @Autowired
     private ThemeMapper themeMapper;
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Override
     public void saveTheme(Theme theme) {
@@ -45,5 +51,12 @@ public class ThemeServiceImpl implements ThemeService {
             theme.setMotto("一言API");
         }
         return theme;
+    }
+
+    @Cacheable(value = "banners")
+    @Override
+    public Hitokoto getHitokoto(){
+        Hitokoto response = restTemplate.getForObject(ContentValue.HITOKOTO_URL, Hitokoto.class);
+        return response;
     }
 }

@@ -100,7 +100,7 @@ public class LogAspect {
             }
             detail = getOperationLogDetail(joinPoint);
             operationLog.setOperationType(OperationType.EXCEPTION.getCode());
-            operationLog.setOperationContent(detail.detail());
+            operationLog.setOperationContent(throwable.toString());
             operationLog.setUserIp(IPUtils.ipToNum(IPUtils.getIpAddress(request)));
             operationLog.setCreateAt(new Date());
             operationLog.setBrowser(IPUtils.getBrowserName(request));

@@ -2,11 +2,14 @@ package com.lingxiao.blog.controller.article;
 
 import com.lingxiao.blog.annotation.OperationLogDetail;
 import com.lingxiao.blog.bean.Category;
+import com.lingxiao.blog.bean.Label;
 import com.lingxiao.blog.enums.OperationType;
+import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.service.article.CategoryService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -31,18 +34,26 @@ public class CategoryController {
         return ResponseEntity.ok().build();
     }
 
-    @ApiOperation(value = "获取所有分类", notes = "获取分类列表")
-    @OperationLogDetail(detail = "获取分类",operationType = OperationType.SELECT)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "pageNum",value = "第几页"),
+            @ApiImplicitParam(name = "pageSize",value = "每页显示多少"),
+            @ApiImplicitParam(name = "keyword",value = "关键词")
+    })
+    @ApiOperation(value = "分页获取分类")
+    @OperationLogDetail(detail = "分页获取分类",operationType = OperationType.SELECT)
     @GetMapping
-    public ResponseEntity<ResponseResult> getCategorys(){
-        ResponseResult responseResult = new ResponseResult<List<Category>>(categoryService.selectAll());
-        return ResponseEntity.ok(responseResult);
+    public ResponseEntity<PageResult<Category>> getCategories(
+            @RequestParam(value = "keyword",defaultValue = "") String keyword,
+            @RequestParam(value = "pageNum",defaultValue = "1")int pageNum,
+            @RequestParam(value = "pageSize",defaultValue = "5")int pageSize){
+        return ResponseEntity.ok(categoryService.getCategories(keyword,pageNum,pageSize));
     }
+
 
     @ApiOperation(value = "根据id获取分类")
     @OperationLogDetail(detail = "根据id获取分类",operationType = OperationType.SELECT)
     @GetMapping(value = "/{id}")
-    public ResponseEntity<ResponseResult> getCategorys(@PathVariable Long id){
+    public ResponseEntity<ResponseResult> getCategoryById(@PathVariable Long id){
         ResponseResult responseResult = new ResponseResult<Category>(categoryService.selectById(id));
         return ResponseEntity.ok(responseResult);
     }

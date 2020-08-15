@@ -13,7 +13,7 @@ public interface UserService extends UserDetailsService{
      * @param loginType
      * @return 返回token
      */
-    String login(String account, String password, int loginType);
+    //String login(String account, String password, int loginType);
 
     /**
      * 登录成功返回一个token

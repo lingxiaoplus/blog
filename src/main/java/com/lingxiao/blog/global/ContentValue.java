@@ -43,4 +43,6 @@ public class ContentValue {
     public static final int EMAIL_DISABLE = 0;
     public static final int EMAIL_ENABLE = 1;
 
+    public static final String HITOKOTO_URL = "https://v1.hitokoto.cn?min_length=16";
+
 }

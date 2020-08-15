@@ -61,7 +61,7 @@ public class UserServiceImpl implements UserService{
     @Autowired
     private RoleService roleService;
 
-    @Override
+    /*@Override
     public String login(String account, String password, int loginType) {
         if (StringUtils.isBlank(account) || StringUtils.isBlank(password)) {
             throw new BlogException(ExceptionEnum.ILLEGA_ARGUMENT);
@@ -88,7 +88,7 @@ public class UserServiceImpl implements UserService{
         }
         String token = authEntication(user);
         return token;
-    }
+    }*/
 
     @Override
     public String register(User user, String ip) {
