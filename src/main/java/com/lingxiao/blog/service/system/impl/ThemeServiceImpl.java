@@ -2,11 +2,13 @@ package com.lingxiao.blog.service.system.impl;
 
 import com.lingxiao.blog.bean.Hitokoto;
 import com.lingxiao.blog.bean.Theme;
+import com.lingxiao.blog.bean.User;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.mapper.ThemeMapper;
 import com.lingxiao.blog.service.system.ThemeService;
+import com.lingxiao.blog.service.user.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,8 @@ public class ThemeServiceImpl implements ThemeService {
     private ThemeMapper themeMapper;
     @Autowired
     private RestTemplate restTemplate;
+    @Autowired
+    private UserService userService;
 
     @Override
     public void saveTheme(Theme theme) {

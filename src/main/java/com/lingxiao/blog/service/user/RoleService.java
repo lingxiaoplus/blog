@@ -12,6 +12,7 @@ public interface RoleService {
     void updateRole(Role role);
     Role selectById(Long id);
     PageResult<Role> selectAll(int pageNum, int pageSize);
+    Role getRoleByLevel(int level);
 
     /**
      * 获取这个菜单能被哪些角色访问

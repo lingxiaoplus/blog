@@ -7,6 +7,7 @@ import com.lingxiao.blog.bean.vo.ArticleDetailVo;
 import com.lingxiao.blog.bean.vo.ArticleVo;
 import com.lingxiao.blog.global.api.ResponseResult;
 
+import java.util.Date;
 import java.util.List;
 
 public interface ArticleService {
@@ -17,6 +18,8 @@ public interface ArticleService {
     void updateArticle(Article article);
 
     List<Article> getRankArticle(int size);
+
+    List<ArticleVo> getTimeLineArticle(Date date);
 
     ResponseResult<HomePageVo> getHomePageBanner(int bannerSize);
 

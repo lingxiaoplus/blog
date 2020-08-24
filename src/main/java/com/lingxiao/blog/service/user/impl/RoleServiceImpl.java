@@ -97,6 +97,14 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    public Role getRoleByLevel(int level) {
+        Role role = new Role();
+        role.setRoleLevel(level);
+        Role selectOne = roleMapper.selectOne(role);
+        return selectOne;
+    }
+
+    @Override
     public void updateRoleMenu(Long roleId,List<Long> menuIds){
         if (roleId == null || CollectionUtils.isEmpty(menuIds)){
             throw new BlogException(ExceptionEnum.ILLEGA_ARGUMENT);

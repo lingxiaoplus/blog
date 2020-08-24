@@ -32,6 +32,8 @@ public interface UserService extends UserDetailsService{
     void changeUser(User user);
     void deleteUser(long userId);
 
+    User getAdminUser();
+
 
     /**
      * 生成token

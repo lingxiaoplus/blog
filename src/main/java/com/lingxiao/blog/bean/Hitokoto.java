@@ -2,8 +2,10 @@ package com.lingxiao.blog.bean;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class Hitokoto {
+public class Hitokoto implements Serializable {
 
     /**
      * id : 5950

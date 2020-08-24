@@ -15,5 +15,5 @@ public interface FileService {
     PageResult getFileList(String fileName,String date,int pageNum, int pageSize);
 
     OssProperties getOssProperties();
-    BingImageData getBingImages();
+    BingImageData getBingImages(int idx);
 }

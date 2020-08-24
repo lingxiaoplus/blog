@@ -1,5 +1,6 @@
 package com.lingxiao.blog.controller;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lingxiao.blog.annotation.OperationLogDetail;
 import com.lingxiao.blog.bean.Category;
 import com.lingxiao.blog.bean.FriendLink;
@@ -22,10 +23,13 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -96,6 +100,19 @@ public class FrontController {
         return ResponseEntity.ok(result);
     }
 
+
+    @ApiOperation(value = "获取年度文章")
+    @OperationLogDetail(detail = "获取年度文章",operationType = OperationType.SELECT)
+    @GetMapping("/article/timeLineForYear")
+    public ResponseEntity<List<ArticleVo>> getArticlesForYear(@RequestParam(value = "date")String date){
+        try {
+            Date parseDate = DateUtils.parseDate(date, "yyyy-MM-dd");
+            return ResponseEntity.ok(articleService.getTimeLineArticle(parseDate));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.badRequest().build();
+    }
 
     @ApiOperation(value = "获取所有标签")
     @OperationLogDetail(detail = "获取所有标签",operationType = OperationType.SELECT)

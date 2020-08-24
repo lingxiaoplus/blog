@@ -8,11 +8,12 @@ import tk.mybatis.mapper.annotation.KeySql;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
+import java.io.Serializable;
 import java.util.Date;
 
 @Data
 @Table(name = "labels")
-public class Label {
+public class Label implements Serializable {
     @Id
     @KeySql(useGeneratedKeys = true)
     private Long id;

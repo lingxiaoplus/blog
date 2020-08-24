@@ -138,7 +138,7 @@ public class UploadUtil {
      * @param limit 每次迭代的长度限制，最大1000，推荐值 1000
      * @return
      */
-    @Cacheable(value = "longCache")
+    @Cacheable(value = "ossPictures")
     public List<com.lingxiao.blog.bean.vo.FileInfo> getFileList(String prefix,int limit){
         List<com.lingxiao.blog.bean.vo.FileInfo> infoList = new ArrayList<>();
         //构造一个带指定 Region 对象的配置类

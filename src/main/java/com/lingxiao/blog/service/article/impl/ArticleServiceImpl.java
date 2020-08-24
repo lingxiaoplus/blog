@@ -32,6 +32,8 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -174,6 +176,12 @@ public class ArticleServiceImpl implements ArticleService {
         return articles;
     }
 
+    @Override
+    public List<ArticleVo> getTimeLineArticle(Date date){
+        List<Article> articles = articleMapper.selectYearArticles(date);
+        return articleVoConvert(articles);
+    }
+
     @Cacheable(value = "banners")
     @Override
     public ResponseResult<HomePageVo> getHomePageBanner(int bannerSize){
@@ -216,10 +224,13 @@ public class ArticleServiceImpl implements ArticleService {
                     Category category = categoryMapper.selectByPrimaryKey(item.getCategoryId());
                     articleVo.setCategoryName(category.getName());
                     articleVo.setWatchCount(item.getWatchCount());
-                    if (item.getContent().length() > 100){
-                        articleVo.setContent(StringUtils.substring(item.getContent(),0,100));
+                    String content = item.getContent();
+                    content = stringFilter(content);
+                    if (content.length() > 100){
+                        //缩略字符串
+                        articleVo.setContent(StringUtils.abbreviate(content,100));
                     }else {
-                        articleVo.setContent(item.getContent());
+                        articleVo.setContent(content);
                     }
                     List<Label> labels = labelService.getLabelByArticleId(item.getId());
                     articleVo.setLabels(labels);
@@ -228,5 +239,12 @@ public class ArticleServiceImpl implements ArticleService {
                 })
                 .collect(Collectors.toList());
         return articleVoList;
+    }
+
+    private static String stringFilter (String str){
+        String regEx="[`~!@#$%^&*()+=|{}\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘”“’]";
+        Pattern p = Pattern.compile(regEx);
+        Matcher m = p.matcher(str);
+        return m.replaceAll("").trim();
     }
 }

@@ -33,4 +33,8 @@
 
     <cache name="categories" maxElementsInMemory="10000" eternal="false"
            timeToIdleSeconds="600" timeToLiveSeconds="86400" overflowToDisk="true" />
+    <cache name="ossPictures" maxElementsInMemory="10000" eternal="false"
+           timeToIdleSeconds="600" timeToLiveSeconds="600" overflowToDisk="true" />
+    <cache name="bingPictures" maxElementsInMemory="10000" eternal="false"
+           timeToIdleSeconds="600" timeToLiveSeconds="600" overflowToDisk="true" />
 </ehcache>

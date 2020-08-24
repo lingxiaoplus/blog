@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.lingxiao.blog.bean.Address;
 import com.lingxiao.blog.bean.BingImageData;
 import com.lingxiao.blog.service.file.impl.FileServiceImpl;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -206,6 +207,16 @@ class BlogApplicationTests {
                 connection.disconnect();
             }
         }
+    }
+
+    //@Test
+    static void getTextLength(){
+        int length = StringUtils.length("https://cn.bing.com/th?id=OHR.BurrowingOwl_ZH-CN7730300251_1920x1080.jpg&rf=LaDigue_1920x1080.jpg&pid=hp");
+        System.out.println("长度： "+length);
+    }
+
+    public static void main(String[] args) {
+        getTextLength();
     }
 
 }

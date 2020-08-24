@@ -12,7 +12,9 @@ import com.lingxiao.blog.utils.UploadUtil;
 import com.qiniu.common.QiniuException;
 import com.qiniu.http.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -34,7 +36,7 @@ public class FileServiceImpl implements FileService {
      * idx 0今天 1明天
      * n 1-8
      */
-    private static final String BING_API = "https://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=8&mkt=zh-CN";
+    private static final String BING_API = "a?format=js&n=8&mkt=zh-CN&idx=";
     /**
      * 文件上传，返回oss地址
      * @param file
@@ -100,11 +102,12 @@ public class FileServiceImpl implements FileService {
     }
 
 
+    @Cacheable(value = "bingPictures")
     @Override
-    public BingImageData getBingImages(){
+    public BingImageData getBingImages(int idx){
         HttpURLConnection connection = null;
         try {
-            URL url = new URL(BING_API);
+            URL url = new URL(BING_API + idx);
             //得到connection对象。
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");

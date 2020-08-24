@@ -94,7 +94,7 @@ public class FileController {
 
 
     @GetMapping("/bing_image")
-    public ResponseEntity<ResponseResult<BingImageData>> getBingImages(){
-        return ResponseEntity.ok(new ResponseResult<>(uploadService.getBingImages()));
+    public ResponseEntity<ResponseResult<BingImageData>> getBingImages(@RequestParam(value = "idx",defaultValue = "0") int idx){
+        return ResponseEntity.ok(new ResponseResult<>(uploadService.getBingImages(idx)));
     }
 }

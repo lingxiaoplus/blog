@@ -195,6 +195,17 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public User getAdminUser() {
+        Role role = roleService.getRoleByLevel(1);
+        UserRole userRole = new UserRole();
+        userRole.setRoleId(role.getId());
+        UserRole selectOne = userRoleMapper.selectOne(userRole);
+        Long userId = selectOne.getUserId();
+        User user = userMapper.selectByPrimaryKey(userId);
+        return user;
+    }
+
+    @Override
     public void initAdmin() {
         //判断是否有系统管理员, 没有就注册
     }

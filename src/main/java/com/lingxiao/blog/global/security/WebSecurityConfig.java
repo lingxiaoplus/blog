@@ -85,7 +85,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 //.apply(new JwtLoginConfigurer<>()).tokenValidSuccessHandler(successHandler).permissiveRequestUrls("/logout")
                 //使用默认的logoutFilter
                 .logout()
-//              .logoutUrl("/logout")   //默认就是"/logout"
+                .logoutUrl("/logout")   //默认就是"/logout"
                 .addLogoutHandler(tokenClearLogoutHandler)  //logout时清除token
                 .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler()) //logout成功后返回200
                 .and()
@@ -125,6 +125,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         config.addAllowedOrigin("https://blog.lingxiaomz.top");
         config.addAllowedOrigin("https://www.lingxiaomz.top");
         config.addAllowedOrigin("https://api.lingxiaomz.top");
+        config.addAllowedOrigin("http://blog.test.lingxiaomz.top");
         //.2是否发送cookie信息
         config.setAllowCredentials(true);
         //.3允许的请求方式
