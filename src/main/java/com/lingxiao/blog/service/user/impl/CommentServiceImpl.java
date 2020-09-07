@@ -52,7 +52,7 @@ public class CommentServiceImpl implements CommentService {
         comment.setCreateAt(new Date());
         comment.setStatus(CommentState.UNDER_APPROVAL.getState());
 
-        if(null != comment.getParentId()){
+        if(null != comment.getParentId() && 0 != comment.getParentId()){
             Comment parent = commentMapper.selectByPrimaryKey(comment.getParentId());
             if (CommentState.UNDER_APPROVAL.getState() == parent.getStatus()){
                 //当前这条父评论还是待审核的 但是能收到子评论 说明是管理员回复的
@@ -138,16 +138,22 @@ public class CommentServiceImpl implements CommentService {
         commentVo.setContent(item.getContent());
         commentVo.setParentId(String.valueOf(item.getParentId()));
         commentVo.setStatus(item.getStatus());
+        commentVo.setUsername(item.getUsername());
+        commentVo.setEmail(item.getEmail());
+        commentVo.setWebsite(item.getWebsite());
+        //commentVo.setHeadPortrait(item.getHeadPortrait());
         DateTime createDate = new DateTime(item.getCreateAt());
         String createString = createDate.toString("yyyy-MM-dd");
         commentVo.setCreateAt(createString);
 
-        User user = userMapper.selectByPrimaryKey(item.getUserId());
+        /*User user = userMapper.selectByPrimaryKey(item.getUserId());
         user.setUIp(IPUtils.numToIP(user.getUserIp()));
         user.setUId(String.valueOf(user.getUserId()));
         user.setUserId(null);
         user.setUserIp(null);
-        commentVo.setMember(user);
+        commentVo.setMember(user);*/
+
+
 
         ArticleDetailVo articleContent = articleService.getArticleContent(item.getArticleId());
         articleContent.setContent(null);

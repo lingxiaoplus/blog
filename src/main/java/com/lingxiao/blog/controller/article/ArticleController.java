@@ -34,6 +34,15 @@ public class ArticleController {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping
+    @ApiOperation(value = "更新文章状态")
+    @ApiImplicitParam(name = "Article",value = "文章实体")
+    @OperationLogDetail(detail = "更新文章状态",operationType = OperationType.UPDATE)
+    public ResponseEntity<Void> updateArticle(@RequestBody Article article){
+        articleService.updateArticle(article);
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/{id}")
     @ApiOperation(value = "删除文章")
     @ApiImplicitParam(name = "id",value = "文章id")

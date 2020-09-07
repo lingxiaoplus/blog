@@ -151,9 +151,8 @@ public class UserServiceImpl implements UserService{
             return user;
         } catch (Exception e) {
             log.error("解密失败", e);
-            //throw new BlogException(ExceptionEnum.VERIFY_USER_LOGIN_ERROR);
+            throw new BlogException(ExceptionEnum.VERIFY_USER_LOGIN_ERROR);
         }
-        return null;
     }
 
     @Override

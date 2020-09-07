@@ -19,15 +19,18 @@ import com.lingxiao.blog.service.article.LabelService;
 import com.lingxiao.blog.service.system.ThemeService;
 import com.lingxiao.blog.service.user.CommentService;
 import com.lingxiao.blog.service.system.FriendLinkService;
+import com.lingxiao.blog.utils.IPUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
@@ -61,7 +64,7 @@ public class FrontController {
             @RequestParam(value = "keyword",defaultValue = "") String keyword,
             @RequestParam(value = "pageNum",defaultValue = "1")int pageNum,
             @RequestParam(value = "pageSize",defaultValue = "5")int pageSize){
-        return ResponseEntity.ok(articleService.getArticles(keyword,pageNum,pageSize));
+        return ResponseEntity.ok(articleService.getArticlesFromPublished(keyword,pageNum,pageSize));
     }
 
     @GetMapping("/banner")
@@ -119,5 +122,11 @@ public class FrontController {
     @GetMapping("/labels")
     public ResponseEntity<ResponseResult<List<Label>>> getLabels(){
         return ResponseEntity.ok(labelService.getAllLabels());
+    }
+
+    @GetMapping("/realIp")
+    public ResponseEntity<String> getRealIp(HttpServletRequest request){
+        String ipAddress = IPUtils.getIpAddress(request);
+        return ResponseEntity.ok(ipAddress);
     }
 }

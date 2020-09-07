@@ -70,8 +70,9 @@ public class Main {
         System.out.println("耗时："+ (endTime -startTime)/1000L + "秒");
 
         System.out.println(Arrays.toString(childList.toArray()));
-    }
 
+
+    }
 
     public List<Org> getChildList(String root){
         List<Org> child = new ArrayList<>();

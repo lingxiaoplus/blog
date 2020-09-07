@@ -13,7 +13,9 @@ import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.mapper.*;
 import com.lingxiao.blog.service.article.ArticleService;
 import com.lingxiao.blog.service.article.LabelService;
+import com.lingxiao.blog.service.system.DictionaryService;
 import com.lingxiao.blog.service.system.ThemeService;
+import com.lingxiao.blog.service.user.CommentService;
 import com.lingxiao.blog.utils.UIDUtil;
 import com.lingxiao.blog.bean.vo.ArticleDetailVo;
 import com.lingxiao.blog.bean.vo.ArticleVo;
@@ -52,6 +54,10 @@ public class ArticleServiceImpl implements ArticleService {
     private LabelService labelService;
     @Autowired
     private ThemeService themeService;
+    @Autowired
+    private DictionaryService dictionaryService;
+    @Autowired
+    private CommentService commentService;
 
     @Transactional
     @Override
@@ -107,7 +113,9 @@ public class ArticleServiceImpl implements ArticleService {
         }
         //List<Label> originalLabels = labelService.getLabelByArticleId(article.getId());
         List<Long> labelIds = article.getLabelIds();
-        labelService.updateArticleLabelByArticleId(article.getId(),labelIds);
+        if (!CollectionUtils.isEmpty(labelIds)) {
+            labelService.updateArticleLabelByArticleId(article.getId(),labelIds);
+        }
     }
 
 
@@ -153,10 +161,8 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public PageResult<ArticleVo> getArticles(String keyword,int pageNum, int pageSize) {
         PageHelper.startPage(pageNum,pageSize,"create_at desc");
-
         Example example = new Example(Article.class);
         example.createCriteria()
-                .andNotEqualTo("status",ContentValue.ARTICLE_STATUS_DELETED)
                 .andLike("title","%"+keyword+"%");
         //example.orderBy("createAt").desc();
         List<Article> articles = articleMapper.selectByExample(example);
@@ -166,6 +172,19 @@ public class ArticleServiceImpl implements ArticleService {
 
         List<ArticleVo> articleVoList = articleVoConvert(pageInfo.getList());
         return new PageResult<ArticleVo>(pageInfo.getTotal(),pageInfo.getPages(),articleVoList);
+    }
+
+    @Override
+    public PageResult<ArticleVo> getArticlesFromPublished(String keyword, int pageNum, int pageSize) {
+        PageHelper.startPage(pageNum,pageSize,"create_at desc");
+        Example example = new Example(Article.class);
+        example.createCriteria()
+                .andEqualTo("status",ContentValue.ARTICLE_STATUS_PUBLISHED)
+                .andLike("title","%"+keyword+"%");
+        List<Article> articles = articleMapper.selectByExample(example);
+        PageInfo<Article> pageInfo = PageInfo.of(articles);
+        List<ArticleVo> articleVoList = articleVoConvert(pageInfo.getList());
+        return new PageResult<>(pageInfo.getTotal(),pageInfo.getPages(),articleVoList);
     }
 
     @Override
@@ -235,6 +254,11 @@ public class ArticleServiceImpl implements ArticleService {
                     List<Label> labels = labelService.getLabelByArticleId(item.getId());
                     articleVo.setLabels(labels);
 
+                    //设置状态
+                    //articleVo.setStatus(item.getStatus());
+                    articleVo.setStatus(dictionaryService.getDictionaryByNameAndCode("articleStatus",
+                            String.valueOf(item.getStatus())));
+                    articleVo.setCommentCount(commentService.getCommentCount(item.getId()));
                     return articleVo;
                 })
                 .collect(Collectors.toList());

@@ -76,8 +76,10 @@ public class LogAspect {
             //anonymousUser
             if (authentication != null && !ContentValue.ANONYMOUSUSER.equals(authentication.getPrincipal())){
                 User user = (User) authentication.getPrincipal();
-                operationLog.setUsername(user.getUsername());
-                operationLog.setNickname(user.getNickname());
+                if(user != null){
+                    operationLog.setUsername(user.getUsername());
+                    operationLog.setNickname(user.getNickname());
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -25,7 +25,8 @@ public class AuthFailHandler extends SimpleUrlAuthenticationFailureHandler {
         resp.setContentType("application/json;charset=utf-8");
         log.error("用户登录失败, {}",e.getMessage());
         PrintWriter out = resp.getWriter();
-        ExceptionResult respBean = new ExceptionResult(HttpStatus.UNAUTHORIZED.value(), e.getMessage());
+        ExceptionResult respBean = new ExceptionResult(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
+        resp.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         if (e instanceof LockedException) {
             respBean.setMessage("账户被锁定，请联系管理员!");
         } else if (e instanceof CredentialsExpiredException) {

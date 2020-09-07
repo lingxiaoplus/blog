@@ -59,7 +59,7 @@ public class IPUtils {
      * @return
      */
     public static String getIpAddress(HttpServletRequest request) {
-        //Map<String, String> headersInfo = getHeadersInfo(request);
+        Map<String, String> headersInfo = getHeadersInfo(request);
         String ip = request.getHeader("x-forwarded-for");
         if (checkIpAddressLocal(ip)) {
             ip = request.getHeader("X-Real-IP");
@@ -94,6 +94,11 @@ public class IPUtils {
                 ip = inet.getHostAddress();
                 log.debug("获取用户真实ip - 根据网卡取本机配置的IP - String ip=" + ip);
             }
+        }
+        //nginx前后端分离，会获取到多个ip，只取第一个
+        String[] split = StringUtils.split(ip, ",");
+        if (split.length > 0){
+            return split[0];
         }
         return ip;
     }

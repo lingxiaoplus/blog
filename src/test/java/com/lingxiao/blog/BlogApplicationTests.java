@@ -4,10 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.lingxiao.blog.bean.Address;
 import com.lingxiao.blog.bean.BingImageData;
+import com.lingxiao.blog.bean.Dictionary;
 import com.lingxiao.blog.service.file.impl.FileServiceImpl;
+import com.lingxiao.blog.service.system.DictionaryService;
+import com.lingxiao.blog.utils.UIDUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.BufferedReader;
@@ -209,14 +213,39 @@ class BlogApplicationTests {
         }
     }
 
-    //@Test
-    static void getTextLength(){
-        int length = StringUtils.length("https://cn.bing.com/th?id=OHR.BurrowingOwl_ZH-CN7730300251_1920x1080.jpg&rf=LaDigue_1920x1080.jpg&pid=hp");
-        System.out.println("长度： "+length);
-    }
+    @Autowired
+    private DictionaryService dictionaryService;
 
-    public static void main(String[] args) {
-        getTextLength();
-    }
+    @Test
+    void addDictionary(){
+        Dictionary dictionary = new Dictionary();
+        dictionary.setName("articleStatus");
+        dictionary.setId(UIDUtil.getUUID());
+        dictionary.setParentId("0");
+        dictionaryService.addDictionary(dictionary);
 
+        Dictionary dictionary1 = new Dictionary();
+        dictionary1.setParentId(dictionary.getId());
+        dictionary1.setId(UIDUtil.getUUID());
+        dictionary1.setName("草稿箱");
+        dictionary1.setCode("0");
+        dictionaryService.addDictionary(dictionary1);
+
+
+        Dictionary dictionary2 = new Dictionary();
+        dictionary2.setParentId(dictionary.getId());
+        dictionary2.setId(UIDUtil.getUUID());
+        dictionary2.setName("已发布");
+        dictionary2.setCode("1");
+        dictionaryService.addDictionary(dictionary2);
+
+
+        Dictionary dictionary3 = new Dictionary();
+        dictionary3.setParentId(dictionary.getId());
+        dictionary3.setId(UIDUtil.getUUID());
+        dictionary3.setName("已删除");
+        dictionary3.setCode("2");
+        dictionaryService.addDictionary(dictionary3);
+
+    }
 }

@@ -32,6 +32,7 @@ public interface ArticleService {
     ArticleDetailVo getArticleContent(Long id);
 
     PageResult<ArticleVo> getArticles(String keyword,int pageNum, int pageSize);
+    PageResult<ArticleVo> getArticlesFromPublished(String keyword,int pageNum, int pageSize);
     /**
      * 发布文章
      */

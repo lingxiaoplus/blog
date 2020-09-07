@@ -56,6 +56,7 @@ public class OperationLogServiceImpl implements OperationLogService {
             logVo.setNickname(item.getNickname());
             Address address = IPUtils.getRealAddrFromIp(IPUtils.numToIP(item.getUserIp()));
             if (address != null) logVo.setUserIp(address.getAddr());
+            //logVo.setUserIp(IPUtils.numToIP(item.getUserIp()));
             logVo.setRunTakes(item.getRunTakes());
             logVo.setOperationContent(item.getOperationContent());
             logVo.setOperationType(ContentValue.LOG_LOGIN == operationType?"登录日志":"操作日志");
