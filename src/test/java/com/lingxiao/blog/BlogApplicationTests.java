@@ -5,14 +5,21 @@ import com.google.gson.JsonObject;
 import com.lingxiao.blog.bean.Address;
 import com.lingxiao.blog.bean.BingImageData;
 import com.lingxiao.blog.bean.Dictionary;
+import com.lingxiao.blog.bean.IpRegion;
+import com.lingxiao.blog.enums.ExceptionEnum;
+import com.lingxiao.blog.mapper.IP2RegionMapper;
 import com.lingxiao.blog.service.file.impl.FileServiceImpl;
 import com.lingxiao.blog.service.system.DictionaryService;
+import com.lingxiao.blog.utils.IPUtils;
 import com.lingxiao.blog.utils.UIDUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -25,8 +32,9 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
+@RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
+@WebAppConfiguration
 class BlogApplicationTests {
     @Test
     void contextLoads() {
@@ -171,7 +179,9 @@ class BlogApplicationTests {
         Date date = new Date(beforDayStart);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String format = simpleDateFormat.format(date);*/
-        FileServiceImpl fileService = new FileServiceImpl();
+        //FileServiceImpl fileService = new FileServiceImpl();
+        ExceptionEnum exceptionEnum = ExceptionEnum.valueOf("ILLEGA_ARGUMENT");
+        System.out.println(exceptionEnum.getMsg());
     }
 
 
@@ -247,5 +257,14 @@ class BlogApplicationTests {
         dictionary3.setCode("2");
         dictionaryService.addDictionary(dictionary3);
 
+    }
+
+    @Autowired
+    private IP2RegionMapper regionMapper;
+    @Test
+    void searchRegion(){
+        long ipToNum = IPUtils.ipToNum("175.152.63.192");
+        IpRegion ipRegion = regionMapper.selectRegionByIp(ipToNum);
+        System.out.println("地址: "+ipRegion);
     }
 }

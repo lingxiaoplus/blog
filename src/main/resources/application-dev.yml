@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8082
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/blog?characterEncoding=UTF-8&useSSL=false
@@ -37,4 +37,8 @@ oss:
 email:
   title: '注册博客'
   minute: 5  #邮件有效时间  单位：分钟
-
+nacos:
+  config:
+    server-addr: 127.0.0.1:8848
+  discovery:
+    server-addr: 127.0.0.1:8848

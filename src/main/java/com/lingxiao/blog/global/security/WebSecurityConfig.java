@@ -51,7 +51,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/css/**","/js/**",
+        web.ignoring().antMatchers("/css/**","/js/**","/config/**",
                 "/index.html","/img/**","/fonts/**","/favicon.ico","/verifyCode",
                 "/image/**","/user/register","/user/email/**","/front/**");  //静态资源无需认证
     }
