@@ -1,9 +1,6 @@
 package com.lingxiao.blog.bean.vo;
 
-import com.lingxiao.blog.bean.User;
 import lombok.Data;
-
-import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 @Data

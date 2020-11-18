@@ -1,6 +1,5 @@
 package com.lingxiao.blog.controller;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lingxiao.blog.annotation.OperationLogDetail;
 import com.lingxiao.blog.bean.Category;
 import com.lingxiao.blog.bean.FriendLink;
@@ -12,11 +11,9 @@ import com.lingxiao.blog.bean.vo.HomePageVo;
 import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.global.api.ResponseResult;
-import com.lingxiao.blog.mapper.LabelMapper;
 import com.lingxiao.blog.service.article.ArticleService;
 import com.lingxiao.blog.service.article.CategoryService;
 import com.lingxiao.blog.service.article.LabelService;
-import com.lingxiao.blog.service.system.ThemeService;
 import com.lingxiao.blog.service.user.CommentService;
 import com.lingxiao.blog.service.system.FriendLinkService;
 import com.lingxiao.blog.utils.IPUtils;
@@ -26,7 +23,6 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -74,7 +70,7 @@ public class FrontController {
 
     @GetMapping("/article/{id}")
     public ResponseEntity<ResponseResult<ArticleDetailVo>> getArticle(@PathVariable("id") Long id){
-        ResponseResult responseResult = new ResponseResult<ArticleDetailVo>(articleService.getArticleContent(id));
+        ResponseResult<ArticleDetailVo> responseResult = new ResponseResult<>(articleService.getArticleContent(id));
         return ResponseEntity.ok(responseResult);
     }
 

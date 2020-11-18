@@ -11,6 +11,7 @@ import com.lingxiao.blog.mapper.EmailMapper;
 import com.lingxiao.blog.service.system.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void addEmail(Email email) {
         List<Email> all = emailMapper.selectAll();
-        if (all == null || all.size() == 0){
+        if (CollectionUtils.isEmpty(all)){
             email.setEnabled(ContentValue.EMAIL_ENABLE);
         }
         int count = emailMapper.insertSelective(email);
@@ -76,6 +77,6 @@ public class EmailServiceImpl implements EmailService {
         PageHelper.startPage(pageNum,pageSize);
         List<Email> emailList = emailMapper.selectAll();
         PageInfo<Email> pageInfo = PageInfo.of(emailList);
-        return new PageResult<Email>(pageInfo.getTotal(), pageInfo.getPages(), pageInfo.getList());
+        return new PageResult<>(pageInfo.getTotal(), pageInfo.getPages(), pageInfo.getList());
     }
 }

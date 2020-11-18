@@ -12,15 +12,11 @@ import com.lingxiao.blog.utils.UploadUtil;
 import com.qiniu.common.QiniuException;
 import com.qiniu.http.Response;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
@@ -49,11 +45,10 @@ public class FileServiceImpl implements FileService {
         } catch (QiniuException e) {
             Response r = e.response;
             // 请求失败时打印的异常的信息
-            System.out.println(r.toString());
             log.error("上传文件失败: {}",r.toString());
             //响应的文本信息
             try {
-                System.out.println(r.bodyString());
+                log.error("上传文件失败body: {}",r.bodyString());
             } catch (QiniuException ex) {
                 ex.printStackTrace();
             }
@@ -84,8 +79,7 @@ public class FileServiceImpl implements FileService {
         List<FileInfo> fileList = uploadUtil.getFileList("", pageSize*pageNum);
         int totalPage = fileList.size() / pageSize + 1;
         List<FileInfo> subList = fileList.subList((pageSize * (pageNum - 1)), (pageSize * pageNum));
-        PageResult<FileInfo> result = new PageResult<>(fileList.size(),totalPage,subList);
-        return result;
+        return new PageResult<>(fileList.size(),totalPage,subList);
     }
 
 
@@ -122,17 +116,17 @@ public class FileServiceImpl implements FileService {
                 InputStream inputStream = connection.getInputStream();
                 //将响应流转换成字符串
                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                StringBuffer sb = new StringBuffer();
+                StringBuilder sb = new StringBuilder();
                 String line = null;
                 while ((line = reader.readLine()) != null) {
-                    sb.append(line + "\n");
+                    sb.append(line).append("\n");
                 }
                 String reponse = sb.toString();
                 BingImageData bingImageData = new Gson().fromJson(reponse, BingImageData.class);
-                bingImageData.getImages().forEach((item)-> item.setUrl("https://cn.bing.com"+item.getUrl()));
+                bingImageData.getImages().forEach(item-> item.setUrl("https://cn.bing.com"+item.getUrl()));
                 return bingImageData;
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }finally {
             if (connection != null){

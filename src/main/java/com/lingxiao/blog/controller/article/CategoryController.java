@@ -2,7 +2,6 @@ package com.lingxiao.blog.controller.article;
 
 import com.lingxiao.blog.annotation.OperationLogDetail;
 import com.lingxiao.blog.bean.Category;
-import com.lingxiao.blog.bean.Label;
 import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.global.api.ResponseResult;
@@ -16,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping("/category")
@@ -53,8 +51,8 @@ public class CategoryController {
     @ApiOperation(value = "根据id获取分类")
     @OperationLogDetail(detail = "根据id获取分类",operationType = OperationType.SELECT)
     @GetMapping(value = "/{id}")
-    public ResponseEntity<ResponseResult> getCategoryById(@PathVariable Long id){
-        ResponseResult responseResult = new ResponseResult<Category>(categoryService.selectById(id));
+    public ResponseEntity<ResponseResult<Category>> getCategoryById(@PathVariable Long id){
+        ResponseResult<Category> responseResult = new ResponseResult<>(categoryService.selectById(id));
         return ResponseEntity.ok(responseResult);
     }
     @ApiOperation(value = "根据id删除分类")

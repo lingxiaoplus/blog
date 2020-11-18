@@ -1,9 +1,10 @@
 package com.lingxiao.blog.global;
 
-import lombok.Data;
-import lombok.Getter;
 
 public class ContentValue {
+    private ContentValue() {
+    }
+
     /**
      * 用户状态
      */

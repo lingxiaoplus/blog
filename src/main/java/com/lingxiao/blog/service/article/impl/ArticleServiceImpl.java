@@ -2,7 +2,6 @@ package com.lingxiao.blog.service.article.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.lingxiao.blog.BlogApplication;
 import com.lingxiao.blog.bean.*;
 import com.lingxiao.blog.bean.vo.HomePageVo;
 import com.lingxiao.blog.enums.ExceptionEnum;
@@ -67,7 +66,6 @@ public class ArticleServiceImpl implements ArticleService {
             updateArticle(article);
             return;
         }
-        //UserInfo userInfo = LoginInterceptor.getUserInfo();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
         long id = UIDUtil.nextId();
@@ -86,7 +84,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     private void addLabels(long aId, List<Long> ids){
-        List<ArticleLabel> labels = ids.stream().map((labelId) -> {
+        List<ArticleLabel> labels = ids.stream().map(labelId -> {
             ArticleLabel articleLabel = new ArticleLabel();
             articleLabel.setArticleId(aId);
             articleLabel.setLabelId(labelId);
@@ -111,7 +109,6 @@ public class ArticleServiceImpl implements ArticleService {
         if (count != 1) {
             throw new BlogException(ExceptionEnum.ARTICLE_UPDATE_ERROR);
         }
-        //List<Label> originalLabels = labelService.getLabelByArticleId(article.getId());
         List<Long> labelIds = article.getLabelIds();
         if (!CollectionUtils.isEmpty(labelIds)) {
             labelService.updateArticleLabelByArticleId(article.getId(),labelIds);
@@ -164,14 +161,13 @@ public class ArticleServiceImpl implements ArticleService {
         Example example = new Example(Article.class);
         example.createCriteria()
                 .andLike("title","%"+keyword+"%");
-        //example.orderBy("createAt").desc();
         List<Article> articles = articleMapper.selectByExample(example);
 
         PageInfo<Article> pageInfo = PageInfo.of(articles);
 
 
         List<ArticleVo> articleVoList = articleVoConvert(pageInfo.getList());
-        return new PageResult<ArticleVo>(pageInfo.getTotal(),pageInfo.getPages(),articleVoList);
+        return new PageResult<>(pageInfo.getTotal(),pageInfo.getPages(),articleVoList);
     }
 
     @Override
@@ -191,8 +187,7 @@ public class ArticleServiceImpl implements ArticleService {
     public List<Article> getRankArticle(int size){
         Example example = new Example(Article.class);
         example.setOrderByClause("watch_count desc");
-        List<Article> articles = articleMapper.selectByExampleAndRowBounds(example,new RowBounds(0,size));
-        return articles;
+        return articleMapper.selectByExampleAndRowBounds(example,new RowBounds(0,size));
     }
 
     @Override
@@ -224,9 +219,9 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     private List<ArticleVo> articleVoConvert(List<Article> articles){
-        List<ArticleVo> articleVoList = articles
+        return articles
                 .stream()
-                .map((item) -> {
+                .map(item -> {
                     ArticleVo articleVo = new ArticleVo();
                     articleVo.setId(String.valueOf(item.getId()));
                     articleVo.setTitle(item.getTitle());
@@ -255,14 +250,12 @@ public class ArticleServiceImpl implements ArticleService {
                     articleVo.setLabels(labels);
 
                     //设置状态
-                    //articleVo.setStatus(item.getStatus());
                     articleVo.setStatus(dictionaryService.getDictionaryByNameAndCode("articleStatus",
                             String.valueOf(item.getStatus())));
                     articleVo.setCommentCount(commentService.getCommentCount(item.getId()));
                     return articleVo;
                 })
                 .collect(Collectors.toList());
-        return articleVoList;
     }
 
     private static String stringFilter (String str){

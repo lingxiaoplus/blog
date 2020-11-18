@@ -33,8 +33,4 @@ public interface ArticleService {
 
     PageResult<ArticleVo> getArticles(String keyword,int pageNum, int pageSize);
     PageResult<ArticleVo> getArticlesFromPublished(String keyword,int pageNum, int pageSize);
-    /**
-     * 发布文章
-     */
-    //void publishArticle();
 }

@@ -2,7 +2,6 @@ package com.lingxiao.blog.global.security.handler;
 
 import com.google.gson.Gson;
 import com.lingxiao.blog.annotation.OperationLogDetail;
-import com.lingxiao.blog.bean.OperationLog;
 import com.lingxiao.blog.bean.User;
 import com.lingxiao.blog.bean.vo.UserVo;
 import com.lingxiao.blog.enums.OperationType;
@@ -10,7 +9,6 @@ import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.service.user.UserService;
 import com.lingxiao.blog.utils.CookieUtils;
-import com.lingxiao.blog.utils.IPUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -22,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Date;
 
 @Slf4j
 @Component

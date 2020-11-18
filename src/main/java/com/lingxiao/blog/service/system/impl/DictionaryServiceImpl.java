@@ -8,6 +8,7 @@ import com.lingxiao.blog.service.system.DictionaryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -25,8 +26,7 @@ public class DictionaryServiceImpl implements DictionaryService {
 
     @Override
     public Dictionary getDictionaryById(String id) {
-        Dictionary dictionary = dictionaryMapper.selectByPrimaryKey(id);
-        return dictionary;
+        return dictionaryMapper.selectByPrimaryKey(id);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class DictionaryServiceImpl implements DictionaryService {
             parent.setParentId(dictionary.getId());
             return dictionaryMapper.select(parent);
         }
-        return null;
+        return Collections.emptyList();
     }
 
     @Override

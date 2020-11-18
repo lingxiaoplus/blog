@@ -50,9 +50,7 @@ public class CommonExceptionHandler {
     public ResponseEntity<ExceptionResult> handleValidException(MethodArgumentNotValidException e){
         List<ObjectError> allErrors = e.getBindingResult().getAllErrors();
         StringBuilder stringBuilder = new StringBuilder();
-        allErrors.forEach((error)->{
-            stringBuilder.append(error.getDefaultMessage()).append(", ");
-        });
+        allErrors.forEach(error-> stringBuilder.append(error.getDefaultMessage()).append(", "));
         ExceptionResult exceptionResult = new ExceptionResult(ExceptionEnum.ILLEGA_ARGUMENT.getCode(),
                 stringBuilder.toString());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResult);

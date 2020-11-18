@@ -2,17 +2,14 @@ package com.lingxiao.blog.service.user.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.lingxiao.blog.annotation.OperationLogDetail;
 import com.lingxiao.blog.bean.*;
 import com.lingxiao.blog.bean.vo.UserVo;
 import com.lingxiao.blog.enums.ExceptionEnum;
-import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.jwt.JwtProperties;
 import com.lingxiao.blog.jwt.JwtUtils;
-import com.lingxiao.blog.mapper.RoleMapper;
 import com.lingxiao.blog.mapper.UserMapper;
 import com.lingxiao.blog.mapper.UserRoleMapper;
 import com.lingxiao.blog.service.system.EmailService;
@@ -20,14 +17,12 @@ import com.lingxiao.blog.service.user.RoleService;
 import com.lingxiao.blog.service.user.UserService;
 import com.lingxiao.blog.utils.EmailUtil;
 import com.lingxiao.blog.utils.IPUtils;
-import com.lingxiao.blog.utils.MD5Util;
 import com.lingxiao.blog.utils.UIDUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.stereotype.Service;
 
@@ -61,35 +56,6 @@ public class UserServiceImpl implements UserService{
     @Autowired
     private RoleService roleService;
 
-    /*@Override
-    public String login(String account, String password, int loginType) {
-        if (StringUtils.isBlank(account) || StringUtils.isBlank(password)) {
-            throw new BlogException(ExceptionEnum.ILLEGA_ARGUMENT);
-        }
-        User user = null;
-        switch (loginType) {
-            case ContentValue.LOGIN_TYPE_NAME:
-                user = userMapper.loginByName(account);
-                break;
-            case ContentValue.LOGIN_TYPE_EMAIL:
-                user = userMapper.loginByEmail(account);
-                break;
-            case ContentValue.LOGIN_TYPE_PHONE:
-                user = userMapper.loginByPhone(account);
-                break;
-        }
-        if (user == null){
-            throw new BlogException(ExceptionEnum.LOGIN_NAME_ERROR);
-        }
-        byte[] salt = MD5Util.hexStringToByte(user.getSalt());
-        boolean equals = MD5Util.validPassword(password, user.getPassword(), salt);
-        if (!equals){
-            throw new BlogException(ExceptionEnum.LOGIN_PASSWORD_ERROR);
-        }
-        String token = authEntication(user);
-        return token;
-    }*/
-
     @Override
     public String register(User user, String ip) {
         if (userMapper.countByEmail(user.getEmail()) > 0){
@@ -116,12 +82,6 @@ public class UserServiceImpl implements UserService{
         user.setStatus(ContentValue.USERTYPE_ENABLE);
         user.setUserId(UIDUtil.nextId());
         user.setUserIp(IPUtils.ipToNum(ip));
-        //密码加密
-       /* byte[] saltByte = MD5Util.createSalt();
-        String salt = MD5Util.byteToHexString(saltByte);
-        String encryptedPwd = MD5Util.getEncryptedPwd(user.getPassword(), saltByte);
-        user.setPassword(encryptedPwd);
-        user.setSalt(salt);*/
 
         String encryptedPwd = PasswordEncoderFactories
                 .createDelegatingPasswordEncoder()
@@ -132,15 +92,13 @@ public class UserServiceImpl implements UserService{
         if (count != 1) {
             throw new BlogException(ExceptionEnum.ILLEGA_ARGUMENT);
         }
-        String token = authEntication(user);
-        return token;
+        return authEntication(user);
     }
 
     @Override
     public User verify(String token) {
         if (StringUtils.isBlank(token)){
             log.error("登录的cookie为空");
-            //throw new BlogException(ExceptionEnum.VERIFY_USER_LOGIN_ERROR);
         }
         try {
             UserInfo userInfo = JwtUtils.getInfoFromToken(token, jwtProperties.getPublicKey());
@@ -200,8 +158,7 @@ public class UserServiceImpl implements UserService{
         userRole.setRoleId(role.getId());
         UserRole selectOne = userRoleMapper.selectOne(userRole);
         Long userId = selectOne.getUserId();
-        User user = userMapper.selectByPrimaryKey(userId);
-        return user;
+        return userMapper.selectByPrimaryKey(userId);
     }
 
     @Override
@@ -218,15 +175,9 @@ public class UserServiceImpl implements UserService{
         userInfo.setUsername(user.getUsername());
         userInfo.setPhoneNumber(user.getPhoneNumber());
         userInfo.setEmail(user.getEmail());
-        /*userInfo.setNickname(user.getNickname());
-        userInfo.setHeadPortrait(user.getHeadPortrait());
-        userInfo.setAge(user.getAge());
-        userInfo.setStatus(user.getStatus());*/
         try {
             log.debug("加密前的用户信息: {}", userInfo);
-            String generateToken = JwtUtils.generateToken(userInfo, jwtProperties.getPrivateKey(), jwtProperties.getExpire());
-            //LoginInterceptor.setUserInfo(userInfo);
-            return generateToken;
+            return JwtUtils.generateToken(userInfo, jwtProperties.getPrivateKey(), jwtProperties.getExpire());
         } catch (Exception e) {
             log.error("生成token失败 ", e);
         }
@@ -247,14 +198,12 @@ public class UserServiceImpl implements UserService{
         List<UserVo> userVoList = pageInfo
                 .getList()
                 .stream()
-                .map((item)->{
+                .map(item->{
                     List<Role> roles = roleService.getRolesByUser(item.getUserId());
                     item.setRoles(roles);
                     return getUserVo(item);
                 })
                 .collect(Collectors.toList());
-        //userRoles.stream()
-        //userRoles.stream().filter(o -> o.getTime() != null).map(TimeTest::getTime).distinct().min(DateUtils::compareDate).get();
         return new PageResult<>(pageInfo.getTotal(), pageInfo.getPages(), userVoList);
     }
 
@@ -274,7 +223,6 @@ public class UserServiceImpl implements UserService{
                 .append(randomCode)
                 .append("  ，有效时间为3分钟");
         emailConfigure.setVerifyCode(randomCode);
-        //emailConfigure.setContent(builder.toString());
         httpSession.setAttribute(PREFIX + receiver, randomCode);
         httpSession.setMaxInactiveInterval(minute);
         try {
@@ -285,9 +233,9 @@ public class UserServiceImpl implements UserService{
         }
     }
 
+    private static Random random = new Random();
     private static String randomCode() {
         StringBuilder str = new StringBuilder();
-        Random random = new Random();
         for (int i = 0; i < 6; i++) {
             str.append(random.nextInt(10));
         }
@@ -296,18 +244,13 @@ public class UserServiceImpl implements UserService{
 
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) {
         User user = userMapper.loginByName(username);
         if (user == null){
             throw new BlogException(ExceptionEnum.LOGIN_NAME_ERROR);
         }
-        /*UserRole userRole = new UserRole();
-        userRole.setUserId(user.getUserId());
-        List<Long> roleIds = userRoleMapper.select(userRole).stream().map(UserRole::getRoleId).collect(Collectors.toList());
-        List<Role> roles = roleMapper.selectByIdList(roleIds);*/
         List<Role> roles = roleService.getRolesByUser(user.getUserId());
         user.setRoles(roles);
-
         return user;
     }
 }

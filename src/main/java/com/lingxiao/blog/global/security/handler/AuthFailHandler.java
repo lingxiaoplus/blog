@@ -1,6 +1,5 @@
 package com.lingxiao.blog.global.security.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.lingxiao.blog.exception.ExceptionResult;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +20,7 @@ import java.io.PrintWriter;
 public class AuthFailHandler extends SimpleUrlAuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse resp, AuthenticationException e) throws IOException, ServletException {
-        //super.onAuthenticationFailure(request, resp, e);
+        super.onAuthenticationFailure(request, resp, e);
         resp.setContentType("application/json;charset=utf-8");
         log.error("用户登录失败, {}",e.getMessage());
         PrintWriter out = resp.getWriter();

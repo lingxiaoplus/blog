@@ -4,8 +4,6 @@ import com.lingxiao.blog.bean.Dictionary;
 import com.lingxiao.blog.bean.Label;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.List;
 
@@ -23,7 +21,6 @@ public class ArticleVo implements Serializable {
     private Long watchCount;
     private String content;
     private List<Label> labels;
-    //private Integer status;
     private Dictionary status;
     private int commentCount;
 }

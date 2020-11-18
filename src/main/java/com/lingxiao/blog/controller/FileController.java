@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 @RestController
 @RequestMapping("/upload")
@@ -33,25 +34,25 @@ public class FileController {
     @ApiImplicitParam(name = "file",value = "文件")
     @PostMapping
     public ResponseEntity<FileInfo> uploadFile(HttpSession session, @RequestParam(value = "file",required = false) MultipartFile file){
-        FileInfo fileInfo = null;
         try {
             String path = session.getServletContext().getRealPath("upload");
             File dir = new File(path);
             if (!dir.exists()){
-                dir.mkdirs();
-                dir.setWritable(true);
+                if(dir.mkdirs()){
+                    dir.setWritable(true);
+                }
             }
             File uploadFile = new File(path,file.getOriginalFilename());
             file.transferTo(uploadFile);
-            fileInfo = uploadService.uploadFile(uploadFile);
-            System.out.println("文件路径"+uploadFile.getAbsolutePath());
+            FileInfo fileInfo = uploadService.uploadFile(uploadFile);
             logger.debug("文件路径: {}",uploadFile.getAbsolutePath());
             //上传成功之后，删除本地文件
-            uploadFile.delete();
+            Files.deleteIfExists(uploadFile.toPath());
+            return ResponseEntity.ok(fileInfo);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return ResponseEntity.ok(fileInfo);
+        return ResponseEntity.badRequest().build();
     }
 
     @ApiOperation(value = "oss文件列表")

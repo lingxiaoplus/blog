@@ -2,16 +2,15 @@ package com.lingxiao.blog.service.system.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.lingxiao.blog.bean.Address;
+import com.lingxiao.blog.bean.IpRegion;
 import com.lingxiao.blog.bean.OperationLog;
 import com.lingxiao.blog.bean.vo.OperationLogVo;
 import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.api.PageResult;
+import com.lingxiao.blog.mapper.IP2RegionMapper;
 import com.lingxiao.blog.mapper.LogMapper;
-import com.lingxiao.blog.mapper.UserMapper;
 import com.lingxiao.blog.service.system.OperationLogService;
-import com.lingxiao.blog.utils.IPUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +25,8 @@ import java.util.stream.Collectors;
 public class OperationLogServiceImpl implements OperationLogService {
     @Autowired
     private LogMapper logMapper;
+    @Autowired
+    private IP2RegionMapper ip2RegionMapper;
 
     @Override
     public PageResult<OperationLogVo> getLogList(int pageNum, int pageSize,int operationType, String keyword){
@@ -46,7 +47,7 @@ public class OperationLogServiceImpl implements OperationLogService {
         }
 
         PageInfo<OperationLog> pageInfo = PageInfo.of(logList);
-        List<OperationLogVo> logListVo = pageInfo.getList().stream().map((item)->{
+        List<OperationLogVo> logListVo = pageInfo.getList().stream().map(item->{
             OperationLogVo logVo = new OperationLogVo();
             DateTime dateTime = new DateTime(item.getCreateAt());
             String dateString = dateTime.toString("yyyy-MM-dd");
@@ -54,9 +55,12 @@ public class OperationLogServiceImpl implements OperationLogService {
             logVo.setId(item.getId());
             logVo.setUsername(item.getUsername());
             logVo.setNickname(item.getNickname());
-            Address address = IPUtils.getRealAddrFromIp(IPUtils.numToIP(item.getUserIp()));
-            if (address != null) logVo.setUserIp(address.getAddr());
-            //logVo.setUserIp(IPUtils.numToIP(item.getUserIp()));
+            IpRegion ipRegion = ip2RegionMapper.selectRegionByIp(item.getUserIp());
+            if (ipRegion != null) {
+                String address = ipRegion.getCountry() + " " +
+                        ipRegion.getProvince() + " " + ipRegion.getCity() + " " + ipRegion.getOperator();
+                logVo.setUserIp(address);
+            }
             logVo.setRunTakes(item.getRunTakes());
             logVo.setOperationContent(item.getOperationContent());
             logVo.setOperationType(ContentValue.LOG_LOGIN == operationType?"登录日志":"操作日志");
@@ -64,10 +68,7 @@ public class OperationLogServiceImpl implements OperationLogService {
             logVo.setExceptionInfo(item.getExceptionInfo());
             return logVo;
         }).collect(Collectors.toList());
-
-
-
-        return new PageResult<OperationLogVo>(pageInfo.getTotal(),pageInfo.getPages(),logListVo);
+        return new PageResult<>(pageInfo.getTotal(),pageInfo.getPages(),logListVo);
     }
 
     @Override

@@ -3,7 +3,6 @@ package com.lingxiao.blog.service.user.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.lingxiao.blog.bean.Comment;
-import com.lingxiao.blog.bean.User;
 import com.lingxiao.blog.bean.vo.ArticleDetailVo;
 import com.lingxiao.blog.bean.vo.CommentVo;
 import com.lingxiao.blog.enums.CommentState;
@@ -15,7 +14,6 @@ import com.lingxiao.blog.mapper.UserMapper;
 import com.lingxiao.blog.service.article.ArticleService;
 import com.lingxiao.blog.service.user.CommentService;
 import com.lingxiao.blog.service.user.UserService;
-import com.lingxiao.blog.utils.IPUtils;
 import com.lingxiao.blog.utils.UIDUtil;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +62,6 @@ public class CommentServiceImpl implements CommentService {
                 }
             }
         }
-        //comment.setUserId(LoginInterceptor.getUserInfo().getId());
         int count = commentMapper.insertSelective(comment);
         if (count != 1) {
             throw new BlogException(ExceptionEnum.COMMENT_INSERT_ERROR);
@@ -82,10 +79,10 @@ public class CommentServiceImpl implements CommentService {
 
         List<CommentVo> commentVoList = pageInfo.getList()
                 .stream()
-                .filter((item)-> item.getParentId() == 0) //去掉楼中楼
+                .filter(item-> item.getParentId() == 0) //去掉楼中楼
                 .map((this::parseComment))
                 .collect(Collectors.toList());
-        return new PageResult<CommentVo>(pageInfo.getTotal(),pageInfo.getPages(),commentVoList);
+        return new PageResult<>(pageInfo.getTotal(),pageInfo.getPages(),commentVoList);
     }
 
     @Override
@@ -99,10 +96,10 @@ public class CommentServiceImpl implements CommentService {
 
         List<CommentVo> commentVoList = pageInfo.getList()
                 .stream()
-                .filter((item)-> item.getParentId() == 0) //去掉楼中楼
+                .filter(item-> item.getParentId() == 0) //去掉楼中楼
                 .map(this::parseComment)
                 .collect(Collectors.toList());
-        return new PageResult<CommentVo>(pageInfo.getTotal(),pageInfo.getPages(),commentVoList);
+        return new PageResult<>(pageInfo.getTotal(),pageInfo.getPages(),commentVoList);
     }
 
 
@@ -123,7 +120,7 @@ public class CommentServiceImpl implements CommentService {
             throw new BlogException(ExceptionEnum.ILLEGA_ARGUMENT);
         }
         List<Comment> comments = commentMapper.selectByIdList(ids);
-        comments.stream().forEach((item)->{
+        comments.stream().forEach(item->{
             item.setStatus(status);
             int i = commentMapper.updateByPrimaryKeySelective(item);
             if(i != 1){
@@ -141,19 +138,9 @@ public class CommentServiceImpl implements CommentService {
         commentVo.setUsername(item.getUsername());
         commentVo.setEmail(item.getEmail());
         commentVo.setWebsite(item.getWebsite());
-        //commentVo.setHeadPortrait(item.getHeadPortrait());
         DateTime createDate = new DateTime(item.getCreateAt());
         String createString = createDate.toString("yyyy-MM-dd");
         commentVo.setCreateAt(createString);
-
-        /*User user = userMapper.selectByPrimaryKey(item.getUserId());
-        user.setUIp(IPUtils.numToIP(user.getUserIp()));
-        user.setUId(String.valueOf(user.getUserId()));
-        user.setUserId(null);
-        user.setUserIp(null);
-        commentVo.setMember(user);*/
-
-
 
         ArticleDetailVo articleContent = articleService.getArticleContent(item.getArticleId());
         articleContent.setContent(null);
@@ -169,7 +156,7 @@ public class CommentServiceImpl implements CommentService {
         //这个地方要做一个优化   楼中楼分页
         List<CommentVo> collect = children
                 .stream()
-                .map((co) -> parseComment(co))
+                .map(this::parseComment)
                 .collect(Collectors.toList());
         commentVo.setReplies(collect);
         return commentVo;
