@@ -1,6 +1,7 @@
 package com.lingxiao.blog.global.security;
 
 import com.lingxiao.blog.global.ContentValue;
+import com.lingxiao.blog.global.SecurityProperties;
 import com.lingxiao.blog.global.security.filter.UrlMetadataSourceFilter;
 import com.lingxiao.blog.global.security.handler.AuthFailHandler;
 import com.lingxiao.blog.global.security.handler.AuthSuccessHandler;
@@ -8,6 +9,8 @@ import com.lingxiao.blog.global.security.handler.RestAccessDeniedHandler;
 import com.lingxiao.blog.global.security.handler.TokenClearLogoutHandler;
 import com.lingxiao.blog.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -25,8 +28,11 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import java.util.List;
+
 //@EnableGlobalMethodSecurity(prePostEnabled = true) //开启注解 判断用户对某个控制层的方法是否具有访问权限
 @EnableWebSecurity
+@EnableConfigurationProperties({SecurityProperties.class})
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -47,6 +53,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private UrlAccessDecisionManager manager;
     @Autowired
     private UserService userService;
+    @Autowired
+    private SecurityProperties securityProperties;
 
 
     @Override
@@ -102,6 +110,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
+    @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
@@ -119,23 +128,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         //1.添加cors配置信息
         CorsConfiguration config = new CorsConfiguration();
         //.1 允许的域，不要写*
-        config.addAllowedOrigin("http://blog.lingxiaomz.top");
-        config.addAllowedOrigin("http://www.lingxiaomz.top");
-        config.addAllowedOrigin("http://api.lingxiaomz.top");
-        config.addAllowedOrigin("https://blog.lingxiaomz.top");
-        config.addAllowedOrigin("https://www.lingxiaomz.top");
-        config.addAllowedOrigin("https://api.lingxiaomz.top");
-        config.addAllowedOrigin("http://blog.test.lingxiaomz.top");
+        List<String> allowedOrigins = securityProperties.getAllowedOrigins();
+        allowedOrigins.forEach(config::addAllowedOrigin);
         //.2是否发送cookie信息
         config.setAllowCredentials(true);
         //.3允许的请求方式
-        config.addAllowedMethod("OPTIONS");
-        config.addAllowedMethod("HEAD");
-        config.addAllowedMethod("GET");
-        config.addAllowedMethod("POST");
-        config.addAllowedMethod("PUT");
-        config.addAllowedMethod("DELETE");
-        config.addAllowedMethod("PATCH");
+        List<String> allowedMethods = securityProperties.getAllowedMethods();
+        allowedMethods.forEach(config::addAllowedMethod);
         //.4允许的头信息
         config.addAllowedHeader("*");
         config.addExposedHeader(ContentValue.LOGIN_TOKEN_NAME);

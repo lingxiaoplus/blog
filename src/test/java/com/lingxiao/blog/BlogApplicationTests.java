@@ -1,19 +1,21 @@
 package com.lingxiao.blog;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.lingxiao.blog.bean.Address;
 import com.lingxiao.blog.bean.BingImageData;
-import com.lingxiao.blog.bean.Dictionary;
-import com.lingxiao.blog.bean.IpRegion;
+import com.lingxiao.blog.bean.po.BingImage;
+import com.lingxiao.blog.bean.po.Dictionary;
+import com.lingxiao.blog.bean.po.IpRegion;
 import com.lingxiao.blog.enums.ExceptionEnum;
+import com.lingxiao.blog.mapper.BingImageMapper;
 import com.lingxiao.blog.mapper.IP2RegionMapper;
-import com.lingxiao.blog.service.file.impl.FileServiceImpl;
+import com.lingxiao.blog.service.file.FileService;
 import com.lingxiao.blog.service.system.DictionaryService;
+import com.lingxiao.blog.utils.DateUtil;
 import com.lingxiao.blog.utils.IPUtils;
 import com.lingxiao.blog.utils.UIDUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,15 +28,20 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest
 @WebAppConfiguration
+@Slf4j
 class BlogApplicationTests {
     @Test
     void contextLoads() {
@@ -266,5 +273,27 @@ class BlogApplicationTests {
         long ipToNum = IPUtils.ipToNum("175.152.63.192");
         IpRegion ipRegion = regionMapper.selectRegionByIp(ipToNum);
         System.out.println("地址: "+ipRegion);
+    }
+
+    @Autowired
+    private FileService fileService;
+    @Autowired
+    private BingImageMapper imageMapper;
+    @Test
+    void getBingImages(){
+        BingImageData bingImages = fileService.getBingImages(0);
+        List<BingImage> collect = bingImages.getImages().stream().map(image -> {
+            BingImage bingImage = new BingImage();
+            bingImage.setTitle(image.getCopyright());
+            bingImage.setUrl(image.getUrl());
+            bingImage.setUrlBase(image.getUrlbase());
+            bingImage.setHashCode(image.getHsh());
+            bingImage.setStartDate(DateUtil.getDateFromString(image.getStartdate()));
+            bingImage.setCreateDate(new Date());
+            return bingImage;
+        }).collect(Collectors.toList());
+        int row = imageMapper.insertList(collect);
+        assert row == collect.size();
+        log.info("获取到的bing: {}",bingImages.toString());
     }
 }

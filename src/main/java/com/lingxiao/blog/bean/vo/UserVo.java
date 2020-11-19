@@ -1,6 +1,6 @@
 package com.lingxiao.blog.bean.vo;
 
-import com.lingxiao.blog.bean.Role;
+import com.lingxiao.blog.bean.po.Role;
 import lombok.Data;
 
 import java.util.Date;

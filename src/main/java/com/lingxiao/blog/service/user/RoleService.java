@@ -1,7 +1,6 @@
 package com.lingxiao.blog.service.user;
 
-import com.lingxiao.blog.bean.Menu;
-import com.lingxiao.blog.bean.Role;
+import com.lingxiao.blog.bean.po.Role;
 import com.lingxiao.blog.global.api.PageResult;
 
 import java.util.List;

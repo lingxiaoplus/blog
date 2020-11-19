@@ -1,6 +1,6 @@
 package com.lingxiao.blog.service.system.impl;
 
-import com.lingxiao.blog.bean.*;
+import com.lingxiao.blog.bean.po.*;
 import com.lingxiao.blog.bean.statistics.AggregationData;
 import com.lingxiao.blog.bean.statistics.ArticleIncreasedData;
 import com.lingxiao.blog.bean.statistics.WeekData;

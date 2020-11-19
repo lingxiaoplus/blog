@@ -1,6 +1,6 @@
 package com.lingxiao.blog.global.security.handler;
 
-import com.lingxiao.blog.bean.User;
+import com.lingxiao.blog.bean.po.User;
 import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.service.user.UserService;
 import com.lingxiao.blog.utils.CookieUtils;

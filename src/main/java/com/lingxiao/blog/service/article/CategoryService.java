@@ -1,6 +1,6 @@
 package com.lingxiao.blog.service.article;
 
-import com.lingxiao.blog.bean.Category;
+import com.lingxiao.blog.bean.po.Category;
 import com.lingxiao.blog.global.api.PageResult;
 
 import java.util.List;

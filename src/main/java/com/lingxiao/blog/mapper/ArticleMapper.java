@@ -1,6 +1,6 @@
 package com.lingxiao.blog.mapper;
 
-import com.lingxiao.blog.bean.Article;
+import com.lingxiao.blog.bean.po.Article;
 import com.lingxiao.blog.bean.statistics.WeekData;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;

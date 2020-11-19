@@ -1,7 +1,7 @@
 package com.lingxiao.blog.controller.user;
 
 import com.lingxiao.blog.annotation.OperationLogDetail;
-import com.lingxiao.blog.bean.Comment;
+import com.lingxiao.blog.bean.po.Comment;
 import com.lingxiao.blog.bean.vo.CommentVo;
 import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.global.api.PageResult;

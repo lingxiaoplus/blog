@@ -1,7 +1,7 @@
 package com.lingxiao.blog.controller.system;
 
 import com.lingxiao.blog.annotation.OperationLogDetail;
-import com.lingxiao.blog.bean.Email;
+import com.lingxiao.blog.bean.po.Email;
 import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.service.system.EmailService;

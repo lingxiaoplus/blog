@@ -32,7 +32,7 @@ public class FileServiceImpl implements FileService {
      * idx 0今天 1明天
      * n 1-8
      */
-    private static final String BING_API = "a?format=js&n=8&mkt=zh-CN&idx=";
+    private static final String BING_API = "https://cn.bing.com/HPImageArchive.aspx?format=js&n=8&mkt=zh-CN&idx=";
     /**
      * 文件上传，返回oss地址
      * @param file

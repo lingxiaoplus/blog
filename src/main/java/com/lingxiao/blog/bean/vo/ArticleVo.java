@@ -1,7 +1,7 @@
 package com.lingxiao.blog.bean.vo;
 
-import com.lingxiao.blog.bean.Dictionary;
-import com.lingxiao.blog.bean.Label;
+import com.lingxiao.blog.bean.po.Dictionary;
+import com.lingxiao.blog.bean.po.Label;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.io.Serializable;

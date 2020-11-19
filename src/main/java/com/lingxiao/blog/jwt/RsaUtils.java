@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.security.*;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
@@ -52,7 +53,7 @@ public class RsaUtils {
      * @return
      * @throws Exception
      */
-    public static PrivateKey getPrivateKey(byte[] bytes) throws Exception {
+    public static PrivateKey getPrivateKey(byte[] bytes) throws NoSuchAlgorithmException, InvalidKeySpecException {
         PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(bytes);
         KeyFactory factory = KeyFactory.getInstance("RSA");
         return factory.generatePrivate(spec);
@@ -80,7 +81,7 @@ public class RsaUtils {
         writeFile(privateKeyFilename, privateKeyBytes);
     }
 
-    private static byte[] readFile(String fileName) throws Exception {
+    private static byte[] readFile(String fileName) throws IOException {
         return Files.readAllBytes(new File(fileName).toPath());
     }
 
@@ -89,9 +90,9 @@ public class RsaUtils {
         if (!dest.exists()) {
             //判断父目录是否存在，如果不存在，则创建
             if (dest.getParentFile() != null && !dest.getParentFile().exists()) {
-                dest.getParentFile().mkdirs();
+                Files.createDirectories(dest.getParentFile().toPath());
             }
-            dest.createNewFile();
+            Files.createFile(dest.toPath());
         }
         Files.write(dest.toPath(), bytes);
     }

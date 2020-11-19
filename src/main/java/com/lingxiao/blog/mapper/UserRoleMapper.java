@@ -1,6 +1,6 @@
 package com.lingxiao.blog.mapper;
 
-import com.lingxiao.blog.bean.UserRole;
+import com.lingxiao.blog.bean.po.UserRole;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import tk.mybatis.mapper.common.BaseMapper;

@@ -1,6 +1,6 @@
 package com.lingxiao.blog.service.system;
 
-import com.lingxiao.blog.bean.Email;
+import com.lingxiao.blog.bean.po.Email;
 import com.lingxiao.blog.global.api.PageResult;
 
 import java.util.List;

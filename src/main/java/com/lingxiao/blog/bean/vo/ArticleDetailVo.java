@@ -1,6 +1,6 @@
 package com.lingxiao.blog.bean.vo;
 
-import com.lingxiao.blog.bean.Label;
+import com.lingxiao.blog.bean.po.Label;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

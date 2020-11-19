@@ -1,11 +1,15 @@
 package com.lingxiao.blog.utils;
 
+import org.apache.commons.lang3.StringUtils;
+
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class DateUtil {
 
+    private static SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy-MM-dd");
     private DateUtil(){
 
     }
@@ -48,7 +52,23 @@ public class DateUtil {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.DAY_OF_YEAR, calendar.get(Calendar.DAY_OF_YEAR) - past);
         Date today = calendar.getTime();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        return format.format(today);
+        return yearFormat.format(today);
+    }
+
+    /**
+     *
+     * @param date  20201118 这种类型的时间
+     * @return
+     */
+    public static Date getDateFromString(String date){
+        String year = StringUtils.left(date, 4);
+        String month = StringUtils.substring(date, 4, 6);
+        String day = StringUtils.substring(date, 6);
+        try {
+            return DateFormat.getDateInstance().parse(year.concat("-").concat(month).concat("-").concat(day));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return new Date();
     }
 }

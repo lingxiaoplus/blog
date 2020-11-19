@@ -1,6 +1,6 @@
 package com.lingxiao.blog.controller.system;
 
-import com.lingxiao.blog.bean.Menu;
+import com.lingxiao.blog.bean.po.Menu;
 import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.service.system.MenuService;
 import io.swagger.annotations.*;

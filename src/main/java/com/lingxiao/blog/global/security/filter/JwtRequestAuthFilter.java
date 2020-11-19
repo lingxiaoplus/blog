@@ -1,15 +1,13 @@
 package com.lingxiao.blog.global.security.filter;
 
-import com.lingxiao.blog.bean.User;
+import com.lingxiao.blog.bean.po.User;
 import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.security.JwtAuthenticationToken;
 import com.lingxiao.blog.global.security.handler.AuthFailHandler;
 import com.lingxiao.blog.global.security.handler.JwtRefreshSuccessHandler;
-import com.lingxiao.blog.jwt.JwtProperties;
 import com.lingxiao.blog.service.user.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
@@ -17,7 +15,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.util.matcher.RequestHeaderRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;

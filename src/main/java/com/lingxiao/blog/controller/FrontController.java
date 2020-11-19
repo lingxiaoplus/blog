@@ -1,9 +1,9 @@
 package com.lingxiao.blog.controller;
 
 import com.lingxiao.blog.annotation.OperationLogDetail;
-import com.lingxiao.blog.bean.Category;
-import com.lingxiao.blog.bean.FriendLink;
-import com.lingxiao.blog.bean.Label;
+import com.lingxiao.blog.bean.po.Category;
+import com.lingxiao.blog.bean.po.FriendLink;
+import com.lingxiao.blog.bean.po.Label;
 import com.lingxiao.blog.bean.vo.ArticleDetailVo;
 import com.lingxiao.blog.bean.vo.ArticleVo;
 import com.lingxiao.blog.bean.vo.CommentVo;

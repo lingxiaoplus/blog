@@ -1,6 +1,6 @@
 package com.lingxiao.blog.service.system.impl;
 
-import com.lingxiao.blog.bean.Dictionary;
+import com.lingxiao.blog.bean.po.Dictionary;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.mapper.DictionaryMapper;

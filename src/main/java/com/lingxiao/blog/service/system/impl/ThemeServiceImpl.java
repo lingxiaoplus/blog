@@ -1,8 +1,7 @@
 package com.lingxiao.blog.service.system.impl;
 
 import com.lingxiao.blog.bean.Hitokoto;
-import com.lingxiao.blog.bean.Theme;
-import com.lingxiao.blog.bean.User;
+import com.lingxiao.blog.bean.po.Theme;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.global.ContentValue;

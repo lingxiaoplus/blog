@@ -1,6 +1,6 @@
 package com.lingxiao.blog.service.article;
 
-import com.lingxiao.blog.bean.Label;
+import com.lingxiao.blog.bean.po.Label;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.global.api.ResponseResult;
 

@@ -1,7 +1,6 @@
 package com.lingxiao.blog.mapper;
 
-import com.lingxiao.blog.bean.IpRegion;
-import com.lingxiao.blog.bean.Label;
+import com.lingxiao.blog.bean.po.IpRegion;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import tk.mybatis.mapper.common.Mapper;

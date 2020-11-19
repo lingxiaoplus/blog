@@ -1,6 +1,6 @@
 package com.lingxiao.blog.service.user;
 
-import com.lingxiao.blog.bean.User;
+import com.lingxiao.blog.bean.po.User;
 import com.lingxiao.blog.bean.vo.UserVo;
 import com.lingxiao.blog.global.api.PageResult;
 import org.springframework.security.core.userdetails.UserDetailsService;

@@ -1,6 +1,6 @@
 package com.lingxiao.blog.service.system;
 
-import com.lingxiao.blog.bean.Dictionary;
+import com.lingxiao.blog.bean.po.Dictionary;
 
 import java.util.List;
 

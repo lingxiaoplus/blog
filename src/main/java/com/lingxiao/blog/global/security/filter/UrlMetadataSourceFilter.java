@@ -1,7 +1,7 @@
 package com.lingxiao.blog.global.security.filter;
 
-import com.lingxiao.blog.bean.Menu;
-import com.lingxiao.blog.bean.Role;
+import com.lingxiao.blog.bean.po.Menu;
+import com.lingxiao.blog.bean.po.Role;
 import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.service.system.MenuService;
 import org.springframework.beans.factory.annotation.Autowired;

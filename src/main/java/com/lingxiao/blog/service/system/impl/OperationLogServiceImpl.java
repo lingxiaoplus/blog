@@ -2,8 +2,8 @@ package com.lingxiao.blog.service.system.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.lingxiao.blog.bean.IpRegion;
-import com.lingxiao.blog.bean.OperationLog;
+import com.lingxiao.blog.bean.po.IpRegion;
+import com.lingxiao.blog.bean.po.OperationLog;
 import com.lingxiao.blog.bean.vo.OperationLogVo;
 import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.global.ContentValue;

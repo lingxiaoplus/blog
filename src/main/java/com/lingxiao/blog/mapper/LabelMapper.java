@@ -1,6 +1,6 @@
 package com.lingxiao.blog.mapper;
 
-import com.lingxiao.blog.bean.Label;
+import com.lingxiao.blog.bean.po.Label;
 import tk.mybatis.mapper.additional.idlist.IdListMapper;
 import tk.mybatis.mapper.common.Mapper;
 

@@ -1,7 +1,7 @@
 package com.lingxiao.blog.controller.user;
 
 import com.lingxiao.blog.annotation.OperationLogDetail;
-import com.lingxiao.blog.bean.User;
+import com.lingxiao.blog.bean.po.User;
 import com.lingxiao.blog.bean.vo.UserVo;
 import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.global.ContentValue;
@@ -12,9 +12,7 @@ import com.lingxiao.blog.utils.CookieUtils;
 import com.lingxiao.blog.utils.IPUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -23,9 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 
 @Controller
 @Api("用户管理接口")

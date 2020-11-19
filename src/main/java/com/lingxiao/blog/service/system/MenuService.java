@@ -1,7 +1,7 @@
 package com.lingxiao.blog.service.system;
 
-import com.lingxiao.blog.bean.Menu;
-import com.lingxiao.blog.bean.Role;
+import com.lingxiao.blog.bean.po.Menu;
+import com.lingxiao.blog.bean.po.Role;
 
 import java.util.List;
 

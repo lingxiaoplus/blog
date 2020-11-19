@@ -1,6 +1,6 @@
 package com.lingxiao.blog.service.article;
 
-import com.lingxiao.blog.bean.Article;
+import com.lingxiao.blog.bean.po.Article;
 import com.lingxiao.blog.bean.vo.HomePageVo;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.bean.vo.ArticleDetailVo;

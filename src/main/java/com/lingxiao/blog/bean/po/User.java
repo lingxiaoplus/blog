@@ -1,12 +1,12 @@
-package com.lingxiao.blog.bean;
+package com.lingxiao.blog.bean.po;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.lingxiao.blog.bean.po.Role;
 import com.lingxiao.blog.global.ContentValue;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.util.CollectionUtils;
 
 import javax.persistence.Id;

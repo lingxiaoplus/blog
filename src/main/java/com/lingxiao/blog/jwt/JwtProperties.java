@@ -5,9 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
@@ -43,7 +41,7 @@ public class JwtProperties {
             this.privateKey = RsaUtils.getPrivateKey(priKeyPath);
         } catch (Exception e) {
             log.error("初始化公钥和私钥失败！",e);
-            throw new RuntimeException();
+            throw new RuntimeException("初始化公钥和私钥失败");
         }
     }
 

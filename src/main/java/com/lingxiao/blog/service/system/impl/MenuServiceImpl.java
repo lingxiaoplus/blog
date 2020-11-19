@@ -1,8 +1,8 @@
 package com.lingxiao.blog.service.system.impl;
 
-import com.lingxiao.blog.bean.Menu;
-import com.lingxiao.blog.bean.MenuRole;
-import com.lingxiao.blog.bean.Role;
+import com.lingxiao.blog.bean.po.Menu;
+import com.lingxiao.blog.bean.po.MenuRole;
+import com.lingxiao.blog.bean.po.Role;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.mapper.MenuMapper;

@@ -1,7 +1,7 @@
 package com.lingxiao.blog.controller.user;
 
 import com.lingxiao.blog.annotation.OperationLogDetail;
-import com.lingxiao.blog.bean.Role;
+import com.lingxiao.blog.bean.po.Role;
 import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.service.user.RoleService;

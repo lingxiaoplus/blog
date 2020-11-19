@@ -1,4 +1,4 @@
-package com.lingxiao.blog.bean;
+package com.lingxiao.blog.bean.po;
 
 import lombok.Data;
 import tk.mybatis.mapper.annotation.KeySql;
@@ -6,12 +6,12 @@ import tk.mybatis.mapper.annotation.KeySql;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-@Table(name="user_role")
 @Data
-public class UserRole {
+@Table(name = "article_label")
+public class ArticleLabel {
     @Id
     @KeySql(useGeneratedKeys = true)
     private Long id;
-    private Long userId;
-    private Long roleId;
+    private Long articleId;
+    private Long labelId;
 }

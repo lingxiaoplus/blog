@@ -1,4 +1,4 @@
-package com.lingxiao.blog.bean;
+package com.lingxiao.blog.bean.po;
 
 import lombok.Data;
 import tk.mybatis.mapper.annotation.KeySql;

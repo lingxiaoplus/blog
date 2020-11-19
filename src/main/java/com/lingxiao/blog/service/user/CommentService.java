@@ -1,7 +1,7 @@
 package com.lingxiao.blog.service.user;
 
 
-import com.lingxiao.blog.bean.Comment;
+import com.lingxiao.blog.bean.po.Comment;
 import com.lingxiao.blog.bean.vo.CommentVo;
 import com.lingxiao.blog.global.api.PageResult;
 

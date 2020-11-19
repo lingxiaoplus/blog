@@ -1,8 +1,11 @@
 package com.lingxiao.blog.bean;
 
+import lombok.ToString;
+
 import java.io.Serializable;
 import java.util.List;
 
+@ToString
 public class BingImageData implements Serializable {
 
     /**
@@ -29,6 +32,7 @@ public class BingImageData implements Serializable {
         this.images = images;
     }
 
+    @ToString
     public static class TooltipsBean implements Serializable{
         /**
          * loading : 正在加载...
@@ -85,6 +89,7 @@ public class BingImageData implements Serializable {
         }
     }
 
+    @ToString
     public static class ImagesBean implements Serializable{
         /**
          * startdate : 20200402

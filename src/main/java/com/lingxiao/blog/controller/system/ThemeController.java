@@ -1,6 +1,6 @@
 package com.lingxiao.blog.controller.system;
 
-import com.lingxiao.blog.bean.Theme;
+import com.lingxiao.blog.bean.po.Theme;
 import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.service.system.ThemeService;
 import io.swagger.annotations.Api;

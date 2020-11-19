@@ -1,7 +1,7 @@
 package com.lingxiao.blog.service.system;
 
 import com.lingxiao.blog.bean.Hitokoto;
-import com.lingxiao.blog.bean.Theme;
+import com.lingxiao.blog.bean.po.Theme;
 
 public interface ThemeService {
     void saveTheme(Theme theme);

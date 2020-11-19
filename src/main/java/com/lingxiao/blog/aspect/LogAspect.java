@@ -1,8 +1,8 @@
 package com.lingxiao.blog.aspect;
 
 import com.lingxiao.blog.annotation.OperationLogDetail;
-import com.lingxiao.blog.bean.OperationLog;
-import com.lingxiao.blog.bean.User;
+import com.lingxiao.blog.bean.po.OperationLog;
+import com.lingxiao.blog.bean.po.User;
 import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.mapper.UserMapper;

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.lingxiao.blog.mapper.ArticleLabelMapper">
-    <resultMap id="columnMap" type="com.lingxiao.blog.bean.ArticleLabel">
+    <resultMap id="columnMap" type="com.lingxiao.blog.bean.po.ArticleLabel">
         <result column="id" property="id" javaType="java.lang.Long"/>
         <result column="article_id" property="articleId" javaType="java.lang.Long"/>
         <result column="label_id" property="labelId" javaType="java.lang.Long"/>

@@ -2,7 +2,7 @@ package com.lingxiao.blog.global.security.handler;
 
 import com.google.gson.Gson;
 import com.lingxiao.blog.annotation.OperationLogDetail;
-import com.lingxiao.blog.bean.User;
+import com.lingxiao.blog.bean.po.User;
 import com.lingxiao.blog.bean.vo.UserVo;
 import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.global.ContentValue;

@@ -2,8 +2,8 @@ package com.lingxiao.blog.service.article.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.lingxiao.blog.bean.ArticleLabel;
-import com.lingxiao.blog.bean.Label;
+import com.lingxiao.blog.bean.po.ArticleLabel;
+import com.lingxiao.blog.bean.po.Label;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.global.api.PageResult;

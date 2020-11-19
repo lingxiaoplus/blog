@@ -47,4 +47,22 @@ email:
   minute: 5  #邮件有效时间  单位：分钟
 
 
+cors:
+  allowedOrigins:
+    - "http://blog.lingxiaomz.top"
+    - "http://www.lingxiaomz.top"
+    - "http://api.lingxiaomz.top"
+    - "https://blog.lingxiaomz.top"
+    - "https://www.lingxiaomz.top"
+    - "https://api.lingxiaomz.top"
+  allowedMethods:
+    - "OPTIONS"
+    - "HEAD"
+    - "GET"
+    - "POST"
+    - "PUT"
+    - "DELETE"
+    - "PATCH"
+
+
 

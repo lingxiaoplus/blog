@@ -2,7 +2,7 @@ package com.lingxiao.blog.service.user.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.lingxiao.blog.bean.Comment;
+import com.lingxiao.blog.bean.po.Comment;
 import com.lingxiao.blog.bean.vo.ArticleDetailVo;
 import com.lingxiao.blog.bean.vo.CommentVo;
 import com.lingxiao.blog.enums.CommentState;

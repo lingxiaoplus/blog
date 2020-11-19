@@ -1,6 +1,6 @@
 package com.lingxiao.blog.service.system;
 
-import com.lingxiao.blog.bean.OperationLog;
+import com.lingxiao.blog.bean.po.OperationLog;
 import com.lingxiao.blog.bean.vo.OperationLogVo;
 import com.lingxiao.blog.global.api.PageResult;
 
