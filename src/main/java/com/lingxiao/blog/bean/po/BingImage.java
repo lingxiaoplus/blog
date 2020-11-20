@@ -5,6 +5,7 @@ import tk.mybatis.mapper.annotation.KeySql;
 
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -13,7 +14,8 @@ import java.util.Date;
  */
 @Table(name = "bing_image")
 @Data
-public class BingImage {
+public class BingImage implements Serializable {
+    private static final long serialVersionUID = 4920600747801363341L;
     @Id
     @KeySql(useGeneratedKeys = true)
     private Long id;

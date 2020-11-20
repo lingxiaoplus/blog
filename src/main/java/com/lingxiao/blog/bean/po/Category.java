@@ -16,7 +16,8 @@ public class Category {
     @Id
     @KeySql(useGeneratedKeys = true)
     private Long id;
-    private Long parentId;  //父分类（如果是root就是0）
+    //父分类（如果是root就是0）
+    private Long parentId;
     @NotBlank(message = "分类名字不能为空")
     private String name;
     private String description;

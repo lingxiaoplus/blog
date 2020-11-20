@@ -1,6 +1,8 @@
 package com.lingxiao.blog.controller;
 
 import com.lingxiao.blog.bean.BingImageData;
+import com.lingxiao.blog.bean.form.PageQueryForm;
+import com.lingxiao.blog.bean.po.BingImage;
 import com.lingxiao.blog.bean.vo.FileInfo;
 import com.lingxiao.blog.global.OssProperties;
 import com.lingxiao.blog.global.api.PageResult;
@@ -94,8 +96,17 @@ public class FileController {
     }
 
 
+    @Deprecated
     @GetMapping("/bing_image")
     public ResponseEntity<ResponseResult<BingImageData>> getBingImages(@RequestParam(value = "idx",defaultValue = "0") int idx){
         return ResponseEntity.ok(new ResponseResult<>(uploadService.getBingImages(idx)));
     }
+
+    @ApiOperation(value = "获取bing日图")
+    @ApiImplicitParam(name = "queryForm",value = "查询对象")
+    @GetMapping("/bingImage")
+    public ResponseEntity<ResponseResult<PageResult<BingImage>>> getBingImagesFromDB(PageQueryForm queryForm){
+        return ResponseEntity.ok(new ResponseResult<>(uploadService.getImageFromDB(queryForm)));
+    }
+
 }

@@ -1,12 +1,17 @@
 package com.lingxiao.blog.service.file.impl;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.google.gson.Gson;
 import com.lingxiao.blog.bean.BingImageData;
+import com.lingxiao.blog.bean.form.PageQueryForm;
+import com.lingxiao.blog.bean.po.BingImage;
 import com.lingxiao.blog.bean.vo.FileInfo;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.global.OssProperties;
 import com.lingxiao.blog.global.api.PageResult;
+import com.lingxiao.blog.mapper.BingImageMapper;
 import com.lingxiao.blog.service.file.FileService;
 import com.lingxiao.blog.utils.UploadUtil;
 import com.qiniu.common.QiniuException;
@@ -33,6 +38,8 @@ public class FileServiceImpl implements FileService {
      * n 1-8
      */
     private static final String BING_API = "https://cn.bing.com/HPImageArchive.aspx?format=js&n=8&mkt=zh-CN&idx=";
+    @Autowired
+    private BingImageMapper bingImageMapper;
     /**
      * 文件上传，返回oss地址
      * @param file
@@ -134,5 +141,13 @@ public class FileServiceImpl implements FileService {
             }
         }
         return null;
+    }
+
+    @Override
+    public PageResult<BingImage> getImageFromDB(PageQueryForm queryForm){
+        PageHelper.startPage(queryForm.getPageNum(),queryForm.getPageSize());
+        List<BingImage> bingImages = bingImageMapper.selectAll();
+        PageInfo<BingImage> pageInfo = PageInfo.of(bingImages);
+        return new PageResult<>(pageInfo.getTotal(),pageInfo.getPages(),bingImages);
     }
 }
