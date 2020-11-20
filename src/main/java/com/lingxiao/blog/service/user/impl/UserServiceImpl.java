@@ -168,6 +168,11 @@ public class UserServiceImpl implements UserService{
     @Override
     public void initAdmin() {
         //判断是否有系统管理员, 没有就注册
+        if (roleService.haveAdmin()){
+            log.info("有系统管理员");
+        }else {
+
+        }
     }
     @Override
     public String authEntication(User user) {

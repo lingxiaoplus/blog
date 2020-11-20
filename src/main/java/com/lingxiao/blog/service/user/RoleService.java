@@ -20,4 +20,6 @@ public interface RoleService {
     List<Role> getRolesByUser(long uid);
 
     void updateRoleMenu(Long roleId,List<Long> menuIds);
+
+    boolean haveAdmin();
 }

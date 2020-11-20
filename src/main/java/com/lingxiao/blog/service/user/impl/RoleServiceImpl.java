@@ -7,6 +7,7 @@ import com.lingxiao.blog.bean.po.Role;
 import com.lingxiao.blog.bean.po.UserRole;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
+import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.mapper.MenuRoleMapper;
 import com.lingxiao.blog.mapper.RoleMapper;
@@ -131,5 +132,15 @@ public class RoleServiceImpl implements RoleService {
         if (insertCount != insertList.size()) {
             throw new BlogException(ExceptionEnum.ROLE_MENU_SECURITY_UPDATE_ERROR);
         }
+    }
+
+    @Override
+    public boolean haveAdmin() {
+        Role role = new Role();
+        role.setRoleTag(ContentValue.USER_TAG_ADMIN);
+        role = roleMapper.selectOne(role);
+        UserRole userRole = new UserRole();
+        userRole.setRoleId(role.getId());
+        return userRoleMapper.selectCount(userRole) > 0;
     }
 }

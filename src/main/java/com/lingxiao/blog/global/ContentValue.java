@@ -46,4 +46,14 @@ public class ContentValue {
 
     public static final String HITOKOTO_URL = "https://v1.hitokoto.cn?min_length=16";
 
+    /**
+     * 角色tag 管理员
+     */
+    public static final String USER_TAG_ADMIN = "admin";
+
+    /**
+     * 角色tag 普通用户
+     */
+    public static final String USER_TAG_NORMAL_USER = "user";
+
 }

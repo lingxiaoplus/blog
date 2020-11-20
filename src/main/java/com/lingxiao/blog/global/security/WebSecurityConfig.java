@@ -59,9 +59,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
+        //静态资源无需认证
         web.ignoring().antMatchers("/css/**","/js/**","/config/**",
-                "/index.html","/img/**","/fonts/**","/favicon.ico","/verifyCode", "/upload/bingImage", "/swagger-ui.html","/swagger-resources/**", "/webjars/**","/v2/api-docs*","/doc.html",
-                "/image/**","/user/register","/user/email/**","/front/**");  //静态资源无需认证
+                "/index.html","/img/**","/fonts/**","/favicon.ico","/verifyCode",
+                "/upload/bingImage", "/swagger-ui.html","/swagger-resources/*", "/webjars/*","/v2/api-docs*","/doc.html",
+                "/image/**","/user/register","/user/email/**","/front/**","/admin/login");
     }
     @Override
     protected void configure(HttpSecurity http) throws Exception {
