@@ -1,5 +1,6 @@
 package com.lingxiao.blog.bean.po;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import tk.mybatis.mapper.annotation.KeySql;
 
@@ -23,6 +24,8 @@ public class BingImage implements Serializable {
     private String urlBase;
     private String title;
     private String hashCode;
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
     private Date startDate;
+    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
     private Date createDate;
 }

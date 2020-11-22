@@ -19,4 +19,6 @@ public interface FileService {
     BingImageData getBingImages(int idx);
 
     PageResult<BingImage> getImageFromDB(PageQueryForm queryForm);
+
+    String getRandomImage();
 }

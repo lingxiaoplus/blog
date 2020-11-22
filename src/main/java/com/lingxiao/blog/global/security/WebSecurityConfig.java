@@ -62,14 +62,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         //静态资源无需认证
         web.ignoring().antMatchers("/css/**","/js/**","/config/**",
                 "/index.html","/img/**","/fonts/**","/favicon.ico","/verifyCode",
-                "/upload/bingImage", "/swagger-ui.html","/swagger-resources/*", "/webjars/*","/v2/api-docs*","/doc.html",
-                "/image/**","/user/register","/user/email/**","/front/**","/admin/login");
+                "/upload/bingImage","/upload/bingImage/random","/job/list","/job/add",
+                "/image/**","/user/register","/user/email/**","/front/**");
     }
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         //super.configure(http);
 
         http.authorizeRequests()
+                //.antMatchers("/admin/login/*","/swagger-ui.html","/swagger-resources/*", "/webjars/*","/v2/api-docs*","/doc.html").permitAll()
                 .withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {
                     @Override
                     public <O extends FilterSecurityInterceptor> O postProcess(O o) {
@@ -150,4 +151,5 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         //3.返回新的CorsFilter
         return new CorsFilter(configurationSource);
     }
+
 }

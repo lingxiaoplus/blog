@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lingxiao.blog.mapper.UserMapper">
+    <resultMap id="columnMap" type="com.lingxiao.blog.bean.po.User">
+        <id column="user_id" property="userId"></id>
+        <result column="user_ip" property="userIp" javaType="java.lang.Long"/>
+        <result column="username" property="username" />
+        <result column="password" property="password" />
+        <result column="email" property="email" />
+        <result column="head_portrait" property="headPortrait" />
+        <result column="age" property="age" />
+        <result column="phone_number" property="phoneNumber" />
+        <result column="nickname" property="nickname" />
+        <result column="status" property="status" />
+        <result column="salt" property="salt" />
+        <result column="birthday" property="birthday" />
+        <result column="create_at" property="createAt" />
+        <result column="update_at" property="updateAt" />
+    </resultMap>
+    <sql id="user">
+        user_id,user_ip,username,password,email,head_portrait,age,phone_number,nickname,status,birthday,create_at,update_at
+    </sql>
+    <select id="login" resultMap="columnMap">
+        SELECT <include refid="user"/> FROM user
+        <where>
+            username=#{condition} or email=#{condition} or phone_number=#{condition}
+        </where>
+    </select>
+</mapper>

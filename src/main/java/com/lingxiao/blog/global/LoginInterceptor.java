@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 
+@Deprecated
 public class LoginInterceptor extends HandlerInterceptorAdapter {
     private JwtProperties jwtProperties;
     private static ThreadLocal<UserInfo> threadLocal = new ThreadLocal<>();  //线程域，用于存放用户信息

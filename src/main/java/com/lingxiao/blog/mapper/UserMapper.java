@@ -15,6 +15,8 @@ public interface UserMapper extends Mapper<User> {
     @Select("select * from user where phone_number=#{phoneNumber}")
     User loginByPhone(@Param("phoneNumber") String phoneNumber);
 
+    User login(@Param("condition") String condition);
+
     @Select("select count(user_id) from user where username=#{username}")
     int countByName(@Param("username") String username);
     @Select("select count(user_id) from user where email=#{email}")

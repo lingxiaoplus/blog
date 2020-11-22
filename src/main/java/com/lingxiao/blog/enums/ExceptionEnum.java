@@ -55,6 +55,9 @@ public enum ExceptionEnum {
     ROLE_DELETE_ERROR(500,"角色删除失败"),
     ROLE_UPDATE_ERROR(500,"角色修改失败"),
     ROLE_SELECT_ERROR(404,"角色查询失败"),
+    JOB_DELETE_ERROR(10001,"删除任务失败"),
+    JOB_ADD_ERROR_CLASS_NOT_FOUND(10002,"添加任务失败，类不存在"),
+    JOB_ADD_ERROR_JOB_START(10003,"添加任务失败，任务触发失败"),
 
     ROLE_MENU_SECURITY_UPDATE_ERROR(500,"修改角色菜单权限失败"),
     ;

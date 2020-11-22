@@ -41,23 +41,6 @@ public class UserController {
         return ResponseEntity.ok(token);
     }
 
-    /*@ApiOperation(value = "用户登录，登录成功返回token", notes = "登录")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "loginType", value = "登录类型(1: 用户名，2: 邮箱，3: 电话)")
-    })
-    @OperationLogDetail(detail = "用户登录", operationType = OperationType.LOGIN)
-    @PostMapping(value = "/login")
-    public ResponseEntity<String> login(
-            @RequestParam(name = "account") String account,
-            @RequestParam(name = "password") String password,
-            @RequestParam(name = "loginType", defaultValue = "1") int loginType,
-            HttpServletRequest request,
-            HttpServletResponse response) {
-        String token = userService.login(account, password, loginType);
-        CookieUtils.setCookie(request, response, ContentValue.LOGIN_TOKEN_NAME, token, ContentValue.COOKIE_MAXAGE);
-        return ResponseEntity.ok(token);
-    }*/
-
     @ApiOperation(value = "验证用户是否登录，返回用户信息", notes = "登录状态")
     @GetMapping(value = "/verify")
     //@OperationLogDetail(detail = "验证用户是否登录",operationType = OperationType.LOGIN)

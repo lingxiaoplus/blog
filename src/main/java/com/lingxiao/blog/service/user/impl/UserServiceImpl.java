@@ -254,7 +254,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public UserDetails loadUserByUsername(String username) {
-        User user = userMapper.loginByName(username);
+        User user = userMapper.login(username);
         if (user == null){
             throw new BlogException(ExceptionEnum.LOGIN_NAME_ERROR);
         }

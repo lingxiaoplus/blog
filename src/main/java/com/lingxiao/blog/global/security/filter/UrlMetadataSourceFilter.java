@@ -19,6 +19,7 @@ import java.util.List;
 
 /**
  * {@link SecurityMetadataSource}
+ * @author lingxiao
  * 动态获取url权限配置  通过当前的请求地址，获取该地址需要的用户角色
  */
 @Component
@@ -37,7 +38,9 @@ public class UrlMetadataSourceFilter implements FilterInvocationSecurityMetadata
             if (antPathMatcher.match(menu.getUrl(),requestUrl)){
                 List<Role> roles = menuService.getRolesByMenu(menu.getId());
                 //如果role是空的，说明这个menu没有和role绑定
-                if (CollectionUtils.isEmpty(roles)) break;
+                if (CollectionUtils.isEmpty(roles)) {
+                    break;
+                }
                 int size = CollectionUtils.isEmpty(roles)?0:roles.size();
                 String[] values = new String[size];
                 for (int i = 0; i < size; i++) {

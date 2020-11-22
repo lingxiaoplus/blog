@@ -13,9 +13,9 @@ import javax.servlet.http.HttpServletRequest;
  * @author renml
  * @date 2020/11/20 17:24
  */
-@Controller
+@Controller("admin")
 public class AdminRegisterController {
-    @RequestMapping("/admin/login")
+    @RequestMapping("/login")
     public String hello(HttpServletRequest request, @RequestParam(value = "name", defaultValue = "springboot-thymeleaf") String name) {
         request.setAttribute("name", name);
         return "login";

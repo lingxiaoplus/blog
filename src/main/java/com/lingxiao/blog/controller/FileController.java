@@ -1,9 +1,10 @@
 package com.lingxiao.blog.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.lingxiao.blog.bean.BingImageData;
 import com.lingxiao.blog.bean.form.PageQueryForm;
-import com.lingxiao.blog.bean.po.BingImage;
 import com.lingxiao.blog.bean.vo.FileInfo;
+import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.OssProperties;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.global.api.ResponseResult;
@@ -105,8 +106,16 @@ public class FileController {
     @ApiOperation(value = "获取bing日图")
     @ApiImplicitParam(name = "queryForm",value = "查询对象")
     @GetMapping("/bingImage")
-    public ResponseEntity<ResponseResult<PageResult<BingImage>>> getBingImagesFromDB(PageQueryForm queryForm){
-        return ResponseEntity.ok(new ResponseResult<>(uploadService.getImageFromDB(queryForm)));
+    public ResponseEntity<ResponseResult<Object>> getBingImagesFromDB(PageQueryForm queryForm){
+        JSONObject object = new JSONObject();
+        object.put("images",uploadService.getImageFromDB(queryForm));
+        object.put("resolution", ContentValue.SUFFIX_IMAGE_MAP);
+        return ResponseEntity.ok(new ResponseResult<>(object));
     }
 
+    @ApiOperation(value = "随机获取一张图")
+    @GetMapping(value = "/bingImage/random")
+    public ResponseEntity<String> getRandomImage(){
+        return ResponseEntity.ok(uploadService.getRandomImage());
+    }
 }

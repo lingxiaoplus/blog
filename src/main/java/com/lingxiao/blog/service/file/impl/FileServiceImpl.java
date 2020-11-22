@@ -13,6 +13,7 @@ import com.lingxiao.blog.global.OssProperties;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.mapper.BingImageMapper;
 import com.lingxiao.blog.service.file.FileService;
+import com.lingxiao.blog.utils.DateUtil;
 import com.lingxiao.blog.utils.UploadUtil;
 import com.qiniu.common.QiniuException;
 import com.qiniu.http.Response;
@@ -24,7 +25,10 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -32,6 +36,8 @@ public class FileServiceImpl implements FileService {
 
     @Autowired
     private UploadUtil uploadUtil;
+    @Autowired
+    private BingImageMapper imageMapper;
     /**
      * format js/xml
      * idx 0今天 1明天
@@ -131,6 +137,25 @@ public class FileServiceImpl implements FileService {
                 String reponse = sb.toString();
                 BingImageData bingImageData = new Gson().fromJson(reponse, BingImageData.class);
                 bingImageData.getImages().forEach(item-> item.setUrl("https://cn.bing.com"+item.getUrl()));
+
+
+                bingImageData.getImages().forEach(image -> {
+                    BingImage bingImage = new BingImage();
+                    bingImage.setTitle(image.getCopyright());
+                    bingImage.setUrl(image.getUrl());
+                    bingImage.setUrlBase("https://cn.bing.com".concat(image.getUrlbase()));
+                    bingImage.setHashCode(image.getHsh());
+                    bingImage.setStartDate(DateUtil.getDateFromString(image.getStartdate()));
+                    bingImage.setCreateDate(new Date());
+                    try {
+                        imageMapper.insert(bingImage);
+                    }catch (Exception e){
+                        log.debug("插入失败");
+                    }
+
+                });
+
+
                 return bingImageData;
             }
         } catch (IOException e) {
@@ -149,5 +174,13 @@ public class FileServiceImpl implements FileService {
         List<BingImage> bingImages = bingImageMapper.selectAll();
         PageInfo<BingImage> pageInfo = PageInfo.of(bingImages);
         return new PageResult<>(pageInfo.getTotal(),pageInfo.getPages(),bingImages);
+    }
+
+    private Random random = new Random();
+    @Override
+    public String getRandomImage() {
+        List<BingImage> bingImages = bingImageMapper.selectAll();
+        int nextInt = random.nextInt(bingImages.size());
+        return bingImages.get(nextInt).getUrl();
     }
 }

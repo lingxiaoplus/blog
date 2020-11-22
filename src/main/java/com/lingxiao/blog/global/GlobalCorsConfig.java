@@ -7,6 +7,7 @@ import org.springframework.web.filter.CorsFilter;
 
 //@Configuration
 //@EnableConfigurationProperties(JwtProperties.class)
+@Deprecated
 public class GlobalCorsConfig {
 
     @Bean

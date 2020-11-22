@@ -15,12 +15,6 @@ spring:
     type: ehcache
     ehcache:
       config: classpath:cache/ehcache.xml
-  thymeleaf:
-    prefix: /templates/
-    check-template: true
-    encoding: utf-8
-    mode: HTML5
-
 
 mybatis:
   configuration:
