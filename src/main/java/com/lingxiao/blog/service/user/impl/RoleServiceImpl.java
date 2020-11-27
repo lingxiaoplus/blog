@@ -139,6 +139,9 @@ public class RoleServiceImpl implements RoleService {
         Role role = new Role();
         role.setRoleTag(ContentValue.USER_TAG_ADMIN);
         role = roleMapper.selectOne(role);
+        if (role == null) {
+            return false;
+        }
         UserRole userRole = new UserRole();
         userRole.setRoleId(role.getId());
         return userRoleMapper.selectCount(userRole) > 0;

@@ -44,6 +44,7 @@ public class UrlMetadataSourceFilter implements FilterInvocationSecurityMetadata
                 int size = CollectionUtils.isEmpty(roles)?0:roles.size();
                 String[] values = new String[size];
                 for (int i = 0; i < size; i++) {
+                    //这个url需要的角色权限列表
                     values[i] = roles.get(i).getRoleTag();
                 }
                 return SecurityConfig.createList(values);

@@ -239,6 +239,17 @@
             <artifactId>c3p0</artifactId>
             <version>0.9.1.2</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-core -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba.boot</groupId>
+            <artifactId>nacos-config-spring-boot-starter</artifactId>
+            <version>0.2.7</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -250,6 +261,10 @@
                     <!-- 可以直接使用./app.jar这样类似于启动shell脚本一般的方式启动项目-->
                     <executable>true</executable>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
             </plugin>
 
             <!-- docker的maven插件， 官网: https://github. com/spotify/docker-maven-plugin-->

@@ -80,6 +80,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
+        //用户是否过期
         return true;
     }
 
@@ -90,6 +91,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isCredentialsNonExpired() {
+        //用户密码是否过期
         return true;
     }
 

@@ -54,7 +54,7 @@ public class TaskConfig {
     public Properties quartzProperties() throws IOException {
         PropertiesFactoryBean propertiesFactoryBean = new PropertiesFactoryBean();
         //这个东西如果不配置的话，quartz有自己默认的配置文件
-        propertiesFactoryBean.setLocation(new ClassPathResource("/quartz.properties"));
+        //propertiesFactoryBean.setLocation(new ClassPathResource("/quartz.properties"));
         propertiesFactoryBean.afterPropertiesSet();
         return propertiesFactoryBean.getObject();
     }

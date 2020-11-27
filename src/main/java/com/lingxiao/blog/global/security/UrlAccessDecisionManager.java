@@ -20,10 +20,12 @@ import java.util.Iterator;
 
 /**
  * @author lingxiao
+ * 负责做出最终的访问控制决策
  */
 @Component
 public class UrlAccessDecisionManager implements AccessDecisionManager {
     /**
+     * 访问控制决策
      * @param authentication 保存了当前登录用户的角色信息，
      * @param object
      * @param configAttributes getAttributes方法传来的，表示当前请求需要的角色（可能有多个）
@@ -57,12 +59,21 @@ public class UrlAccessDecisionManager implements AccessDecisionManager {
         }
     }
 
-
+    /**
+     * 是否支持处理传递的ConfigAttribute
+     * @param attribute 可以自定义SecurityMetadataSource
+     * @return
+     */
     @Override
     public boolean supports(ConfigAttribute attribute) {
         return true;
     }
 
+    /**
+     * 确认class是否为AccessDecisionManager
+     * @param clazz
+     * @return
+     */
     @Override
     public boolean supports(Class<?> clazz) {
         return true;
