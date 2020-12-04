@@ -36,21 +36,19 @@ public class CommonExceptionHandler {
     @Autowired
     private OperationLogService logService;
     @Autowired
-    private UserMapper userMapper;
-    @Autowired
     private HttpServletRequest request;
 
     @ExceptionHandler(BlogException.class)
-    public ResponseEntity<ExceptionResult> handleException(BlogException e){
+    public ResponseEntity<ExceptionResult> handleException(BlogException e) {
         ExceptionEnum exceptionEnum = e.getExceptionEnum();
         return ResponseEntity.status(exceptionEnum.getCode()).body(new ExceptionResult(exceptionEnum));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ExceptionResult> handleValidException(MethodArgumentNotValidException e){
+    public ResponseEntity<ExceptionResult> handleValidException(MethodArgumentNotValidException e) {
         List<ObjectError> allErrors = e.getBindingResult().getAllErrors();
         StringBuilder stringBuilder = new StringBuilder();
-        allErrors.forEach(error-> stringBuilder.append(error.getDefaultMessage()).append(", "));
+        allErrors.forEach(error -> stringBuilder.append(error.getDefaultMessage()).append(", "));
         ExceptionResult exceptionResult = new ExceptionResult(ExceptionEnum.ILLEGA_ARGUMENT.getCode(),
                 stringBuilder.toString());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResult);
@@ -58,30 +56,34 @@ public class CommonExceptionHandler {
 
     /**
      * 处理所有不可知异常
+     *
      * @param throwable
      * @return json
      */
     @ExceptionHandler(Throwable.class)  //捕获的异常类型
     @ResponseBody
-    public ResponseEntity<ExceptionResult> handlerException(Throwable throwable){
+    public ResponseEntity<ExceptionResult> handlerException(Throwable throwable) {
         ExceptionResult apiResult = new ExceptionResult(HttpStatus.INTERNAL_SERVER_ERROR.value(), throwable.getMessage());
         throwable.printStackTrace();
+        insertOperationLog(throwable);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResult);
+    }
 
-        try {
-            OperationLog operationLog = new OperationLog();
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication != null && authentication.getPrincipal() != null){
-                User user = (User) authentication.getPrincipal();
-                operationLog.setUsername(user.getUsername());
-                operationLog.setNickname(user.getNickname());
-            }
-            operationLog.setOperationType(OperationType.EXCEPTION.getCode());
-            operationLog.setOperationContent("unknow exception");
-            operationLog.setUserIp(IPUtils.ipToNum(IPUtils.getIpAddress(request)));
-            operationLog.setCreateAt(new Date());
-            operationLog.setBrowser(IPUtils.getBrowserName(request));
-            Writer writer = new StringWriter();
-            PrintWriter printWriter = new PrintWriter(writer);
+    private void insertOperationLog(Throwable throwable) {
+        OperationLog operationLog = new OperationLog();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() != null) {
+            User user = (User) authentication.getPrincipal();
+            operationLog.setUsername(user.getUsername());
+            operationLog.setNickname(user.getNickname());
+        }
+        operationLog.setOperationType(OperationType.EXCEPTION.getCode());
+        operationLog.setOperationContent("unknow exception");
+        operationLog.setUserIp(IPUtils.ipToNum(IPUtils.getIpAddress(request)));
+        operationLog.setCreateAt(new Date());
+        operationLog.setBrowser(IPUtils.getBrowserName(request));
+        try (Writer writer = new StringWriter();
+             PrintWriter printWriter = new PrintWriter(writer);) {
             throwable.printStackTrace(printWriter);
             Throwable cause = throwable.getCause();
             while (cause != null) {
@@ -90,13 +92,9 @@ public class CommonExceptionHandler {
             }
             String result = writer.toString();
             operationLog.setExceptionInfo(result);
-            printWriter.close();
-            writer.close();
             logService.setOperationLog(operationLog);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("插入异常日志失败：{}", e.getMessage());
         }
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResult);
     }
 }

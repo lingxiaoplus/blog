@@ -121,6 +121,7 @@ public class IPUtils {
      * @param request
      * @return
      */
+    @Deprecated
     public final static String getIpAddress2(HttpServletRequest request) {
         // 获取请求主机IP地址,如果通过代理进来，则透过防火墙获取真实IP地址
         String ip = request.getHeader("X-Forwarded-For");

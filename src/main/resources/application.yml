@@ -24,6 +24,10 @@ spring:
     check-location: true
     locations: classpath:db
     clean-disabled: true
+  redis:
+    port: 6379
+    password: lingxiao
+    host: 47.92.215.253
 
 
 mybatis:

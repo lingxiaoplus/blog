@@ -9,6 +9,7 @@ import com.lingxiao.blog.bean.vo.ArticleVo;
 import com.lingxiao.blog.bean.vo.CommentVo;
 import com.lingxiao.blog.bean.vo.HomePageVo;
 import com.lingxiao.blog.enums.OperationType;
+import com.lingxiao.blog.global.RedisConstants;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.service.article.ArticleService;
@@ -17,6 +18,7 @@ import com.lingxiao.blog.service.article.LabelService;
 import com.lingxiao.blog.service.user.CommentService;
 import com.lingxiao.blog.service.system.FriendLinkService;
 import com.lingxiao.blog.utils.IPUtils;
+import com.lingxiao.blog.utils.RedisUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -31,6 +33,9 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * @author admin
+ */
 @RestController
 @RequestMapping("/front")
 @Api("首页数据接口")
@@ -45,6 +50,8 @@ public class FrontController {
     private FriendLinkService linkService;
     @Autowired
     private LabelService labelService;
+    @Autowired
+    private RedisUtil redisUtil;
 
     @ApiOperation(value = "获取所有分类", notes = "获取分类列表")
     @GetMapping("/category")
@@ -124,5 +131,17 @@ public class FrontController {
     public ResponseEntity<String> getRealIp(HttpServletRequest request){
         String ipAddress = IPUtils.getIpAddress(request);
         return ResponseEntity.ok(ipAddress);
+    }
+
+    /**
+     * 访问
+     * @param request
+     * @return
+     */
+    @GetMapping("/statics")
+    public ResponseEntity<Integer> getAccessStatics(HttpServletRequest request){
+        String ipAddress = IPUtils.getIpAddress(request);
+        Integer count = redisUtil.getValueByKey(String.format(RedisConstants.KEY_FRONT_STATTICS_IP_COUNT,ipAddress));
+        return ResponseEntity.ok(count);
     }
 }
