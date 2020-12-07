@@ -58,6 +58,7 @@ public enum ExceptionEnum {
     JOB_DELETE_ERROR(10001,"删除任务失败"),
     JOB_ADD_ERROR_CLASS_NOT_FOUND(10002,"添加任务失败，类不存在"),
     JOB_ADD_ERROR_JOB_START(10003,"添加任务失败，任务触发失败"),
+    IP_REGION_INIT_ERROR(10004,"ip地址转换失败"),
 
     ROLE_MENU_SECURITY_UPDATE_ERROR(500,"修改角色菜单权限失败"),
     ;

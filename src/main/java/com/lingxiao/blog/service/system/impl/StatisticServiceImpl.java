@@ -1,5 +1,6 @@
 package com.lingxiao.blog.service.system.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.lingxiao.blog.bean.po.*;
 import com.lingxiao.blog.bean.statistics.AggregationData;
 import com.lingxiao.blog.bean.statistics.ArticleIncreasedData;
@@ -7,15 +8,18 @@ import com.lingxiao.blog.bean.statistics.WeekData;
 import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.mapper.*;
 import com.lingxiao.blog.service.system.StatisticService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 @Service
+@Slf4j
 public class StatisticServiceImpl implements StatisticService {
     @Autowired
     private ArticleMapper articleMapper;
@@ -29,6 +33,8 @@ public class StatisticServiceImpl implements StatisticService {
     private LabelMapper labelMapper;
     @Autowired
     private FriendLinkMapper linkMapper;
+    @Autowired
+    private VisitAnalyseMapper visitAnalyseMapper;
 
     public ResponseResult<Map<String, Object>> getArticleWeekIncreased(){
         List<WeekData> weekData = articleMapper.weekIncreased();
@@ -73,4 +79,13 @@ public class StatisticServiceImpl implements StatisticService {
         map.put("aggregationData",aggregationData);
     }
 
+    @Override
+    public ResponseResult<Object> getOperatorDistributed(){
+        List<Map<String, Object>> operatorsAnalyse = visitAnalyseMapper.getOperatorsAnalyse();
+        long total = operatorsAnalyse.stream().mapToLong(map -> (Long) map.get("count")).sum();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("total",total);
+        jsonObject.put("list",operatorsAnalyse);
+        return new ResponseResult<>(jsonObject);
+    }
 }

@@ -7,10 +7,12 @@ import com.lingxiao.blog.bean.po.BingImage;
 import com.lingxiao.blog.bean.po.Dictionary;
 import com.lingxiao.blog.bean.po.IpRegion;
 import com.lingxiao.blog.enums.ExceptionEnum;
+import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.mapper.BingImageMapper;
 import com.lingxiao.blog.mapper.IP2RegionMapper;
 import com.lingxiao.blog.service.file.FileService;
 import com.lingxiao.blog.service.system.DictionaryService;
+import com.lingxiao.blog.service.system.StatisticService;
 import com.lingxiao.blog.utils.DateUtil;
 import com.lingxiao.blog.utils.IPUtils;
 import com.lingxiao.blog.utils.UIDUtil;
@@ -295,5 +297,13 @@ class BlogApplicationTests {
         int row = imageMapper.insertList(collect);
         assert row == collect.size();
         log.info("获取到的bing: {}",bingImages.toString());
+    }
+
+    @Autowired
+    private StatisticService statisticService;
+    @Test
+    void getOperatorsAnalyse(){
+        ResponseResult<Object> operatorDistributed = statisticService.getOperatorDistributed();
+        log.info(operatorDistributed.toString());
     }
 }

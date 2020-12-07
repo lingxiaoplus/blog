@@ -9,4 +9,6 @@ import java.util.Map;
 
 public interface StatisticService {
     ResponseResult<Map<String, Object>> getArticleWeekIncreased();
+
+    ResponseResult<Object> getOperatorDistributed();
 }
