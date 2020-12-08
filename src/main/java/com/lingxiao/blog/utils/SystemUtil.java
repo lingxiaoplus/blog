@@ -105,7 +105,7 @@ public class SystemUtil {
         diskStoreInfo.setUsed(formatByte(usedSize));
         diskStoreInfo.setAcaliable(formatByte(freeSize));
         diskStoreInfo.setTotal(formatByte(totalSize));
-        diskStoreInfo.setUsageRate(mFormat.format(usedSize*1.0/totalSize));
+        diskStoreInfo.setUsageRate(mFormat.format(freeSize*1.0/totalSize));
         return diskStoreInfo;
     }
 

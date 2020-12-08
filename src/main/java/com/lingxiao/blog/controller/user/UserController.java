@@ -79,4 +79,19 @@ public class UserController {
         PageResult<UserVo> userList = userService.getUserList(pageNum, pageSize, userId);
         return ResponseEntity.ok(userList);
     }
+
+    @ApiOperation(value = "修改用户基本信息", notes = "修改用户基本信息")
+    @ApiImplicitParam(name = "user", value = "用户基本信息")
+    @PostMapping
+    public ResponseEntity<Void> changeUserBaseInfo(@RequestBody UserVo userVo){
+        User user = new User();
+        user.setUserId(Long.valueOf(userVo.getUserId()));
+        user.setAge(userVo.getAge());
+        user.setBirthday(userVo.getBirthday());
+        user.setPhoneNumber(userVo.getPhoneNumber());
+        user.setHeadPortrait(userVo.getHeadPortrait());
+
+        userService.changeUser(user);
+        return ResponseEntity.ok().build();
+    }
 }

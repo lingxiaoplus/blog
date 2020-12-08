@@ -18,6 +18,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * @author Admin
+ */
 @Table(name = "user")
 @Data
 public class User implements UserDetails {
@@ -33,14 +36,17 @@ public class User implements UserDetails {
     private String email;
     private String headPortrait;
     private Integer age;
-    //  @NotEmpty(message = "电话号码不能为空")
+
     private String phoneNumber;
     @NotEmpty(message = "昵称不能为空")
     private String nickname;
     private Integer status;
 
+    /**
+     * 盐值
+     */
     @JsonIgnore
-    private String salt; //盐值
+    private String salt;
 
     private Date birthday;
     @JsonIgnore

@@ -147,7 +147,6 @@ public class UserServiceImpl implements UserService{
         user.setPassword(null);
         user.setUsername(null);
         user.setEmail(null);
-        user.setPhoneNumber(null);
         int count = userMapper.updateByPrimaryKeySelective(user);
         if (count != 1) {
             throw new BlogException(ExceptionEnum.UPDATE_USER_ERROR);
