@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author lingxiao
@@ -20,13 +21,14 @@ import java.util.List;
 @Component
 public class RedisUtil {
 
-    public RedisTemplate redisTemplate;
+    public RedisTemplate redisTemplate = null;
 
     @Autowired(required = false)
     public void setRedisTemplate(RedisTemplate redisTemplate) {
         RedisSerializer<String> stringSerializer = new StringRedisSerializer();
         redisTemplate.setKeySerializer(stringSerializer);
         redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        //redisTemplate.setValueSerializer(stringSerializer);
         redisTemplate.setHashKeySerializer(stringSerializer);
         redisTemplate.setHashValueSerializer(stringSerializer);
         this.redisTemplate = redisTemplate;
@@ -69,6 +71,13 @@ public class RedisUtil {
         redisTemplate.opsForList().rightPushAll(key, list);
     }
 
+    public void rightPushAll(String key, List list,long time) {
+        // 先删除再push
+        delRedis(key);
+        redisTemplate.opsForList().rightPushAll(key, list);
+        redisTemplate.expire(key,time, TimeUnit.MILLISECONDS);
+    }
+
     public <T> void pushValue(String key, T data) {
         Gson gson = new Gson();
         Type type = new TypeToken<T>() {
@@ -79,8 +88,7 @@ public class RedisUtil {
     }
 
     public <T> void pushValue(String key, T data, long time) {
-        redisTemplate.opsForValue().set(key, data);
-
+        redisTemplate.opsForValue().set(key, data,time,TimeUnit.MILLISECONDS);
     }
 
     public <T> T getValueByKey(String key) {

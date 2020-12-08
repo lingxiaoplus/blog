@@ -21,6 +21,7 @@ import com.lingxiao.blog.service.user.RoleService;
 import com.lingxiao.blog.service.user.UserService;
 import com.lingxiao.blog.utils.EmailUtil;
 import com.lingxiao.blog.utils.IPUtils;
+import com.lingxiao.blog.utils.RedisUtil;
 import com.lingxiao.blog.utils.UIDUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -37,6 +38,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+/**
+ * @author admin
+ */
 @Service
 @EnableConfigurationProperties(JwtProperties.class)
 @Slf4j
@@ -59,6 +63,8 @@ public class UserServiceImpl implements UserService{
     private UserRoleMapper userRoleMapper;
     @Autowired
     private RoleService roleService;
+    @Autowired
+    private RedisUtil redisUtil;
 
     @Override
     public String register(User user, String ip) {
@@ -103,6 +109,7 @@ public class UserServiceImpl implements UserService{
     public User verify(String token) {
         if (StringUtils.isBlank(token)){
             log.error("登录的cookie为空");
+            throw new BlogException(ExceptionEnum.VERIFY_USER_LOGIN_ERROR);
         }
         try {
             UserInfo userInfo = JwtUtils.getInfoFromToken(token, jwtProperties.getPublicKey());
@@ -176,7 +183,7 @@ public class UserServiceImpl implements UserService{
     }
     @Override
     public String authEntication(User user) {
-        if (user == null) {
+        if (user == null){
             return null;
         }
         UserInfo userInfo = new UserInfo();

@@ -1,7 +1,5 @@
 package com.lingxiao.blog.global;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.lingxiao.blog.bean.po.IpRegion;
 import com.lingxiao.blog.bean.po.VisitAnalyse;
 import com.lingxiao.blog.mapper.VisitAnalyseMapper;
@@ -32,14 +30,8 @@ public class FrontStatisticsFilter implements Filter {
     private RedisUtil redisUtil;
     private VisitAnalyseMapper visitAnalyseMapper;
     private IP2RegionService ip2RegionService;
-    private Cache ipCache;
-
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        ipCache = CacheBuilder.newBuilder()
-                .maximumSize(2)
-                .expireAfterWrite(1, TimeUnit.DAYS)
-                .build();
     }
 
     private void initBean(HttpServletRequest request){
@@ -61,15 +53,14 @@ public class FrontStatisticsFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
-        //redisUtil.incr(String.format(RedisConstants.KEY_FRONT_STATTICS_SITE_COUNT,servletRequest.getRemoteAddr()),1L);
-
         if (StringUtils.contains(request.getRequestURI(),URL_PATTERN)){
             log.debug("前端过滤器：{}",request.getRequestURI());
             initBean(request);
             String ipAddress = IPUtils.getIpAddress(request);
             String today = DateUtil.getPastDate(0);
-            if (ipCache.getIfPresent(ipAddress+today) == null){
-                ipCache.put(ipAddress+today,1);
+            Object visited = redisUtil.getValueByKey(String.format(RedisConstants.KEY_FRONT_STATTICS_IP_TODAY, ipAddress, today));
+            if (visited == null){
+                redisUtil.pushValue(String.format(RedisConstants.KEY_FRONT_STATTICS_IP_TODAY, ipAddress, today),1,TimeUnit.DAYS.toMillis(1));
                 VisitAnalyse visitAnalyse = new VisitAnalyse();
                 visitAnalyse.setDate(new Date());
                 visitAnalyse.setIp(IPUtils.ipToNum(ipAddress));

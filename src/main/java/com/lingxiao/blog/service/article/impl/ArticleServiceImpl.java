@@ -8,6 +8,7 @@ import com.lingxiao.blog.bean.vo.HomePageVo;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.global.ContentValue;
+import com.lingxiao.blog.global.RedisConstants;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.mapper.*;
@@ -16,6 +17,7 @@ import com.lingxiao.blog.service.article.LabelService;
 import com.lingxiao.blog.service.system.DictionaryService;
 import com.lingxiao.blog.service.system.ThemeService;
 import com.lingxiao.blog.service.user.CommentService;
+import com.lingxiao.blog.utils.RedisUtil;
 import com.lingxiao.blog.utils.UIDUtil;
 import com.lingxiao.blog.bean.vo.ArticleDetailVo;
 import com.lingxiao.blog.bean.vo.ArticleVo;
@@ -34,6 +36,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -58,6 +61,8 @@ public class ArticleServiceImpl implements ArticleService {
     private DictionaryService dictionaryService;
     @Autowired
     private CommentService commentService;
+    @Autowired
+    private RedisUtil redisUtil;
 
     @Transactional
     @Override
@@ -193,8 +198,14 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public List<ArticleVo> getTimeLineArticle(Date date){
+        List<ArticleVo> result = redisUtil.getListByKey(RedisConstants.KEY_FRONT_ARTICLE_TIMELINE_YEAR);
+        if (!CollectionUtils.isEmpty(result)){
+            return result;
+        }
         List<Article> articles = articleMapper.selectYearArticles(date);
-        return articleVoConvert(articles);
+        result = articleVoConvert(articles);
+        redisUtil.rightPushAll(RedisConstants.KEY_FRONT_ARTICLE_TIMELINE_YEAR,result, TimeUnit.DAYS.toMillis(1));
+        return result;
     }
 
     @Cacheable(value = "banners")

@@ -132,16 +132,4 @@ public class FrontController {
         String ipAddress = IPUtils.getIpAddress(request);
         return ResponseEntity.ok(ipAddress);
     }
-
-    /**
-     * 访问
-     * @param request
-     * @return
-     */
-    @GetMapping("/statics")
-    public ResponseEntity<Integer> getAccessStatics(HttpServletRequest request){
-        String ipAddress = IPUtils.getIpAddress(request);
-        Integer count = redisUtil.getValueByKey(String.format(RedisConstants.KEY_FRONT_STATTICS_IP_COUNT,ipAddress));
-        return ResponseEntity.ok(count);
-    }
 }

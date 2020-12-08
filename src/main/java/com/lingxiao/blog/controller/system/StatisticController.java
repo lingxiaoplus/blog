@@ -20,6 +20,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Type;
 import java.util.Map;
 
+/**
+ * @author 统计
+ */
 @RestController
 @RequestMapping("/statistics")
 @Slf4j
@@ -28,23 +31,15 @@ public class StatisticController {
     private StatisticService statisticService;
 
     @GetMapping("/article/week")
-    public ResponseEntity<ResponseResult<Map<String, Object>>> getArticleWeekIncreased(
+    public ResponseEntity<ResponseResult<Object>> getArticleWeekIncreased(
             HttpServletRequest request,
             HttpServletResponse response,
             @CookieValue(value = ContentValue.STATISTICS_CACHE_NAME,required = false) String cookieCache){
-        //String cache = CookieUtils.getCookieValue(request, ContentValue.STATISTICS_CACHE_NAME);
-        Gson gson = new Gson();
-        Type type = new TypeToken<ResponseResult<Map<String, Object>>>() {}.getType();
-        ResponseResult<Map<String, Object>> result;
-        //先从cookie里面获取，如果没有再从数据库查
-        if (!StringUtils.isBlank(cookieCache)){
-            result = gson.fromJson(cookieCache, type);
-            log.info("cookie缓存里有数据，直接返回,{}",result);
-        }else {
-            result = statisticService.getArticleWeekIncreased();
-            String json = gson.toJson(result, type);
-            CookieUtils.setCookie(request,response, ContentValue.STATISTICS_CACHE_NAME,json,60*60*24,true);
-        }
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(statisticService.getArticleWeekIncreased());
+    }
+
+    @GetMapping("/visitAnalyse")
+    public ResponseEntity<ResponseResult<Object>> getVisitAnalyse(){
+        return ResponseEntity.ok(statisticService.getOperatorDistributed());
     }
 }

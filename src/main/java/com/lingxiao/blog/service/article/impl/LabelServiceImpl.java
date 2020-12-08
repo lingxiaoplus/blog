@@ -6,11 +6,13 @@ import com.lingxiao.blog.bean.po.ArticleLabel;
 import com.lingxiao.blog.bean.po.Label;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
+import com.lingxiao.blog.global.RedisConstants;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.mapper.ArticleLabelMapper;
 import com.lingxiao.blog.mapper.LabelMapper;
 import com.lingxiao.blog.service.article.LabelService;
+import com.lingxiao.blog.utils.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -21,16 +23,21 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+/**
+ * @author admin
+ */
 @Service
 public class LabelServiceImpl implements LabelService {
     @Autowired
     private LabelMapper labelMapper;
     @Autowired
     private ArticleLabelMapper articleLabelMapper;
+    @Autowired
+    private RedisUtil redisUtil;
 
-    @CacheEvict(value = "labels",allEntries = true)
     @Override
     public void addLabel(Label label){
         label.setCreateAt(new Date());
@@ -38,18 +45,18 @@ public class LabelServiceImpl implements LabelService {
         if (count != 1) {
             throw new BlogException(ExceptionEnum.LABEL_INSERT_ERROR);
         }
+        redisUtil.delRedis(RedisConstants.KEY_FRONT_LABEL_LIST);
     }
 
-    @CacheEvict(value = "labels",allEntries = true)
     @Override
     public void deleteLabel(List<Long> ids){
         int count = labelMapper.deleteByIdList(ids);
         if (count != ids.size()) {
             throw new BlogException(ExceptionEnum.LABEL_DELETE_ERROR);
         }
+        redisUtil.delRedis(RedisConstants.KEY_FRONT_LABEL_LIST);
     }
 
-    @CacheEvict(value = "labels",allEntries = true)
     @Override
     public void updateLabel(Label label){
         label.setCreateAt(new Date());
@@ -57,6 +64,7 @@ public class LabelServiceImpl implements LabelService {
         if (count != 1) {
             throw new BlogException(ExceptionEnum.LABEL_UPDATE_ERROR);
         }
+        redisUtil.delRedis(RedisConstants.KEY_FRONT_LABEL_LIST);
     }
 
     @Override
@@ -70,12 +78,19 @@ public class LabelServiceImpl implements LabelService {
         return new PageResult<Label>(pageInfo.getTotal(),pageInfo.getPages(),pageInfo.getList());
     }
 
-    @Cacheable(value = "labels")
     @Override
     public ResponseResult<List<Label>> getAllLabels(){
-        List<Label> labels = labelMapper.selectAll();
         ResponseResult<List<Label>> result = new ResponseResult<>();
+        List<Label>  labels = redisUtil.getListByKey(RedisConstants.KEY_FRONT_LABEL_LIST);
+        if (!CollectionUtils.isEmpty(labels)){
+            result.setData(labels);
+            return result;
+        }
+        labels = labelMapper.selectAll();
         result.setData(labels);
+        if (!CollectionUtils.isEmpty(labels)){
+            redisUtil.rightPushAll(RedisConstants.KEY_FRONT_LABEL_LIST,labels, TimeUnit.DAYS.toMillis(1));
+        }
         return result;
     }
 
@@ -92,14 +107,11 @@ public class LabelServiceImpl implements LabelService {
         return labels;
     }
 
-    @CacheEvict(value = "labels",allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void updateArticleLabelByArticleId(long id, List<Long> labelIds){
         ArticleLabel deleteArticle = new ArticleLabel();
         deleteArticle.setArticleId(id);
-        //int count = articleLabelMapper.selectCount(deleteArticle);
-        //int deleteCount = articleLabelMapper.delete(deleteArticle);
         articleLabelMapper.delete(deleteArticle);
         List<ArticleLabel> insertList = labelIds.stream().map((labelId) -> {
             ArticleLabel articleLabel = new ArticleLabel();
@@ -111,6 +123,7 @@ public class LabelServiceImpl implements LabelService {
         if (insertCount != insertList.size()){
             throw new BlogException(ExceptionEnum.ILLEGA_ARGUMENT);
         }
+        redisUtil.delRedis(RedisConstants.KEY_FRONT_LABEL_LIST);
     }
 
 }

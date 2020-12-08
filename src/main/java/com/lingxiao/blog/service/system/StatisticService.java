@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface StatisticService {
-    ResponseResult<Map<String, Object>> getArticleWeekIncreased();
+    ResponseResult<Object> getArticleWeekIncreased();
 
     ResponseResult<Object> getOperatorDistributed();
 }

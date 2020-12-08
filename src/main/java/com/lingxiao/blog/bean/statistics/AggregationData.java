@@ -2,6 +2,9 @@ package com.lingxiao.blog.bean.statistics;
 
 import lombok.Data;
 
+/**
+ * @author admin
+ */
 @Data
 public class AggregationData {
     private int todayIncreased;

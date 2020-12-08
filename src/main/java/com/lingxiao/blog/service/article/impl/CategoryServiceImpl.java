@@ -6,9 +6,11 @@ import com.lingxiao.blog.bean.po.Category;
 import com.lingxiao.blog.bean.po.Label;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
+import com.lingxiao.blog.global.RedisConstants;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.mapper.CategoryMapper;
 import com.lingxiao.blog.service.article.CategoryService;
+import com.lingxiao.blog.utils.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -18,15 +20,19 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+/**
+ * @author admin
+ */
 @Service
-
 public class CategoryServiceImpl implements CategoryService {
 
     @Autowired
     private CategoryMapper categoryMapper;
+    @Autowired
+    private RedisUtil redisUtil;
 
-    @CacheEvict(value = "categories",allEntries = true)
     @Override
     public void addCategory(Category category) {
         category.setCreateAt(new Date());
@@ -34,18 +40,18 @@ public class CategoryServiceImpl implements CategoryService {
         if (count != 1){
             throw new BlogException(ExceptionEnum.CATEGORY_INSERT_ERROR);
         }
+        redisUtil.delRedis(RedisConstants.KEY_BACK_CATEGORY_LIST);
     }
 
-    @CacheEvict(value = "categories",allEntries = true)
     @Override
     public void deleteCategory(Long id) {
         int count = categoryMapper.deleteByPrimaryKey(id);
         if (count != 1) {
             throw new BlogException(ExceptionEnum.CATEGORY_DELETE_ERROR);
         }
+        redisUtil.delRedis(RedisConstants.KEY_BACK_CATEGORY_LIST);
     }
 
-    @CacheEvict(value = "categories",allEntries = true)
     @Override
     public void updateCategory(Category category) {
         category.setCreateAt(new Date());
@@ -53,6 +59,7 @@ public class CategoryServiceImpl implements CategoryService {
         if (count != 1) {
             throw new BlogException(ExceptionEnum.CATEGORY_UPDATE_ERROR);
         }
+        redisUtil.delRedis(RedisConstants.KEY_BACK_CATEGORY_LIST);
     }
 
     @Override
@@ -64,12 +71,18 @@ public class CategoryServiceImpl implements CategoryService {
         return category;
     }
 
-    @Cacheable(value = "categories")
     @Override
     public List<Category> selectAll() {
+        List<Category> cacheList = redisUtil.getListByKey(RedisConstants.KEY_BACK_CATEGORY_LIST);
+        if (!CollectionUtils.isEmpty(cacheList)){
+            return cacheList;
+        }
         List<Category> categoryList = categoryMapper.selectAll();
         if (CollectionUtils.isEmpty(categoryList)){
             throw new BlogException(ExceptionEnum.CATEGORY_SELECT_ERROR);
+        }
+        if (!CollectionUtils.isEmpty(categoryList)){
+            redisUtil.rightPushAll(RedisConstants.KEY_BACK_CATEGORY_LIST,categoryList, TimeUnit.HOURS.toMillis(1));
         }
         return categoryList;
     }
