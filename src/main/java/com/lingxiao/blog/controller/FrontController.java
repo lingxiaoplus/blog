@@ -141,7 +141,7 @@ public class FrontController {
     public String getEmail(){
         Context context = new Context();
         context.setVariable("title", "blog");
-        String emailText = templateEngine.process("index", context);
+        String emailText = templateEngine.process("email", context);
         return emailText;
     }
 }
