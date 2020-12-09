@@ -20,5 +20,6 @@ public class RedisConstants {
     public static final String KEY_FRONT_STATTICS_ARTICLE_INCREASE = "blog:front:article:increase:%s";
 
     public static final String KEY_BACK_CATEGORY_LIST = "blog:back:category:list:%s";
+    public static final String KEY_BACK_REGISTER_EMAIL_CODE = "blog:back:register:email:code:%s";
 
 }

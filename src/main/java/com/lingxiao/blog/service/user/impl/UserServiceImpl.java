@@ -11,6 +11,7 @@ import com.lingxiao.blog.bean.vo.UserVo;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.global.ContentValue;
+import com.lingxiao.blog.global.RedisConstants;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.jwt.JwtProperties;
 import com.lingxiao.blog.jwt.JwtUtils;
@@ -32,10 +33,14 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -49,16 +54,10 @@ public class UserServiceImpl implements UserService{
     private UserMapper userMapper;
     @Autowired
     private JwtProperties jwtProperties;
-
     @Autowired
     private EmailService emailService;
-
-    @Autowired
-    private HttpSession httpSession;
-    public static final String PREFIX = "email_code: ";
     @Autowired
     private EmailUtil emailUtil;
-
     @Autowired
     private UserRoleMapper userRoleMapper;
     @Autowired
@@ -68,6 +67,25 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public String register(User user, String ip) {
+        authUserExists(user);
+        authEmailCode(user);
+
+        user.setCreateAt(new Date());
+        user.setStatus(ContentValue.USERTYPE_ENABLE);
+        user.setUserId(UIDUtil.nextId());
+        user.setUserIp(IPUtils.ipToNum(ip));
+        String encryptedPwd = PasswordEncoderFactories
+                .createDelegatingPasswordEncoder()
+                .encode(user.getPassword());
+        user.setPassword(encryptedPwd);
+        int count = userMapper.insertSelective(user);
+        if (count != 1) {
+            throw new BlogException(ExceptionEnum.ILLEGA_ARGUMENT);
+        }
+        return authEntication(user);
+    }
+
+    private void authUserExists(User user){
         if (userMapper.countByEmail(user.getEmail()) > 0){
             throw new BlogException(ExceptionEnum.REGISTER_EMAIL_ERROR);
         }
@@ -77,32 +95,18 @@ public class UserServiceImpl implements UserService{
         if (userMapper.countByPhone(user.getUsername()) > 0){
             throw new BlogException(ExceptionEnum.REGISTER_PHONE_ERROR);
         }
+    }
 
-        Object attribute = httpSession.getAttribute(PREFIX + user.getEmail());
-        if (attribute == null){
+    private void authEmailCode(User user){
+        Object emailCode = redisUtil.getValueByKey(RedisConstants.KEY_BACK_REGISTER_EMAIL_CODE);
+        if (emailCode == null){
             throw new BlogException(ExceptionEnum.INVALID_EMAIL_CODE_ERROR);
         }else {
-            String code = (String) attribute;
+            String code = (String) emailCode;
             if (!code.equals(user.getVerifyCode())){
                 throw new BlogException(ExceptionEnum.NOTEQUAL_EMAIL_CODE_ERROR);
             }
         }
-
-        user.setCreateAt(new Date());
-        user.setStatus(ContentValue.USERTYPE_ENABLE);
-        user.setUserId(UIDUtil.nextId());
-        user.setUserIp(IPUtils.ipToNum(ip));
-
-        String encryptedPwd = PasswordEncoderFactories
-                .createDelegatingPasswordEncoder()
-                .encode(user.getPassword());
-        user.setPassword(encryptedPwd);
-
-        int count = userMapper.insertSelective(user);
-        if (count != 1) {
-            throw new BlogException(ExceptionEnum.ILLEGA_ARGUMENT);
-        }
-        return authEntication(user);
     }
 
     @Override
@@ -230,29 +234,25 @@ public class UserServiceImpl implements UserService{
         emailConfigure.setReceiveAddress(receiver);
         emailConfigure.setAuthCode(enableEmail.getAuthCode());
         emailConfigure.setTitle("注册博客");
-        int minute = 60*60*3;
+
+        int minute = 3;
         emailConfigure.setMinute(minute);
         String randomCode = randomCode();
-        StringBuilder builder = new StringBuilder();
-        builder.append("您正在注册博客，验证码为：")
-                .append(randomCode)
-                .append("  ，有效时间为3分钟");
         emailConfigure.setVerifyCode(randomCode);
-        httpSession.setAttribute(PREFIX + receiver, randomCode);
-        httpSession.setMaxInactiveInterval(minute);
         try {
             emailUtil.sendEmail(emailConfigure);
+            redisUtil.pushValue(RedisConstants.KEY_BACK_REGISTER_EMAIL_CODE,randomCode, TimeUnit.MINUTES.toMillis(minute));
         } catch (MessagingException e) {
             e.printStackTrace();
             throw new BlogException(ExceptionEnum.SEND_EMAIL_ERROR);
         }
     }
 
-    private static Random random = new Random();
+    private static final Random RANDOM = new Random();
     private static String randomCode() {
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < 6; i++) {
-            str.append(random.nextInt(10));
+            str.append(RANDOM.nextInt(10));
         }
         return str.toString();
     }

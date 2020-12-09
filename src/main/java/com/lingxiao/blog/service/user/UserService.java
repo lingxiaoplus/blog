@@ -47,6 +47,10 @@ public interface UserService extends UserDetailsService{
      */
     void initAdmin();
 
+    /**
+     * 发送邮件
+     * @param receiver 邮箱地址
+     */
     void sendEmail(String receiver);
 
     UserVo getUserVo(User user);

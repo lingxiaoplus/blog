@@ -12,6 +12,7 @@ import com.lingxiao.blog.mapper.BingImageMapper;
 import com.lingxiao.blog.mapper.IP2RegionMapper;
 import com.lingxiao.blog.service.file.FileService;
 import com.lingxiao.blog.service.system.DictionaryService;
+import com.lingxiao.blog.service.system.IP2RegionService;
 import com.lingxiao.blog.service.system.StatisticService;
 import com.lingxiao.blog.utils.DateUtil;
 import com.lingxiao.blog.utils.IPUtils;
@@ -305,5 +306,12 @@ class BlogApplicationTests {
     void getOperatorsAnalyse(){
         ResponseResult<Object> operatorDistributed = statisticService.getOperatorDistributed();
         log.info(operatorDistributed.toString());
+    }
+    @Autowired
+    private IP2RegionService ip2RegionService;
+    @Test
+    void getRegion(){
+        IpRegion ipRegion = ip2RegionService.selectRegionByIp(IPUtils.ipToNum("222.209.35.198"));
+        log.info("region: {}",ipRegion.toString());
     }
 }

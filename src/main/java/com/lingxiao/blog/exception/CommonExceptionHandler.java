@@ -5,7 +5,6 @@ import com.lingxiao.blog.bean.po.OperationLog;
 import com.lingxiao.blog.bean.po.User;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.enums.OperationType;
-import com.lingxiao.blog.mapper.UserMapper;
 import com.lingxiao.blog.service.system.OperationLogService;
 import com.lingxiao.blog.utils.IPUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +27,9 @@ import java.io.Writer;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * @author admin
+ */
 @ControllerAdvice
 @Slf4j
 public class CommonExceptionHandler {
@@ -60,7 +62,7 @@ public class CommonExceptionHandler {
      * @param throwable
      * @return json
      */
-    @ExceptionHandler(Throwable.class)  //捕获的异常类型
+    @ExceptionHandler(Throwable.class)
     @ResponseBody
     public ResponseEntity<ExceptionResult> handlerException(Throwable throwable) {
         ExceptionResult apiResult = new ExceptionResult(HttpStatus.INTERNAL_SERVER_ERROR.value(), throwable.getMessage());
@@ -78,12 +80,12 @@ public class CommonExceptionHandler {
             operationLog.setNickname(user.getNickname());
         }
         operationLog.setOperationType(OperationType.EXCEPTION.getCode());
-        operationLog.setOperationContent("unknow exception");
+        operationLog.setOperationContent(throwable.getClass().getSimpleName());
         operationLog.setUserIp(IPUtils.ipToNum(IPUtils.getIpAddress(request)));
         operationLog.setCreateAt(new Date());
         operationLog.setBrowser(IPUtils.getBrowserName(request));
         try (Writer writer = new StringWriter();
-             PrintWriter printWriter = new PrintWriter(writer);) {
+             PrintWriter printWriter = new PrintWriter(writer)) {
             throwable.printStackTrace(printWriter);
             Throwable cause = throwable.getCause();
             while (cause != null) {

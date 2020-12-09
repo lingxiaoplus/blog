@@ -13,5 +13,6 @@ ENV JAVA_OPTS="\
 -XX:SurvivorRatio=8 \
 -XX:+UseConcMarkSweepGC \
 "
+ENV PASSWORD=lE1rl5K$
 EXPOSE 8081
-ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar /blog.jar" ]
+ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -Djasypt.encryptor.password=$PASSWORD -Djava.security.egd=file:/dev/./urandom -jar /blog.jar" ]

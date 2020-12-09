@@ -27,6 +27,9 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring5.SpringTemplateEngine;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
@@ -131,5 +134,14 @@ public class FrontController {
     public ResponseEntity<String> getRealIp(HttpServletRequest request){
         String ipAddress = IPUtils.getIpAddress(request);
         return ResponseEntity.ok(ipAddress);
+    }
+    @Autowired
+    private SpringTemplateEngine templateEngine;
+    @RequestMapping("/mail")
+    public String getEmail(){
+        Context context = new Context();
+        context.setVariable("title", "blog");
+        String emailText = templateEngine.process("index", context);
+        return emailText;
     }
 }

@@ -18,7 +18,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 
 /**
- * @author renml
+ * @author renml  引用一个轻量级数据库 抛弃原有的ip段查询地址提高查询效率
  * @date 2020/12/7 14:58
  */
 @Service("ip2RegionService")
@@ -32,9 +32,7 @@ public class IP2RegionServiceImpl implements IP2RegionService {
         Resource resource = resourceLoader.getResource("classpath:ip2region.db");
         try {
             dbSearcher = new DbSearcher(new DbConfig(), resource.getFile().getPath());
-        }catch (IOException e){
-            e.printStackTrace();
-        } catch (DbMakerConfigException e) {
+        }catch (IOException|DbMakerConfigException e){
             e.printStackTrace();
         }
     }
@@ -49,12 +47,13 @@ public class IP2RegionServiceImpl implements IP2RegionService {
             DataBlock dataBlock = dbSearcher.btreeSearch(ip);
             String region = dataBlock.getRegion();
             String[] split = StringUtils.split(region,"\\|");
-            ipRegion.setCountry(split[1]);
-            ipRegion.setProvince(split[3]);
-            ipRegion.setCity(split[4]);
-            if (split.length >=6){
-                ipRegion.setOperator(split[5]);
+            if (split.length < 5){
+                throw new BlogException(ExceptionEnum.IP_REGION_INIT_ERROR);
             }
+            ipRegion.setCountry(split[0]);
+            ipRegion.setProvince(split[2]);
+            ipRegion.setCity(split[3]);
+            ipRegion.setOperator(split[4]);
         } catch (IOException exception) {
             exception.printStackTrace();
             throw new BlogException(ExceptionEnum.IP_REGION_INIT_ERROR);

@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -70,7 +71,7 @@ public class RoleServiceImpl implements RoleService {
         if (CollectionUtils.isEmpty(roles)){
             throw new BlogException(ExceptionEnum.ROLE_SELECT_ERROR);
         }
-        roles.forEach((item)->{
+        roles.forEach(item->{
             MenuRole menuRole = new MenuRole();
             menuRole.setRid(item.getId());
             List<Long> mIds = menuRoleMapper
@@ -78,11 +79,10 @@ public class RoleServiceImpl implements RoleService {
                     .stream()
                     .map(MenuRole::getMid)
                     .collect(Collectors.toList());
-            //List<Menu> menus = menuMapper.selectByIdList(mIds);
             item.setMenuList(mIds);
         });
         PageInfo<Role> pageInfo = PageInfo.of(roles);
-        return new PageResult<Role>(pageInfo.getTotal(),pageInfo.getPages(),pageInfo.getList());
+        return new PageResult<>(pageInfo.getTotal(),pageInfo.getPages(),pageInfo.getList());
     }
 
     @Override
@@ -90,18 +90,18 @@ public class RoleServiceImpl implements RoleService {
         UserRole userRole = new UserRole();
         userRole.setUserId(uid);
         List<UserRole> select = userRoleMapper.select(userRole);
-        if (CollectionUtils.isEmpty(select)) return null;
+        if (CollectionUtils.isEmpty(select)) {
+            return Collections.emptyList();
+        }
         List<Long> ids = select.stream().map(UserRole::getRoleId).collect(Collectors.toList());
-        List<Role> roles = roleMapper.selectByIdList(ids);
-        return roles;
+        return roleMapper.selectByIdList(ids);
     }
 
     @Override
     public Role getRoleByLevel(int level) {
         Role role = new Role();
         role.setRoleLevel(level);
-        Role selectOne = roleMapper.selectOne(role);
-        return selectOne;
+        return roleMapper.selectOne(role);
     }
 
     @Override
@@ -122,7 +122,7 @@ public class RoleServiceImpl implements RoleService {
                 throw new BlogException(ExceptionEnum.ROLE_MENU_SECURITY_UPDATE_ERROR);
             }
         }
-        List<MenuRole> insertList = menuIds.stream().map((item) -> {
+        List<MenuRole> insertList = menuIds.stream().map(item -> {
             MenuRole menuRoleInsert = new MenuRole();
             menuRoleInsert.setRid(roleId);
             menuRoleInsert.setMid(item);

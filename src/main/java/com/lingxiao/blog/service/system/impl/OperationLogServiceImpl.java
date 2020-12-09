@@ -10,6 +10,7 @@ import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.mapper.IP2RegionMapper;
 import com.lingxiao.blog.mapper.LogMapper;
+import com.lingxiao.blog.service.system.IP2RegionService;
 import com.lingxiao.blog.service.system.OperationLogService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -26,7 +27,7 @@ public class OperationLogServiceImpl implements OperationLogService {
     @Autowired
     private LogMapper logMapper;
     @Autowired
-    private IP2RegionMapper ip2RegionMapper;
+    private IP2RegionService ip2RegionService;
 
     @Override
     public PageResult<OperationLogVo> getLogList(int pageNum, int pageSize,int operationType, String keyword){
@@ -35,7 +36,7 @@ public class OperationLogServiceImpl implements OperationLogService {
         //查除了 登录日志的其他所有
         Example example = new Example(OperationLog.class);
         example.setOrderByClause("create_at desc");
-        if(operationType < 0){
+        if(operationType < OperationType.LOGIN.getCode()){
             example
                     .createCriteria()
                     .andNotEqualTo("operationType", OperationType.LOGIN.getCode())
@@ -55,17 +56,18 @@ public class OperationLogServiceImpl implements OperationLogService {
             logVo.setId(item.getId());
             logVo.setUsername(item.getUsername());
             logVo.setNickname(item.getNickname());
-            IpRegion ipRegion = ip2RegionMapper.selectRegionByIp(item.getUserIp());
-            if (ipRegion != null) {
-                String address = ipRegion.getCountry() + " " +
-                        ipRegion.getProvince() + " " + ipRegion.getCity() + " " + ipRegion.getOperator();
-                logVo.setUserIp(address);
-            }
             logVo.setRunTakes(item.getRunTakes());
             logVo.setOperationContent(item.getOperationContent());
             logVo.setOperationType(ContentValue.LOG_LOGIN == operationType?"登录日志":"操作日志");
             logVo.setBrowser(item.getBrowser());
             logVo.setExceptionInfo(item.getExceptionInfo());
+            //没法批量查询，只能单个查
+            IpRegion ipRegion = ip2RegionService.selectRegionByIp(item.getUserIp());
+            if (ipRegion != null) {
+                String address = ipRegion.getCountry() + " " +
+                        ipRegion.getProvince() + " " + ipRegion.getCity() + " " + ipRegion.getOperator();
+                logVo.setUserIp(address);
+            }
             return logVo;
         }).collect(Collectors.toList());
         return new PageResult<>(pageInfo.getTotal(),pageInfo.getPages(),logListVo);

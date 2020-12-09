@@ -63,10 +63,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
         //静态资源无需认证
-        web.ignoring().antMatchers("/css/**","/js/**","/config/**",
-                "/index.html","/img/**","/fonts/**","/favicon.ico","/verifyCode",
-                "/upload/bingImage","/upload/bingImage/random","/job/list","/job/add","/config/get",
-                "/image/**","/user/register","/user/email/**","/front/**");
+        List<String> ignorePaths = securityProperties.getIgnorePaths();
+        web.ignoring().antMatchers(ignorePaths.toArray(new String[ignorePaths.size()]));
     }
 
     /**
