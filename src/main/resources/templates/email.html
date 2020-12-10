@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">>
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>博客</title>
     <meta http-equiv="Content-Type" content="text/html; charset=gb18030">
     <meta name="referrer" content="origin">
     <meta name="renderer" content="webkit">
@@ -21,9 +21,7 @@
 </head>
 <body>
 <div style="position:relative;z-index:1;margin-bottom:12px;">
-    <div style="position:relative;font-size:14px;height:auto;padding:15px 15px 10px 15px;z-index:1;zoom:1;line-height:1.7;"
-         class="body">
-
+    <div style="position:relative;font-size:14px;height:auto;padding:15px 15px 10px 15px;z-index:1;zoom:1;line-height:1.7;" class="body">
         <div id="mailContentContainer">
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse">
                 <tbody>
@@ -31,7 +29,7 @@
                     <tbody>
                     <td height="63" bgcolor="#3b485b">
                         <table>
-                            <td text-align="middle" style="padding-left: 20px;padding-top:5px;color:#fff;font-size:16px;">register 注册</td>
+                            <td text-align="middle" style="padding-left: 20px;padding-top:5px;color:#fff;font-size:16px;">凌霄的博客</td>
                         </table>
                     </td>
                     </tbody>
@@ -44,12 +42,11 @@
                                 <td valign="top" style="border-top:1px solid #d9d9d9">
                                     <div style="font-size:14px;line-height:10px"><br><br><br><br></div>
                                     <div style="font-size:18px;line-height:18px;color:#444;">尊敬的用户：<br><br><br></div>
-                                    <div style="font-size:14px;line-height:22px;color:#444;font-weight:bold;">您本次注册验证码为：<span style="border-bottom:1px dashed #ccc;z-index:1"
-                                                                                                                              t="7"><span style="border-bottom:1px dashed #ccc;z-index:1" t="7">
-															<font color="#FF0000">530255</font>
-														</span></span></div>
+                                    <div style="font-size:14px;line-height:22px;color:#444;font-weight:bold;">您本次注册验证码为：
+                                        <font color="#FF0000" th:text="${verifyCode}"></font>
+                                    </div>
                                     <div style="font-size:14px;line-height:10px"><br><br></div>
-                                    <div style="font-size:14px;line-height:22px;color:#666;">验证码5分钟内有效，请尽快完成注册！</div>
+                                    <div style="font-size:14px;line-height:22px;color:#666;">验证码<span th:text="${expireTime}"/>分钟内有效，请尽快完成注册！</div>
                                     <div style="font-size:14px;line-height:10px"><br><br><br><br></div>
                                 </td>
                                 <td width="65" align="left" valign="top" style="border-top:1px solid #d9d9d9;border-right:1px solid #d9d9d9;"></td>
@@ -59,7 +56,7 @@
                                 <td align="left" valign="top" style="color:#999">
                                     <div style="font-size:8px;line-height:14px"><br><br></div>
                                     <div style="min-height:1px;font-size:1px;line-height:1px;background-color:#e0e0e0">&nbsp;</div>
-                                    <div style="font-size:12px;line-height:20px;width:425px;"><br><br>此邮件由代码狗系统自动发出，请勿回复！</div>
+                                    <div style="font-size:12px;line-height:20px;width:425px;"><br><br>此邮件由凌霄博客系统自动发出，请勿回复！</div>
                                 </td>
                                 <td style="border-right:1px solid #d9d9d9">&nbsp;</td>
                             </tr>

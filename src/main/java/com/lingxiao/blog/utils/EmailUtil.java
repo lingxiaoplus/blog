@@ -1,8 +1,11 @@
 package com.lingxiao.blog.utils;
 
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring5.SpringTemplateEngine;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -11,25 +14,36 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.util.Properties;
 
+
+/**
+ * @author admin
+ */
 @Component
 public class EmailUtil {
+    @Autowired
+    private SpringTemplateEngine templateEngine;
+
     @Data
     public static class EmailConfigure {
         private String sendAddress;
         private String authCode;
         private String receiveAddress;
         private String title;
-        //private Object content;
-        private String verifyCode;  //验证码
-        private int minute; //分钟
+        //验证码
+        private String verifyCode;
+        //分钟
+        private int minute;
     }
 
     @Async("taskExecutor")
     public void sendEmail(final EmailConfigure configure) throws MessagingException {
         Properties prop = new Properties();
-        prop.setProperty("mail.host", "smtp.qq.com"); //// 设置QQ邮件服务器
-        prop.setProperty("mail.transport.protocol", "smtp"); // 邮件发送协议
-        prop.setProperty("mail.smtp.auth", "true"); // 需要验证用户名密码
+        //设置QQ邮件服务器
+        prop.setProperty("mail.host", "smtp.qq.com");
+        //邮件发送协议
+        prop.setProperty("mail.transport.protocol", "smtp");
+        //需要验证用户名密码
+        prop.setProperty("mail.smtp.auth", "true");
 
         // 关于QQ邮箱，还要设置SSL加密，加上以下代码即可
        /* MailSSLSocketFactory sf = new MailSSLSocketFactory();
@@ -77,166 +91,20 @@ public class EmailUtil {
             mm.addBodyPart(text);
             mm.addBodyPart(image);
             mm.setSubType("related");*/
+
+        Context context = new Context();
+        context.setVariable("expireTime", configure.getMinute());
+        context.setVariable("verifyCode", configure.getVerifyCode());
+        String emailText = templateEngine.process("email", context);
+
         MimeBodyPart text = new MimeBodyPart();
-        text.setContent(htmlContent(configure.getVerifyCode(),configure.getMinute()), "text/html;charset=UTF-8");
+        text.setContent(emailText, "text/html;charset=UTF-8");
         MimeMultipart mm = new MimeMultipart();
         mm.addBodyPart(text);
         mm.setSubType("related");
-
-        //configure.getContent()
         message.setContent(mm);
-
         //5、发送邮件
         ts.sendMessage(message, message.getAllRecipients());
         ts.close();
-    }
-
-
-    private static String htmlContent(String verifyCode, int minute) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("<html xmlns:o=\"urn:schemas-microsoft-com:office:office\"\n" +
-                "xmlns:w=\"urn:schemas-microsoft-com:office:word\"\n" +
-                "xmlns:m=\"http://schemas.microsoft.com/office/2004/12/omml\"\n" +
-                "xmlns=\"http://www.w3.org/TR/REC-html40\">\n" +
-                "\n" +
-                "<body lang=ZH-CN style='tab-interval:21.0pt'>\n" +
-                "\n" +
-                "<div class=WordSection1>\n" +
-                "\n" +
-                "<p class=MsoNormal><span lang=EN-US><o:p>&nbsp;</o:p></span></p>\n" +
-                "\n" +
-                "<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=\"100%\"\n" +
-                " style='width:100.0%;border-collapse:collapse;mso-yfti-tbllook:1184;mso-padding-alt:\n" +
-                " 0cm 0cm 0cm 0cm'>\n" +
-                " <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>\n" +
-                "  <td style='padding:0cm 0cm 0cm 0cm'>\n" +
-                "  <div align=center>\n" +
-                "  <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=600\n" +
-                "   style='width:450.0pt;border-collapse:collapse;mso-yfti-tbllook:1184;\n" +
-                "   mso-padding-alt:0cm 0cm 0cm 0cm'>\n" +
-                "   <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:47.25pt'>\n" +
-                "    <td style='background:#3B485B;padding:0cm 0cm 0cm 0cm;height:47.25pt'>\n" +
-                "    <table class=MsoNormalTable border=0 cellpadding=0 style='mso-cellspacing:\n" +
-                "     1.5pt;mso-yfti-tbllook:1184'>\n" +
-                "     <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>\n" +
-                "      <td style='padding:3.75pt .75pt .75pt 15.0pt'>\n" +
-                "      <p class=MsoNormal><span style='font-family:\"微软雅黑\",sans-serif;color:white'>注册<span\n" +
-                "      lang=EN-US>-</span>凌霄的博客<span lang=EN-US><o:p></o:p></span></span></p>\n" +
-                "      </td>\n" +
-                "     </tr>\n" +
-                "    </table>\n" +
-                "    </td>\n" +
-                "   </tr>\n" +
-                "   <tr style='mso-yfti-irow:1'>\n" +
-                "    <td style='padding:0cm 0cm 0cm 0cm'>\n" +
-                "    <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0\n" +
-                "     width=\"100%\" style='width:100.0%;mso-cellspacing:0cm;mso-yfti-tbllook:\n" +
-                "     1184;mso-padding-alt:0cm 0cm 0cm 0cm'>\n" +
-                "     <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>\n" +
-                "      <td width=73 valign=top style='width:54.75pt;border-top:solid #D9D9D9 1.0pt;\n" +
-                "      border-left:solid #D9D9D9 1.0pt;border-bottom:none;border-right:none;\n" +
-                "      mso-border-top-alt:solid #D9D9D9 .75pt;mso-border-left-alt:solid #D9D9D9 .75pt;\n" +
-                "      padding:0cm 0cm 0cm 0cm'></td>\n" +
-                "      <td valign=top style='border:none;border-top:solid #D9D9D9 1.0pt;\n" +
-                "      mso-border-top-alt:solid #D9D9D9 .75pt;padding:0cm 0cm 0cm 0cm'>\n" +
-                "      <div>\n" +
-                "      <p class=MsoNormal style='margin-bottom:12.0pt;mso-line-height-alt:7.5pt'><span\n" +
-                "      lang=EN-US style='font-size:10.5pt'><br>\n" +
-                "      <br style='mso-special-character:line-break'>\n" +
-                "      <![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>\n" +
-                "      <![endif]><o:p></o:p></span></p>\n" +
-                "      </div>\n" +
-                "      <div>\n" +
-                "      <p class=MsoNormal style='margin-bottom:13.5pt;line-height:13.5pt'><span\n" +
-                "      style='font-size:13.5pt;font-family:\"微软雅黑\",sans-serif;color:#444444'>尊敬的用户：<span\n" +
-                "      lang=EN-US><br style='mso-special-character:line-break'>\n" +
-                "      <![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>\n" +
-                "      <![endif]><o:p></o:p></span></span></p>\n" +
-                "      </div>\n" +
-                "      <div>\n" +
-                "      <p class=MsoNormal style='line-height:16.5pt'><b><span style='font-size:\n" +
-                "      10.5pt;font-family:\"微软雅黑\",sans-serif;color:#444444'>您本次注册验证码为：</span></b><b><span\n" +
-                "      lang=EN-US style='font-size:10.5pt;font-family:\"微软雅黑\",sans-serif;\n" +
-                "      color:red'>")
-                .append(verifyCode)
-                .append("</span></b><b><span lang=EN-US style='font-size:10.5pt;\n" +
-                        "      font-family:\"微软雅黑\",sans-serif;color:#444444'><o:p></o:p></span></b></p>\n" +
-                        "      </div>\n" +
-                        "      <div>\n" +
-                        "      <p class=MsoNormal style='margin-bottom:12.0pt;mso-line-height-alt:7.5pt'><span\n" +
-                        "      lang=EN-US style='font-size:10.5pt'><o:p>&nbsp;</o:p></span></p>\n" +
-                        "      </div>\n" +
-                        "      <div>\n" +
-                        "      <p class=MsoNormal style='line-height:16.5pt'><span style='font-size:\n" +
-                        "      10.5pt;font-family:\"微软雅黑\",sans-serif;color:#666666'>验证码<span lang=EN-US>")
-                .append(minute)
-                .append("</span>分钟内有效，请尽快完成注册！<span\n" +
-                        "      lang=EN-US><o:p></o:p></span></span></p>\n" +
-                        "      </div>\n" +
-                        "      <div>\n" +
-                        "      <p class=MsoNormal style='margin-bottom:12.0pt;mso-line-height-alt:7.5pt'><span\n" +
-                        "      lang=EN-US style='font-size:10.5pt'><br>\n" +
-                        "      <br style='mso-special-character:line-break'>\n" +
-                        "      <![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>\n" +
-                        "      <![endif]><o:p></o:p></span></p>\n" +
-                        "      </div>\n" +
-                        "      </td>\n" +
-                        "      <td width=65 valign=top style='width:48.75pt;border-top:solid #D9D9D9 1.0pt;\n" +
-                        "      border-left:none;border-bottom:none;border-right:solid #D9D9D9 1.0pt;\n" +
-                        "      mso-border-top-alt:solid #D9D9D9 .75pt;mso-border-right-alt:solid #D9D9D9 .75pt;\n" +
-                        "      padding:0cm 0cm 0cm 0cm'></td>\n" +
-                        "     </tr>\n" +
-                        "     <tr style='mso-yfti-irow:1'>\n" +
-                        "      <td style='border:none;border-left:solid #D9D9D9 1.0pt;mso-border-left-alt:\n" +
-                        "      solid #D9D9D9 .75pt;padding:0cm 0cm 0cm 0cm'>\n" +
-                        "      <p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>\n" +
-                        "      </td>\n" +
-                        "      <td valign=top style='padding:0cm 0cm 0cm 0cm'>\n" +
-                        "      \n" +
-                        "      <div style='min-height:1px'>\n" +
-                        "      <p class=MsoNormal style='mso-line-height-alt:.75pt;background:#E0E0E0'><span\n" +
-                        "      lang=EN-US style='font-size:1.0pt;color:#999999'>&nbsp;<o:p></o:p></span></p>\n" +
-                        "      </div>\n" +
-                        "      <div>\n" +
-                        "      <p class=MsoNormal style='line-height:10.0pt'><span lang=EN-US\n" +
-                        "      style='font-size:9.0pt;font-family:\"微软雅黑\",sans-serif;color:#999999'><br>\n" +
-                        "      <br>\n" +
-                        "      </span><span style='font-size:9.0pt;font-family:\"微软雅黑\",sans-serif;\n" +
-                        "      color:#999999'>此邮件由凌霄博客系统自动发出，请勿回复！<span lang=EN-US><o:p></o:p></span></span></p>\n" +
-                        "      </div>\n" +
-                        "      </td>\n" +
-                        "      <td style='border:none;border-right:solid #D9D9D9 1.0pt;mso-border-right-alt:\n" +
-                        "      solid #D9D9D9 .75pt;padding:0cm 0cm 0cm 0cm'>\n" +
-                        "      <p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>\n" +
-                        "      </td>\n" +
-                        "     </tr>\n" +
-                        "     <tr style='mso-yfti-irow:2;mso-yfti-lastrow:yes'>\n" +
-                        "      <td colspan=3 style='border:solid #D9D9D9 1.0pt;border-top:none;\n" +
-                        "      mso-border-left-alt:solid #D9D9D9 .75pt;mso-border-bottom-alt:solid #D9D9D9 .75pt;\n" +
-                        "      mso-border-right-alt:solid #D9D9D9 .75pt;padding:0cm 0cm 0cm 0cm'>\n" +
-                        "      <div style='min-height:42px'>\n" +
-                        "      <p class=MsoNormal style='line-height:31.5pt'><span lang=EN-US\n" +
-                        "      style='font-size:31.5pt'>&nbsp;<o:p></o:p></span></p>\n" +
-                        "      </div>\n" +
-                        "      </td>\n" +
-                        "     </tr>\n" +
-                        "    </table>\n" +
-                        "    </td>\n" +
-                        "   </tr>\n" +
-                        "   \n" +
-                        "  </table>\n" +
-                        "  </div>\n" +
-                        "  </td>\n" +
-                        " </tr>\n" +
-                        "</table>\n" +
-                        "\n" +
-                        "\n" +
-                        "\n" +
-                        "</div>\n" +
-                        "\n" +
-                        "</body>\n" +
-                        "\n" +
-                        "</html>");
-        return builder.toString();
     }
 }

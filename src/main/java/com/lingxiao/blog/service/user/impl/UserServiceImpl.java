@@ -86,13 +86,13 @@ public class UserServiceImpl implements UserService{
     }
 
     private void authUserExists(User user){
-        if (userMapper.countByEmail(user.getEmail()) > 0){
-            throw new BlogException(ExceptionEnum.REGISTER_EMAIL_ERROR);
-        }
-        if (userMapper.countByName(user.getUsername()) > 0){
+        if (userMapper.selectCountByAccount(user.getUsername()) > 0){
             throw new BlogException(ExceptionEnum.REGISTER_USERNAME_ERROR);
         }
-        if (userMapper.countByPhone(user.getUsername()) > 0){
+        if (userMapper.selectCountByAccount(user.getEmail()) > 0){
+            throw new BlogException(ExceptionEnum.REGISTER_EMAIL_ERROR);
+        }
+        if (userMapper.selectCountByAccount(user.getPhoneNumber()) > 0){
             throw new BlogException(ExceptionEnum.REGISTER_PHONE_ERROR);
         }
     }

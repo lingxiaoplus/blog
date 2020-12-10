@@ -26,4 +26,12 @@
             username=#{condition} or email=#{condition} or phone_number=#{condition}
         </where>
     </select>
+
+    <select id="selectCountByAccount" resultType="java.lang.Integer">
+        select count(user_id) from user
+        <where>
+            username=#{account} or email=#{account} or phone_number=#{account}
+        </where>
+    </select>
+
 </mapper>

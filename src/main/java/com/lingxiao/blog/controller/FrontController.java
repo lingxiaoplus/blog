@@ -140,7 +140,8 @@ public class FrontController {
     @RequestMapping("/mail")
     public String getEmail(){
         Context context = new Context();
-        context.setVariable("title", "blog");
+        context.setVariable("expireTime", "5");
+        context.setVariable("verifyCode", "54657");
         String emailText = templateEngine.process("email", context);
         return emailText;
     }

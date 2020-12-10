@@ -25,9 +25,9 @@ spring:
     locations: classpath:db
     clean-disabled: true
   redis:
-    port: 6379
+    port: 16379
     password: ENC(o0K+mAHRQzhK+pipW5NHp+Ttt4yG3lp0FpHZkn31mCwhJApVHy1e3lxA28hZhP0Y)
-    host: 47.92.215.253
+    host: redis.lingxiaomz.top
   thymeleaf:
     mode: HTML5
 
@@ -96,6 +96,12 @@ cors:
     - "/image/**"
     - "/user/register"
     - "/user/email/**"
+    - "/swagger-ui.html"
+    - "/swagger-resources/*"
+    - "/webjars/*"
+    - "/v2/api-docs*"
+    - "/doc.html"
+    - "/error/**"
     - "/front/**"
 nacos:
   config:
