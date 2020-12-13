@@ -17,7 +17,7 @@ public interface VisitAnalyseMapper extends BaseMapper<VisitAnalyse> {
      * 获取运营商数据分析
      * @return
      */
-    @Select("SELECT operators,count(ip) count FROM `visit_analyse` group by operators")
+    @Select("SELECT operators `name`,count(ip) `value` FROM `visit_analyse` group by operators")
     List<Map<String,Object>> getOperatorsAnalyse();
 
     /**

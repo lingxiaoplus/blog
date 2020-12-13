@@ -2,6 +2,7 @@ package com.lingxiao.blog.bean.po;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import lombok.ToString;
 import tk.mybatis.mapper.annotation.KeySql;
 
 import javax.persistence.Id;
@@ -15,6 +16,7 @@ import java.util.Date;
  */
 @Table(name = "bing_image")
 @Data
+@ToString
 public class BingImage implements Serializable {
     private static final long serialVersionUID = 4920600747801363341L;
     @Id

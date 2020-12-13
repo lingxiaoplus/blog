@@ -9,15 +9,23 @@ import com.lingxiao.blog.bean.po.BingImage;
 import com.lingxiao.blog.bean.vo.FileInfo;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
+import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.OssProperties;
+import com.lingxiao.blog.global.RedisConstants;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.mapper.BingImageMapper;
 import com.lingxiao.blog.service.file.FileService;
 import com.lingxiao.blog.utils.DateUtil;
+import com.lingxiao.blog.utils.RedisUtil;
 import com.lingxiao.blog.utils.UploadUtil;
 import com.qiniu.common.QiniuException;
 import com.qiniu.http.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -28,8 +36,11 @@ import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
 
+/**
+ * @author Admin
+ */
 @Service
 @Slf4j
 public class FileServiceImpl implements FileService {
@@ -38,19 +49,19 @@ public class FileServiceImpl implements FileService {
     private UploadUtil uploadUtil;
     @Autowired
     private BingImageMapper imageMapper;
+    @Autowired
+    private RedisUtil redisUtil;
+
     /**
      * format js/xml
      * idx 0今天 1明天
      * n 1-8
      */
     private static final String BING_API = "https://cn.bing.com/HPImageArchive.aspx?format=js&n=8&mkt=zh-CN&idx=";
+
     @Autowired
     private BingImageMapper bingImageMapper;
-    /**
-     * 文件上传，返回oss地址
-     * @param file
-     * @return
-     */
+
     @Override
     public FileInfo uploadFile(File file) {
         try {
@@ -65,8 +76,24 @@ public class FileServiceImpl implements FileService {
             } catch (QiniuException ex) {
                 ex.printStackTrace();
             }
+            throw new BlogException(ExceptionEnum.UPLOAD_FILE_ERROR);
         }
-        return null;
+    }
+
+    @Override
+    public FileInfo uploadFile(File file, String folder) {
+        try {
+            return uploadUtil.upload(file,folder);
+        } catch (QiniuException e) {
+            try {
+                Response r = e.response;
+                // 请求失败时打印的异常的信息
+                log.error("上传文件失败: {},上传文件失败body: {}",r.toString(),r.bodyString());
+            } catch (QiniuException ex) {
+                ex.printStackTrace();
+            }
+            throw new BlogException(ExceptionEnum.UPLOAD_FILE_ERROR);
+        }
     }
 
     @Override
@@ -164,6 +191,51 @@ public class FileServiceImpl implements FileService {
             if (connection != null){
                 connection.disconnect();
             }
+        }
+        return null;
+    }
+
+    public BingImageData getBingImageByJsoup(int currentPage){
+        try {
+            Connection connection = Jsoup.connect(ContentValue.BING_IOLIU_URL + "?p=" + currentPage)
+                    .header("Referer", ContentValue.BING_IOLIU_URL)
+                    .header("User-Agent", ContentValue.USER_AGENT)
+                    .timeout(5000);
+            Connection.Response response = connection.response();
+            response.cookies();
+            Document doc = connection.get();
+            Elements elementPage = doc.getElementsByClass("container");
+            elementPage.forEach(item ->{
+                Elements itemElements = item.getElementsByClass("item");
+                itemElements.forEach(image ->{
+                    String imageUrl = image.select("img").attr("src");
+                    int hashCode = imageUrl.hashCode();
+
+                    String replaceUrl = StringUtils.replace(imageUrl, "640x480", "1920x1080");
+                    BingImage bingImage = new BingImage();
+                    bingImage.setTitle("");
+                    bingImage.setUrl(replaceUrl);
+                    //bingImage.setUrlBase("https://cn.bing.com".concat(image.getUrlbase()));
+                    bingImage.setHashCode(String.valueOf(hashCode));
+                    //bingImage.setStartDate(DateUtil.getDateFromString(image.getStartdate()));
+                    bingImage.setCreateDate(new Date());
+
+                    log.info("jsoup 爬取到的： {}",replaceUrl);
+                });
+            });
+            Integer maxPage = redisUtil.getValueByKey(RedisConstants.KEY_BACK_BINGIMAGE_TASK_MAXPAGE);
+            if (maxPage == null){
+                Elements pageElement = doc.getElementsByClass("page");
+                String span = pageElement.select("span").text();
+                String[] split = StringUtils.split(span, "/");
+                if (split.length > 1){
+                    maxPage = Integer.valueOf(split[1]);
+                    log.info("最大页数，{}",maxPage);
+                    redisUtil.pushValue(RedisConstants.KEY_BACK_BINGIMAGE_TASK_MAXPAGE,maxPage, TimeUnit.DAYS.toMillis(30));
+                }
+            }
+        }catch (IOException ex){
+            ex.printStackTrace();
         }
         return null;
     }

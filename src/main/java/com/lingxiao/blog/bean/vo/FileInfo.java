@@ -1,10 +1,15 @@
 package com.lingxiao.blog.bean.vo;
 
 import lombok.Data;
+import lombok.ToString;
 
 import java.io.Serializable;
 
+/**
+ * @author Admin
+ */
 @Data
+@ToString
 public class FileInfo implements Serializable {
     private String name;
     private String path;

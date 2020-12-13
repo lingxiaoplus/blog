@@ -45,6 +45,7 @@ public class UploadUtil {
     public OssProperties getOssProperties(){
         return ossProperties;
     }
+
     /**
      * @return 返回图片链接
      */
@@ -57,6 +58,30 @@ public class UploadUtil {
 
         //调用put方法上传
         Response res = uploadManager.put(file.getPath(), file.getName(), getUpToken(mAuth));
+        //打印返回的信息
+        log.debug("文件上传返回信息: {}",res.bodyString());
+        StringMap jsonToMap = res.jsonToMap();
+        String key = (String) jsonToMap.get("key");
+        String url = ossProperties.getPrefixImg() + key;
+        com.lingxiao.blog.bean.vo.FileInfo fileInfo = new com.lingxiao.blog.bean.vo.FileInfo();
+        fileInfo.setName(key);
+        fileInfo.setPath(url);
+        fileInfo.setSize(FileUtil.getFileSize(file.length()));
+        return fileInfo;
+    }
+
+    /**
+     * @return 返回图片链接
+     */
+    public com.lingxiao.blog.bean.vo.FileInfo upload(File file,String folder) throws QiniuException{
+        //第二种方式: 自动识别要上传的空间(bucket)的存储区域是华东、华北、华南。
+        Zone z = Zone.autoZone();
+        Configuration c = new Configuration(z);
+        //创建上传对象
+        UploadManager uploadManager = new UploadManager(c);
+
+        //调用put方法上传
+        Response res = uploadManager.put(file.getPath(), folder.concat("/").concat(file.getName()), getUpToken(mAuth));
         //打印返回的信息
         log.debug("文件上传返回信息: {}",res.bodyString());
         StringMap jsonToMap = res.jsonToMap();

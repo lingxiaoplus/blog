@@ -71,4 +71,20 @@ public class DateUtil {
         }
         return new Date();
     }
+
+    /**
+     *
+     * @param dateStr   类型的时间
+     * @return
+     */
+    public static Date getDateFromString(String dateStr,String format){
+        Date date = null;
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        try {
+            date = sdf.parse(dateStr);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date;
+    }
 }

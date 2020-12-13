@@ -80,6 +80,14 @@ public class ContentValue {
     public static final String SUFFIX_IMAGE_480P = "640x480.jpg";
     public static final String SUFFIX_IMAGE_360P = "480x360.jpg";
     public static final String SUFFIX_IMAGE_240P = "320x240.jpg";
+    /**
+     * bing日图
+     */
+    public static final String BING_IOLIU_URL = "https://bing.ioliu.cn/";
+    /**
+     * 浏览器标志
+     */
+    public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:48.0) Gecko/20100101 Firefox/48.0";
 
     public static final Map<String,String> SUFFIX_IMAGE_MAP = new HashMap<>();
     static {

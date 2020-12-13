@@ -32,7 +32,6 @@ public class BingImageTask implements Job {
     @Autowired
     private FileService fileService;
 
-    //@Scheduled(cron = "0 0 0 1/1 * ?")
     private void configureTasks() {
         BingImageData bingImages = fileService.getBingImages(0);
         bingImages.getImages().forEach(image -> {
@@ -46,22 +45,6 @@ public class BingImageTask implements Job {
             imageMapper.insert(bingImage);
         });
         log.info("定时任务，插入数据");
-        /*List<BingImage> collect = bingImages.getImages().stream().map(image -> {
-            BingImage bingImage = new BingImage();
-            bingImage.setTitle(image.getCopyright());
-            bingImage.setUrl(image.getUrl());
-            bingImage.setUrlBase("https://cn.bing.com".concat(image.getUrlbase()));
-            bingImage.setHashCode(image.getHsh());
-            bingImage.setStartDate(DateUtil.getDateFromString(image.getStartdate()));
-            bingImage.setCreateDate(new Date());
-            return bingImage;
-        }).collect(Collectors.toList());
-        int row = imageMapper.insertList(collect);
-        if (row != collect.size()){
-            log.info("定时任务，插入部分数据");
-        }else {
-            log.info("定时任务，插入全部数据");
-        }*/
     }
 
     @Override

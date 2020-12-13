@@ -1,9 +1,6 @@
 package com.lingxiao.blog.service.system.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.lingxiao.blog.bean.po.*;
 import com.lingxiao.blog.bean.statistics.AggregationData;
 import com.lingxiao.blog.bean.statistics.LineChartData;
@@ -12,14 +9,15 @@ import com.lingxiao.blog.global.RedisConstants;
 import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.mapper.*;
 import com.lingxiao.blog.service.system.StatisticService;
+import com.lingxiao.blog.utils.IPUtils;
 import com.lingxiao.blog.utils.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.HashMap;
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -49,7 +47,6 @@ public class StatisticServiceImpl implements StatisticService {
 
     @Autowired
     private RedisUtil redisUtil;
-
 
     @Override
     public ResponseResult<Object> getArticleWeekIncreased(){
@@ -117,6 +114,7 @@ public class StatisticServiceImpl implements StatisticService {
             countDownLatch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
+            Thread.currentThread().interrupt();
         }
         redisUtil.pushValue(RedisConstants.KEY_FRONT_STATTICS_VISIT_ANALYSE,jsonObject, TimeUnit.HOURS.toMillis(4));
         return new ResponseResult<>(jsonObject);
@@ -125,10 +123,11 @@ public class StatisticServiceImpl implements StatisticService {
     private void getOperatorsAnalyse(JSONObject jsonObject,CountDownLatch countDownLatch){
         Executors.newSingleThreadExecutor().execute(()->{
             List<Map<String, Object>> operatorsAnalyse = visitAnalyseMapper.getOperatorsAnalyse();
-            long total = operatorsAnalyse.stream().mapToLong(map -> (Long) map.get("count")).sum();
+            long total = operatorsAnalyse.stream().mapToLong(map -> (Long) map.get("value")).sum();
             JSONObject operators = new JSONObject();
             operators.put("total",total);
-            operators.put("list",operatorsAnalyse);
+            operators.put("series",operatorsAnalyse);
+            operators.put("legend", IPUtils.OPERATORS_LIST);
             jsonObject.put("operatorAnalyse",operators);
             countDownLatch.countDown();
         });

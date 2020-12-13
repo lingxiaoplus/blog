@@ -67,7 +67,7 @@ public class FrontStatisticsFilter implements Filter {
                 IpRegion ipRegion = ip2RegionService.selectRegionByIp(visitAnalyse.getIp());
                 if (ipRegion != null){
                     visitAnalyse.setProvince(ipRegion.getProvince());
-                    visitAnalyse.setOperators(ipRegion.getOperator());
+                    visitAnalyse.setOperators(IPUtils.transformOperators(ipRegion.getOperator()));
                 }
                 visitAnalyseMapper.insertSelective(visitAnalyse);
             }

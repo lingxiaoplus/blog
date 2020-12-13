@@ -10,7 +10,19 @@ import com.lingxiao.blog.global.api.PageResult;
 import java.io.File;
 
 public interface FileService {
+    /**
+     * 文件上传，返回oss地址
+     * @param file 文件
+     * @return
+     */
     FileInfo uploadFile(File file);
+    /**
+     * 文件上传，返回oss地址
+     * @param file 文件
+     * @param folder 文件夹
+     * @return
+     */
+    FileInfo uploadFile(File file,String folder);
     void deleteFile(String fileName);
     void moveOrRenameFile(String oldName,String newName, String toBucket);
     PageResult<FileInfo> getFileList(String fileName,String date,int pageNum, int pageSize);
