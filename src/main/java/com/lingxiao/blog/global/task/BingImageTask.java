@@ -2,9 +2,11 @@ package com.lingxiao.blog.global.task;
 
 import com.lingxiao.blog.bean.BingImageData;
 import com.lingxiao.blog.bean.po.BingImage;
+import com.lingxiao.blog.global.RedisConstants;
 import com.lingxiao.blog.mapper.BingImageMapper;
 import com.lingxiao.blog.service.file.FileService;
 import com.lingxiao.blog.utils.DateUtil;
+import com.lingxiao.blog.utils.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -31,6 +33,8 @@ public class BingImageTask implements Job {
     private BingImageMapper imageMapper;
     @Autowired
     private FileService fileService;
+    @Autowired
+    private RedisUtil redisUtil;
 
     private void configureTasks() {
         BingImageData bingImages = fileService.getBingImages(0);
@@ -47,9 +51,15 @@ public class BingImageTask implements Job {
         log.info("定时任务，插入数据");
     }
 
+    private void startJsoupTask(){
+        Integer currentPageObj = redisUtil.getValueByKey(RedisConstants.KEY_BACK_BINGIMAGE_TASK_CURRENTPAGE);
+        fileService.getBingImageByJsoup(currentPageObj==null?1:currentPageObj+1);
+    }
+
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         log.info("job execute: {}", jobExecutionContext.getJobDetail().getKey());
-        configureTasks();
+        //configureTasks();
+        startJsoupTask();
     }
 }

@@ -1,18 +1,20 @@
 package com.lingxiao.blog.utils;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class FileUtil {
+    private FileUtil(){ }
     /**
      * @param saveDir
      * @return
@@ -22,13 +24,14 @@ public class FileUtil {
     public static void isExistDir(String saveDir) throws IOException {
         // 下载位置
         File downloadFile = new File(saveDir);
+        Path path = downloadFile.toPath();
         if (downloadFile.exists()) {
             if (downloadFile.isFile()){
-                downloadFile.delete();
-                downloadFile.mkdirs();
+                Files.delete(path);
+                Files.createDirectories(path);
             }
         }else {
-            downloadFile.mkdirs();
+            Files.createDirectories(path);
         }
     }
 
@@ -39,28 +42,15 @@ public class FileUtil {
      * @param dest
      * @throws IOException
      */
-    public static void copyFile(File source, File dest)
-            throws IOException {
-        InputStream input = null;
-        OutputStream output = null;
-        try {
-            input = new FileInputStream(source);
-            output = new FileOutputStream(dest);
+    public static void copyFile(File source, File dest) {
+        try (InputStream input = new FileInputStream(source);OutputStream output =new FileOutputStream(dest)){
             byte[] buf = new byte[1024];
             int bytesRead;
             while ((bytesRead = input.read(buf)) > 0) {
                 output.write(buf, 0, bytesRead);
             }
-            input.close();
-            output.close();
         } catch (IOException e){
             e.printStackTrace();
-            if (input != null){
-                input.close();
-            }
-            if (output != null){
-                output.close();
-            }
         }
     }
 
@@ -85,11 +75,9 @@ public class FileUtil {
             }
             return fileList;
         } catch (NullPointerException e) {
-            //ToastUtils.show("出错了："+e.getMessage());
-            //Log.i("seedownloadimgact", "出错了");
             e.printStackTrace();
         }
-        return null;
+        return Collections.emptyList();
     }
 
     /**
@@ -99,22 +87,17 @@ public class FileUtil {
      */
     public static long getFileSize(String filePath) {
         File file = new File(filePath);
-        if (file == null) {
+        if (!file.exists()) {
             return 0;
         }
         long size = 0;
-        if (file.exists()) {
-            FileInputStream fis = null;
-            try {
-                fis = new FileInputStream(file);
-                size = fis.available();
-                fis.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
+        try (FileInputStream fis = new FileInputStream(file)){
+            size = fis.available();
+            //mb
+            size = size / 1024 / 1024;
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        size = size / 1024 / 1024; //mb
         return size;
     }
 

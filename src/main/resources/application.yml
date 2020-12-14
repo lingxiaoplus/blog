@@ -60,6 +60,7 @@ oss:
   secretKey: ENC(xKj7NFWTv+frIYmyHb6/uK7p94g2N4FHJGcAtlW0vVRr8ueBbtcNNWSEuOXof5UPNBH7o6TJOzR7PmiesU7EdLTnA80G+XBrM6UhBZ8zYiw=)
   bucketName: function  # 要上传的空间
   prefixImg: http://img.lingxiaomz.top/
+  temporaryFolder: D:\bingImage\
 
 email:
   title: '注册博客'

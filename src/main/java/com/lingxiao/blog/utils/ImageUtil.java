@@ -18,10 +18,8 @@ public class ImageUtil {
         InputStream stream = null;
         try {
             if (!localFile.exists()) {
-                //localFile.createNewFile();
-                if (localFile.getParentFile() != null && !localFile.getParentFile().exists()) {
-                    Files.createDirectories(localFile.getParentFile().toPath());
-                }
+                localFile.createNewFile();
+                //Files.createFile(localFile.toPath());
             }
             URL url = new URL(imageUrl);
             URLConnection conn = url.openConnection();

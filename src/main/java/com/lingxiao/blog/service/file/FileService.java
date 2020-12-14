@@ -30,6 +30,8 @@ public interface FileService {
     OssProperties getOssProperties();
     BingImageData getBingImages(int idx);
 
+    void getBingImageByJsoup(int currentPage);
+
     PageResult<BingImage> getImageFromDB(PageQueryForm queryForm);
 
     String getRandomImage();

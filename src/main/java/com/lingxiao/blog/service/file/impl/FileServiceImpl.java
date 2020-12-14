@@ -15,9 +15,7 @@ import com.lingxiao.blog.global.RedisConstants;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.mapper.BingImageMapper;
 import com.lingxiao.blog.service.file.FileService;
-import com.lingxiao.blog.utils.DateUtil;
-import com.lingxiao.blog.utils.RedisUtil;
-import com.lingxiao.blog.utils.UploadUtil;
+import com.lingxiao.blog.utils.*;
 import com.qiniu.common.QiniuException;
 import com.qiniu.http.Response;
 import lombok.extern.slf4j.Slf4j;
@@ -27,20 +25,22 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
+import java.nio.file.Files;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author Admin
  */
+@EnableConfigurationProperties(OssProperties.class)
 @Service
 @Slf4j
 public class FileServiceImpl implements FileService {
@@ -51,6 +51,8 @@ public class FileServiceImpl implements FileService {
     private BingImageMapper imageMapper;
     @Autowired
     private RedisUtil redisUtil;
+    @Autowired
+    private OssProperties ossProperties;
 
     /**
      * format js/xml
@@ -195,8 +197,15 @@ public class FileServiceImpl implements FileService {
         return null;
     }
 
-    public BingImageData getBingImageByJsoup(int currentPage){
+    private Map<String,String> downloadheaders = new HashMap<>(1);
+    @Override
+    public void getBingImageByJsoup(int currentPage){
+        Integer maxPage = redisUtil.getValueByKey(RedisConstants.KEY_BACK_BINGIMAGE_TASK_MAXPAGE);
+        if (maxPage != null && maxPage.intValue() >= currentPage) {
+            return;
+        }
         try {
+            downloadheaders.put("User-Agent",ContentValue.USER_AGENT);
             Connection connection = Jsoup.connect(ContentValue.BING_IOLIU_URL + "?p=" + currentPage)
                     .header("Referer", ContentValue.BING_IOLIU_URL)
                     .header("User-Agent", ContentValue.USER_AGENT)
@@ -204,32 +213,46 @@ public class FileServiceImpl implements FileService {
             Connection.Response response = connection.response();
             response.cookies();
             Document doc = connection.get();
+            List<BingImage> images = new ArrayList<>();
             Elements elementPage = doc.getElementsByClass("container");
             elementPage.forEach(item ->{
                 Elements itemElements = item.getElementsByClass("item");
                 itemElements.forEach(image ->{
                     String imageUrl = image.select("img").attr("src");
-                    int hashCode = imageUrl.hashCode();
-
+                    String description = image.getElementsByClass("description").first().text();
+                    String calendar = image.getElementsByClass("calendar").first().select("em").text();
                     String replaceUrl = StringUtils.replace(imageUrl, "640x480", "1920x1080");
+                    String hashCode = MD5Util.hashKeyForDisk(replaceUrl);
+
+                    int count = bingImageMapper.selectCountByHashCode(hashCode);
+                    if (count != 0){
+                        return;
+                    }
+
                     BingImage bingImage = new BingImage();
-                    bingImage.setTitle("");
-                    bingImage.setUrl(replaceUrl);
-                    //bingImage.setUrlBase("https://cn.bing.com".concat(image.getUrlbase()));
-                    bingImage.setHashCode(String.valueOf(hashCode));
-                    //bingImage.setStartDate(DateUtil.getDateFromString(image.getStartdate()));
+                    bingImage.setTitle(description);
+                    bingImage.setUrlBase(replaceUrl);
+                    bingImage.setHashCode(hashCode);
+                    bingImage.setStartDate(DateUtil.getDateFromString(calendar,"yyyy-MM-dd"));
                     bingImage.setCreateDate(new Date());
 
-                    log.info("jsoup 爬取到的： {}",replaceUrl);
+                    //下载文件并上传到oss
+                    File localFile = new File(ossProperties.getTemporaryFolder() + hashCode + ".jpg");
+                    boolean success = ImageUtil.downloadImageWithHeaders(replaceUrl, "jpg",localFile,downloadheaders);
+                    log.info("jsoup：{}, 下载成功：{}",bingImage,success);
+                    FileInfo fileInfo = uploadFile(localFile, "bingImage");
+                    bingImage.setUrl(fileInfo.getPath());
+                    images.add(bingImage);
                 });
             });
-            Integer maxPage = redisUtil.getValueByKey(RedisConstants.KEY_BACK_BINGIMAGE_TASK_MAXPAGE);
+            bingImageMapper.insertList(images);
+            redisUtil.pushValue(RedisConstants.KEY_BACK_BINGIMAGE_TASK_CURRENTPAGE,currentPage,TimeUnit.DAYS.toMillis(30));
             if (maxPage == null){
                 Elements pageElement = doc.getElementsByClass("page");
                 String span = pageElement.select("span").text();
                 String[] split = StringUtils.split(span, "/");
                 if (split.length > 1){
-                    maxPage = Integer.valueOf(split[1]);
+                    maxPage = Integer.valueOf(split[1].trim());
                     log.info("最大页数，{}",maxPage);
                     redisUtil.pushValue(RedisConstants.KEY_BACK_BINGIMAGE_TASK_MAXPAGE,maxPage, TimeUnit.DAYS.toMillis(30));
                 }
@@ -237,7 +260,6 @@ public class FileServiceImpl implements FileService {
         }catch (IOException ex){
             ex.printStackTrace();
         }
-        return null;
     }
 
     @Override
