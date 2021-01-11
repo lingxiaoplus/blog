@@ -14,7 +14,7 @@ public interface ArticleService {
     /**
      * 添加文章到草稿箱IntoDraft
      */
-    void addArticle(Article article);
+    long addArticle(Article article);
     void updateArticle(Article article);
 
     List<Article> getRankArticle(int size);

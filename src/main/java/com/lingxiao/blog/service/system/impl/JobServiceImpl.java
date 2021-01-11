@@ -79,6 +79,7 @@ public class JobServiceImpl implements JobService {
         try {
             //交由Scheduler安排触发
             scheduler.scheduleJob(job, trigger);
+            log.info("新增任务, 交由Scheduler安排触发");
         } catch (SchedulerException e) {
             e.printStackTrace();
             throw new BlogException(ExceptionEnum.JOB_ADD_ERROR_JOB_START);

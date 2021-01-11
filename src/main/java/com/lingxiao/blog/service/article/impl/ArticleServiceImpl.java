@@ -64,13 +64,13 @@ public class ArticleServiceImpl implements ArticleService {
     @Autowired
     private RedisUtil redisUtil;
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
-    public void addArticle(Article article) {
+    public long addArticle(Article article) {
         if (null != article.getId()){
             //更新文章
             updateArticle(article);
-            return;
+            return article.getId();
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
@@ -87,6 +87,8 @@ public class ArticleServiceImpl implements ArticleService {
             addLabels(article.getId(),article.getLabelIds());
         }
         log.info("文章，{}", article);
+        redisUtil.delRedis(RedisConstants.KEY_FRONT_STATTICS_ARTICLE_INCREASE);
+        return id;
     }
 
     private void addLabels(long aId, List<Long> ids){
@@ -102,7 +104,7 @@ public class ArticleServiceImpl implements ArticleService {
         }
     }
 
-    @Transactional(noRollbackFor = {Exception.class})
+    @Transactional(rollbackFor = {Exception.class})
     @Override
     public void updateArticle(Article article) {
         if (null == articleMapper.selectByPrimaryKey(article.getId())){
@@ -198,13 +200,13 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public List<ArticleVo> getTimeLineArticle(Date date){
-        List<ArticleVo> result = redisUtil.getListByKey(RedisConstants.KEY_FRONT_ARTICLE_TIMELINE_YEAR);
+        List<ArticleVo> result = redisUtil.getListByKey(String.format(RedisConstants.KEY_FRONT_ARTICLE_TIMELINE_YEAR,date.getTime()));
         if (!CollectionUtils.isEmpty(result)){
             return result;
         }
         List<Article> articles = articleMapper.selectYearArticles(date);
         result = articleVoConvert(articles);
-        redisUtil.rightPushAll(RedisConstants.KEY_FRONT_ARTICLE_TIMELINE_YEAR,result, TimeUnit.DAYS.toMillis(1));
+        redisUtil.rightPushAll(String.format(RedisConstants.KEY_FRONT_ARTICLE_TIMELINE_YEAR,date.getTime()),result, TimeUnit.DAYS.toMillis(1));
         return result;
     }
 

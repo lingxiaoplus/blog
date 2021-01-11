@@ -16,6 +16,6 @@ public class InitAdminListener implements ApplicationListener<ContextRefreshedEv
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         log.debug("spring启动监听");
-        userService.initAdmin();
+        //userService.initAdmin();
     }
 }

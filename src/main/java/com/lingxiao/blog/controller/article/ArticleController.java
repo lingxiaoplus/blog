@@ -29,9 +29,8 @@ public class ArticleController {
     @ApiOperation(value = "添加文章")
     @ApiImplicitParam(name = "Article",value = "文章实体")
     @OperationLogDetail(detail = "添加文章",operationType = OperationType.INSERT)
-    public ResponseEntity<Void> addArticle(@RequestBody @Valid Article article){
-        articleService.addArticle(article);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Long> addArticle(@RequestBody @Valid Article article){
+        return ResponseEntity.ok(articleService.addArticle(article));
     }
 
     @PutMapping

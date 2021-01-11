@@ -16,22 +16,26 @@ import java.util.List;
 public class FileUtil {
     private FileUtil(){ }
     /**
-     * @param saveDir
+     * @param folder
      * @return
      * @throws IOException
      * 判断下载目录是否存在
      */
-    public static void isExistDir(String saveDir) throws IOException {
+    public static void createFolder(String folder) {
         // 下载位置
-        File downloadFile = new File(saveDir);
+        File downloadFile = new File(folder);
         Path path = downloadFile.toPath();
-        if (downloadFile.exists()) {
-            if (downloadFile.isFile()){
-                Files.delete(path);
+        try {
+            if (downloadFile.exists()) {
+                if (downloadFile.isFile()){
+                    Files.delete(path);
+                    Files.createDirectories(path);
+                }
+            }else {
                 Files.createDirectories(path);
             }
-        }else {
-            Files.createDirectories(path);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

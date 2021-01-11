@@ -10,7 +10,7 @@ public class RedisConstants {
     }
     public static final String KEY_FRONT_STATTICS_IP_COUNT = "blog:front:ip:count:%s";
     public static final String KEY_FRONT_LABEL_LIST = "blog:front:label:list";
-    public static final String KEY_FRONT_ARTICLE_TIMELINE_YEAR = "blog:front:article:timeline:year";
+    public static final String KEY_FRONT_ARTICLE_TIMELINE_YEAR = "blog:front:article:timeline:year:%s";
     /**
      * 访问的ip +今日日期
      */

@@ -41,67 +41,8 @@ class FileServiceTest {
     @Autowired
     private FileService fileService;
 
-    private Map<String,String> downloadheaders = new HashMap<>(1);
-
     @Test
     void getBingImages(){
-        try {
-            downloadheaders.put("User-Agent",ContentValue.USER_AGENT);
-            int currentPage = 1;
-            Connection connection = Jsoup.connect(ContentValue.BING_IOLIU_URL + "?p=" + currentPage)
-                    .header("Referer", ContentValue.BING_IOLIU_URL)
-                    .header("User-Agent", ContentValue.USER_AGENT)
-                    .timeout(5000);
-            Connection.Response response = connection.response();
-            response.cookies();
-            Document doc = connection.get();
-            List<BingImage> images = new ArrayList<>();
-            Elements elementPage = doc.getElementsByClass("container");
-            elementPage.forEach(item ->{
-                Elements itemElements = item.getElementsByClass("item");
-                itemElements.forEach(image ->{
-                    String imageUrl = image.select("img").attr("src");
-
-                    String description = image.getElementsByClass("description").first().text();
-                    String calendar = image.getElementsByClass("calendar").first().select("em").text();
-                    String replaceUrl = StringUtils.replace(imageUrl, "640x480", "1920x1080");
-                    String hashCode = MD5Util.hashKeyForDisk(replaceUrl);
-
-                    int count = bingImageMapper.selectCountByHashCode(hashCode);
-                    if (count != 0){
-                        return;
-                    }
-
-                    BingImage bingImage = new BingImage();
-                    bingImage.setTitle(description);
-                    bingImage.setUrlBase(replaceUrl);
-                    bingImage.setHashCode(hashCode);
-                    bingImage.setStartDate(DateUtil.getDateFromString(calendar,"yyyy-MM-dd"));
-                    bingImage.setCreateDate(new Date());
-
-
-                    File localFile = new File("D:\\bingImage\\" + hashCode + ".jpg");
-                    boolean success = ImageUtil.downloadImageWithHeaders(replaceUrl, "jpg",localFile,downloadheaders);
-                    log.info("jsoup：{}, 下载成功：{}",bingImage,success);
-                    FileInfo fileInfo = fileService.uploadFile(localFile, "bingImage");
-                    bingImage.setUrl(fileInfo.getPath());
-                    images.add(bingImage);
-                });
-            });
-            bingImageMapper.insertList(images);
-            Integer maxPage = redisUtil.getValueByKey(RedisConstants.KEY_BACK_BINGIMAGE_TASK_MAXPAGE);
-            if (maxPage == null){
-                Elements pageElement = doc.getElementsByClass("page");
-                String span = pageElement.select("span").text();
-                String[] split = StringUtils.split(span, "/");
-                if (split.length > 1){
-                    maxPage = Integer.valueOf(split[1].trim());
-                    log.info("最大页数，{}",maxPage);
-                    redisUtil.pushValue(RedisConstants.KEY_BACK_BINGIMAGE_TASK_MAXPAGE,maxPage, TimeUnit.DAYS.toMillis(30));
-                }
-            }
-        }catch (IOException ex){
-            ex.printStackTrace();
-        }
+        fileService.getBingImageByJsoup(1);
     }
 }

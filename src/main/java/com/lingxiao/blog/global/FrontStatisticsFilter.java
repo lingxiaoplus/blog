@@ -53,7 +53,7 @@ public class FrontStatisticsFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
-        if (StringUtils.contains(request.getRequestURI(),URL_PATTERN)){
+        /*if (StringUtils.contains(request.getRequestURI(),URL_PATTERN)){
             log.debug("前端过滤器：{}",request.getRequestURI());
             initBean(request);
             String ipAddress = IPUtils.getIpAddress(request);
@@ -71,7 +71,7 @@ public class FrontStatisticsFilter implements Filter {
                 }
                 visitAnalyseMapper.insertSelective(visitAnalyse);
             }
-        }
+        }*/
         //执行
         filterChain.doFilter(servletRequest, servletResponse);
     }

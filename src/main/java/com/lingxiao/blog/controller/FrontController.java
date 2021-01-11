@@ -15,6 +15,7 @@ import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.service.article.ArticleService;
 import com.lingxiao.blog.service.article.CategoryService;
 import com.lingxiao.blog.service.article.LabelService;
+import com.lingxiao.blog.service.file.FileService;
 import com.lingxiao.blog.service.user.CommentService;
 import com.lingxiao.blog.service.system.FriendLinkService;
 import com.lingxiao.blog.utils.IPUtils;
@@ -145,4 +146,14 @@ public class FrontController {
         String emailText = templateEngine.process("email", context);
         return emailText;
     }
+
+    @Autowired
+    private FileService fileService;
+    @RequestMapping("/jsoup/{currentPage}")
+    public ResponseEntity<Void> getEmail(@PathVariable("currentPage") int currentPage){
+        fileService.getBingImageByJsoup(currentPage);
+        return ResponseEntity.ok().build();
+    }
+
+
 }

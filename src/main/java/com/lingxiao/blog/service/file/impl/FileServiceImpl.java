@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -40,7 +41,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author Admin
  */
-@EnableConfigurationProperties(OssProperties.class)
 @Service
 @Slf4j
 public class FileServiceImpl implements FileService {
@@ -51,8 +51,6 @@ public class FileServiceImpl implements FileService {
     private BingImageMapper imageMapper;
     @Autowired
     private RedisUtil redisUtil;
-    @Autowired
-    private OssProperties ossProperties;
 
     /**
      * format js/xml
@@ -201,7 +199,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public void getBingImageByJsoup(int currentPage){
         Integer maxPage = redisUtil.getValueByKey(RedisConstants.KEY_BACK_BINGIMAGE_TASK_MAXPAGE);
-        if (maxPage != null && maxPage.intValue() >= currentPage) {
+        if (maxPage != null && maxPage <= currentPage) {
             return;
         }
         try {
@@ -237,15 +235,32 @@ public class FileServiceImpl implements FileService {
                     bingImage.setCreateDate(new Date());
 
                     //下载文件并上传到oss
-                    File localFile = new File(ossProperties.getTemporaryFolder() + hashCode + ".jpg");
+                    FileUtil.createFolder(uploadUtil.getOssProperties().getTemporaryFolder());
+                    //FileUtil.createFolder("D:\\bingImage\\");
+                    File localFile = new File(uploadUtil.getOssProperties().getTemporaryFolder() + hashCode + ".jpg");
                     boolean success = ImageUtil.downloadImageWithHeaders(replaceUrl, "jpg",localFile,downloadheaders);
                     log.info("jsoup：{}, 下载成功：{}",bingImage,success);
                     FileInfo fileInfo = uploadFile(localFile, "bingImage");
                     bingImage.setUrl(fileInfo.getPath());
                     images.add(bingImage);
+                    try {
+                        Files.delete(localFile.toPath());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 });
             });
-            bingImageMapper.insertList(images);
+            if (!CollectionUtils.isEmpty(images)){
+                bingImageMapper.insertList(images);
+            }
+            currentPage++;
+            log.info("当前页：{}",currentPage);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            getBingImageByJsoup(currentPage);
             redisUtil.pushValue(RedisConstants.KEY_BACK_BINGIMAGE_TASK_CURRENTPAGE,currentPage,TimeUnit.DAYS.toMillis(30));
             if (maxPage == null){
                 Elements pageElement = doc.getElementsByClass("page");
