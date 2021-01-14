@@ -10,6 +10,7 @@ import org.lionsoul.ip2region.DataBlock;
 import org.lionsoul.ip2region.DbConfig;
 import org.lionsoul.ip2region.DbMakerConfigException;
 import org.lionsoul.ip2region.DbSearcher;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -23,10 +24,12 @@ import java.io.IOException;
 @Slf4j
 public class IP2RegionServiceImpl implements IP2RegionService {
     private DbSearcher dbSearcher;
+    @Value("${ipregion.path}")
+    private String regionPath;
     @PostConstruct
     private void init() {
         try {
-            dbSearcher = new DbSearcher(new DbConfig(), "/blog/ip2region.db");
+            dbSearcher = new DbSearcher(new DbConfig(), regionPath);
         }catch (IOException|DbMakerConfigException e){
             log.error("ip地址库初始化失败");
             e.printStackTrace();

@@ -23,7 +23,9 @@
 hs_err_pid*
 /.idea/
 /target/
+!**/src/main/**/target/
+!**/src/test/**/target/
 /rsakey/
-/src/main/resources/application-dev.yml
-/src/main/resources/application-pro.yml
-/src/main/resources/quartz.properties
+!**/src/main/**/application-dev.yml
+!**/src/main/**/application-pro.yml
+!**/src/main/**/quartz.properties
