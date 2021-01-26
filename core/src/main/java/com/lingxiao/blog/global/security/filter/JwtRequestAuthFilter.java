@@ -37,9 +37,6 @@ public class JwtRequestAuthFilter extends OncePerRequestFilter {
 
     @Autowired
     private UserService userService;
-
-    /*@Autowired
-    private AuthSuccessHandler successHandler;*/
     @Autowired
     private AuthFailHandler failHandler;
     @Autowired
@@ -50,8 +47,7 @@ public class JwtRequestAuthFilter extends OncePerRequestFilter {
     private List<RequestMatcher> permissiveRequestMatchers = new ArrayList<>();
 
     protected String getJwtToken(HttpServletRequest request){
-        String token = request.getHeader(ContentValue.LOGIN_TOKEN_NAME);
-        return token;
+        return request.getHeader(ContentValue.LOGIN_TOKEN_NAME);
     }
 
     @Override

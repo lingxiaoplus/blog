@@ -24,5 +24,11 @@ public class RedisConstants {
 
     public static final String KEY_BACK_BINGIMAGE_TASK_MAXPAGE = "blog:back:bingImage:task:maxPage";
     public static final String KEY_BACK_BINGIMAGE_TASK_CURRENTPAGE = "blog:back:bingImage:task:currentPage";
+    /**
+     * 文章
+     */
+    public static final String KEY_BACK_ARTICLE_PAGE = "blog:back:article:page:currentPage:%s:pageSize:%s";
+
+    public static final String KEY_BACK_DICTIONARY_NAME_CODE = "blog:back:dictionary:name:%s:code:%s";
 
 }

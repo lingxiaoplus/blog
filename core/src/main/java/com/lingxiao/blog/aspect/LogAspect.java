@@ -24,6 +24,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Date;
+import java.util.Objects;
 
 @Aspect
 @Component
@@ -95,7 +96,7 @@ public class LogAspect {
         OperationLog operationLog = new OperationLog();
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (!ContentValue.ANONYMOUSUSER.equals(authentication.getPrincipal())){
+            if (Objects.nonNull(authentication) && !ContentValue.ANONYMOUSUSER.equals(authentication.getPrincipal())){
                 User user = (User) authentication.getPrincipal();
                 operationLog.setUsername(user.getUsername());
                 operationLog.setNickname(user.getNickname());
@@ -135,8 +136,7 @@ public class LogAspect {
 
     private OperationLogDetail getOperationLogDetail(JoinPoint joinPoint){
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        OperationLogDetail annotation = signature.getMethod().getAnnotation(OperationLogDetail.class);
-        return annotation;
+        return signature.getMethod().getAnnotation(OperationLogDetail.class);
     }
 
 }

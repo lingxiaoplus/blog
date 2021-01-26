@@ -5,10 +5,11 @@ import com.lingxiao.blog.bean.BingImageData;
 import com.lingxiao.blog.bean.form.PageQueryForm;
 import com.lingxiao.blog.bean.vo.FileInfo;
 import com.lingxiao.blog.global.ContentValue;
-import com.lingxiao.blog.global.OssProperties;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.service.file.FileService;
+import com.lingxiao.oss.bean.OssFileInfo;
+import com.lingxiao.oss.bean.OssProperties;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -36,7 +37,7 @@ public class FileController {
     @ApiOperation(value = "上传文件，上传成功返回文件链接")
     @ApiImplicitParam(name = "file",value = "文件")
     @PostMapping
-    public ResponseEntity<FileInfo> uploadFile(HttpSession session, @RequestParam(value = "file",required = false) MultipartFile file){
+    public ResponseEntity<OssFileInfo> uploadFile(HttpSession session, @RequestParam(value = "file",required = false) MultipartFile file){
         try {
             String path = session.getServletContext().getRealPath("upload");
             File dir = new File(path);
@@ -47,7 +48,7 @@ public class FileController {
             }
             File uploadFile = new File(path,file.getOriginalFilename());
             file.transferTo(uploadFile);
-            FileInfo fileInfo = uploadService.uploadFile(uploadFile);
+            OssFileInfo fileInfo = uploadService.uploadFile(uploadFile);
             logger.debug("文件路径: {}",uploadFile.getAbsolutePath());
             //上传成功之后，删除本地文件
             Files.deleteIfExists(uploadFile.toPath());
@@ -60,7 +61,7 @@ public class FileController {
 
     @ApiOperation(value = "oss文件列表")
     @GetMapping("/list")
-    public ResponseEntity<PageResult<FileInfo>> getFileList(
+    public ResponseEntity<PageResult<OssFileInfo>> getFileList(
             @RequestParam(value = "fileName",defaultValue = "") String fileName,
             @RequestParam(value = "date",defaultValue = "") String date,
             @RequestParam(value = "pageNum",defaultValue = "1") int pageNum,

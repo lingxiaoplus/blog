@@ -18,4 +18,6 @@ public class Email {
     @NotBlank(message = "邮箱不能为空")
     private String authCode;
     private Integer enabled;
+    private String host;
+    private String protocol;
 }

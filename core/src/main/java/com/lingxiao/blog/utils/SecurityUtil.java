@@ -1,6 +1,8 @@
 package com.lingxiao.blog.utils;
 
 import com.lingxiao.blog.bean.po.User;
+import com.lingxiao.blog.enums.ExceptionEnum;
+import com.lingxiao.blog.exception.BlogException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -13,6 +15,6 @@ public class SecurityUtil {
         if (authentication != null && authentication.getPrincipal() != null) {
             return (User) authentication.getPrincipal();
         }
-        return null;
+        throw new BlogException(ExceptionEnum.VERIFY_USER_LOGIN_ERROR);
     }
 }

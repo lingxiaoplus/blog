@@ -3,19 +3,26 @@ package com.lingxiao.blog.service.system.impl;
 import com.lingxiao.blog.bean.po.Dictionary;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
+import com.lingxiao.blog.global.RedisConstants;
 import com.lingxiao.blog.mapper.DictionaryMapper;
 import com.lingxiao.blog.service.system.DictionaryService;
+import com.lingxiao.blog.utils.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * @author lingxiao
+ */
 @Service
 public class DictionaryServiceImpl implements DictionaryService {
 
     @Autowired
     private DictionaryMapper dictionaryMapper;
+    @Autowired
+    private RedisUtil redisUtil;
 
     @Override
     public Dictionary getDictionaryByCode(String code) {
@@ -51,6 +58,11 @@ public class DictionaryServiceImpl implements DictionaryService {
 
     @Override
     public Dictionary getDictionaryByNameAndCode(String name, String code) {
+        String key = String.format(RedisConstants.KEY_BACK_DICTIONARY_NAME_CODE, name, code);
+        Dictionary cache = redisUtil.getValueByKey(key);
+        if (cache != null){
+            return cache;
+        }
         Dictionary select = new Dictionary();
         select.setName(name);
         Dictionary dictionary = dictionaryMapper.selectOne(select);
@@ -58,7 +70,9 @@ public class DictionaryServiceImpl implements DictionaryService {
             Dictionary parent = new Dictionary();
             parent.setParentId(dictionary.getId());
             parent.setCode(code);
-            return dictionaryMapper.selectOne(parent);
+            Dictionary result = dictionaryMapper.selectOne(parent);
+            redisUtil.pushValue(key,result);
+            return result;
         }
         return null;
     }

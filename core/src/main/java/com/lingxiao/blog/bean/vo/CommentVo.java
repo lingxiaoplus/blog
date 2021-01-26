@@ -3,6 +3,9 @@ package com.lingxiao.blog.bean.vo;
 import lombok.Data;
 import java.util.List;
 
+/**
+ * @author lingxiao
+ */
 @Data
 public class CommentVo {
     private String id;
@@ -16,7 +19,9 @@ public class CommentVo {
     private String website;
 
     //private User member;  //这条评论的所属者
-    private ArticleDetailVo article;  //文章
-    private List<CommentVo> replies;  //这条评论的回复
+    //文章
+    private ArticleVo article;
+    //这条评论的回复
+    private List<CommentVo> replies;
 
 }

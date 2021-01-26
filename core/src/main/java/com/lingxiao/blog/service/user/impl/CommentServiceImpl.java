@@ -2,8 +2,9 @@ package com.lingxiao.blog.service.user.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.lingxiao.blog.bean.po.Article;
 import com.lingxiao.blog.bean.po.Comment;
-import com.lingxiao.blog.bean.vo.ArticleDetailVo;
+import com.lingxiao.blog.bean.vo.ArticleVo;
 import com.lingxiao.blog.bean.vo.CommentVo;
 import com.lingxiao.blog.enums.CommentState;
 import com.lingxiao.blog.enums.ExceptionEnum;
@@ -18,6 +19,7 @@ import com.lingxiao.blog.utils.UIDUtil;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 import java.util.Date;
@@ -44,6 +46,7 @@ public class CommentServiceImpl implements CommentService {
         return commentMapper.selectCount(comment);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void addComment(Comment comment) {
         comment.setId(UIDUtil.nextId());
@@ -66,6 +69,11 @@ public class CommentServiceImpl implements CommentService {
         if (count != 1) {
             throw new BlogException(ExceptionEnum.COMMENT_INSERT_ERROR);
         }
+        int commentCount = getCommentCount(comment.getArticleId());
+        Article article = new Article();
+        article.setId(comment.getArticleId());
+        article.setCommentCount(commentCount+1L);
+        articleService.updateArticle(article);
     }
 
     @Override
@@ -79,7 +87,8 @@ public class CommentServiceImpl implements CommentService {
 
         List<CommentVo> commentVoList = pageInfo.getList()
                 .stream()
-                .filter(item-> item.getParentId() == 0) //去掉楼中楼
+                //去掉楼中楼
+                .filter(item-> item.getParentId() == 0)
                 .map((this::parseComment))
                 .collect(Collectors.toList());
         return new PageResult<>(pageInfo.getTotal(),pageInfo.getPages(),commentVoList);
@@ -89,14 +98,16 @@ public class CommentServiceImpl implements CommentService {
     public PageResult<CommentVo> getCommentsByArticleId(int pageNum, int pageSize, long id) {
         PageHelper.startPage(pageNum,pageSize);
         Comment comment = new Comment();
-        comment.setStatus(CommentState.APPROVAL.getState());  //已通过的评论
+        //已通过的评论
+        comment.setStatus(CommentState.APPROVAL.getState());
         comment.setArticleId(id);
         List<Comment> comments = commentMapper.select(comment);
         PageInfo<Comment> pageInfo = PageInfo.of(comments);
 
         List<CommentVo> commentVoList = pageInfo.getList()
                 .stream()
-                .filter(item-> item.getParentId() == 0) //去掉楼中楼
+                //去掉楼中楼
+                .filter(item-> item.getParentId() == 0)
                 .map(this::parseComment)
                 .collect(Collectors.toList());
         return new PageResult<>(pageInfo.getTotal(),pageInfo.getPages(),commentVoList);
@@ -142,7 +153,7 @@ public class CommentServiceImpl implements CommentService {
         String createString = createDate.toString("yyyy-MM-dd");
         commentVo.setCreateAt(createString);
 
-        ArticleDetailVo articleContent = articleService.getArticleContent(item.getArticleId());
+        ArticleVo articleContent = articleService.getArticleContent(item.getArticleId());
         articleContent.setContent(null);
         commentVo.setArticle(articleContent);
 

@@ -1,5 +1,6 @@
 package com.lingxiao.blog.utils;
 
+import com.sun.mail.util.MailSSLSocketFactory;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -12,6 +13,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import java.security.GeneralSecurityException;
 import java.util.Properties;
 
 
@@ -33,23 +35,25 @@ public class EmailUtil {
         private String verifyCode;
         //分钟
         private int minute;
+        private String host;
+        private String protocol;
     }
 
     @Async("taskExecutor")
-    public void sendEmail(final EmailConfigure configure) throws MessagingException {
+    public void sendEmail(final EmailConfigure configure) throws MessagingException, GeneralSecurityException {
         Properties prop = new Properties();
         //设置QQ邮件服务器
-        prop.setProperty("mail.host", "smtp.qq.com");
+        prop.setProperty("mail.host", configure.host);
         //邮件发送协议
-        prop.setProperty("mail.transport.protocol", "smtp");
+        prop.setProperty("mail.transport.protocol", configure.protocol);
         //需要验证用户名密码
         prop.setProperty("mail.smtp.auth", "true");
 
         // 关于QQ邮箱，还要设置SSL加密，加上以下代码即可
-       /* MailSSLSocketFactory sf = new MailSSLSocketFactory();
+        MailSSLSocketFactory sf = new MailSSLSocketFactory();
         sf.setTrustAllHosts(true);
         prop.put("mail.smtp.ssl.enable", "true");
-        prop.put("mail.smtp.ssl.socketFactory", sf);*/
+        prop.put("mail.smtp.ssl.socketFactory", sf);
 
         //使用JavaMail发送邮件的5个步骤
         //创建定义整个应用程序所需的环境信息的 Session 对象
@@ -64,7 +68,7 @@ public class EmailUtil {
         //2、通过session得到transport对象
         Transport ts = session.getTransport();
         //3、使用邮箱的用户名和授权码连上邮件服务器
-        ts.connect("smtp.qq.com", configure.getSendAddress(), configure.getAuthCode());
+        ts.connect(configure.host, configure.getSendAddress(), configure.getAuthCode());
         //4、创建邮件
         //创建邮件对象
         MimeMessage message = new MimeMessage(session);

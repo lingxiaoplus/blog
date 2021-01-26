@@ -1,6 +1,7 @@
-package com.lingxiao.blog.utils;
+package com.lingxiao.oss.utils;
 
-import com.lingxiao.blog.global.OssProperties;
+import com.lingxiao.oss.bean.OssProperties;
+import com.lingxiao.oss.bean.OssFileInfo;
 import com.qiniu.common.QiniuException;
 import com.qiniu.common.Zone;
 import com.qiniu.http.Response;
@@ -14,29 +15,24 @@ import com.qiniu.util.StringMap;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@EnableConfigurationProperties(OssProperties.class)
-@Component
+/**
+ * @author lingxiao
+ */
 @Slf4j
 public class UploadUtil {
-    @Autowired
-    private OssProperties ossProperties;
-
+    private final OssProperties ossProperties;
     private Auth mAuth;
-
-    @PostConstruct
-    private void init(){
+    public UploadUtil(OssProperties ossProperties) {
+        this.ossProperties = ossProperties;
+        log.info("配置文件: {}",ossProperties);
         mAuth = Auth.create(ossProperties.getAccessKey(), ossProperties.getSecretKey());
     }
 
@@ -45,50 +41,66 @@ public class UploadUtil {
     }
 
     /**
+     * 默认上传到rootPath
      * @return 返回图片链接
      */
-    public com.lingxiao.blog.bean.vo.FileInfo upload(File file) throws QiniuException{
-        //第二种方式: 自动识别要上传的空间(bucket)的存储区域是华东、华北、华南。
-        Zone z = Zone.autoZone();
-        Configuration c = new Configuration(z);
-        //创建上传对象
-        UploadManager uploadManager = new UploadManager(c);
-
-        //调用put方法上传
-        Response res = uploadManager.put(file.getPath(), file.getName(), getUpToken(mAuth));
-        //打印返回的信息
-        log.debug("文件上传返回信息: {}",res.bodyString());
-        StringMap jsonToMap = res.jsonToMap();
-        String key = (String) jsonToMap.get("key");
-        String url = ossProperties.getPrefixImg() + key;
-        com.lingxiao.blog.bean.vo.FileInfo fileInfo = new com.lingxiao.blog.bean.vo.FileInfo();
-        fileInfo.setName(key);
-        fileInfo.setPath(url);
-        fileInfo.setSize(FileUtil.getFileSize(file.length()));
-        return fileInfo;
+    public OssFileInfo upload(File file) throws QiniuException{
+        return upload(file,"/");
     }
 
     /**
      * @return 返回图片链接
      */
-    public com.lingxiao.blog.bean.vo.FileInfo upload(File file,String folder) throws QiniuException{
+    public OssFileInfo upload(File file,String folder) throws QiniuException{
         //第二种方式: 自动识别要上传的空间(bucket)的存储区域是华东、华北、华南。
         Zone z = Zone.autoZone();
         Configuration c = new Configuration(z);
         //创建上传对象
         UploadManager uploadManager = new UploadManager(c);
-
+        if (StringUtils.isNotBlank(ossProperties.getRootPath())){
+            folder = ossProperties.getRootPath() + folder;
+        }
+        String concatPath = folder.concat("/").concat(file.getName());
+        log.info("上传的路径: {}",concatPath);
         //调用put方法上传
-        Response res = uploadManager.put(file.getPath(), folder.concat("/").concat(file.getName()), getUpToken(mAuth));
+        Response res = uploadManager.put(file.getPath(), concatPath, getUpToken(mAuth));
         //打印返回的信息
         log.debug("文件上传返回信息: {}",res.bodyString());
         StringMap jsonToMap = res.jsonToMap();
         String key = (String) jsonToMap.get("key");
-        String url = ossProperties.getPrefixImg() + key;
-        com.lingxiao.blog.bean.vo.FileInfo fileInfo = new com.lingxiao.blog.bean.vo.FileInfo();
+        String url = ossProperties.getPrefixDomain() + key;
+        OssFileInfo fileInfo = new OssFileInfo();
         fileInfo.setName(key);
         fileInfo.setPath(url);
-        fileInfo.setSize(FileUtil.getFileSize(file.length()));
+        fileInfo.setSize(file.length());
+        return fileInfo;
+    }
+
+    /**
+     * 覆盖上传
+     * @return 返回图片链接
+     */
+    public OssFileInfo coverUpload(File file,String folder) throws QiniuException{
+        //第二种方式: 自动识别要上传的空间(bucket)的存储区域是华东、华北、华南。
+        Zone z = Zone.autoZone();
+        Configuration c = new Configuration(z);
+        //创建上传对象
+        UploadManager uploadManager = new UploadManager(c);
+        if (StringUtils.isNotBlank(ossProperties.getRootPath())){
+            folder = ossProperties.getRootPath() + folder;
+        }
+        String remotePath = folder.concat("/").concat(file.getName());
+        //调用put方法上传
+        Response res = uploadManager.put(file.getPath(), remotePath, getUpToken(mAuth,remotePath));
+        //打印返回的信息
+        log.debug("文件上传返回信息: {}",res.bodyString());
+        StringMap jsonToMap = res.jsonToMap();
+        String key = (String) jsonToMap.get("key");
+        String url = ossProperties.getPrefixDomain() + key;
+        OssFileInfo fileInfo = new OssFileInfo();
+        fileInfo.setName(key);
+        fileInfo.setPath(url);
+        fileInfo.setSize(file.length());
         return fileInfo;
     }
 
@@ -161,40 +173,37 @@ public class UploadUtil {
      * @param limit 每次迭代的长度限制，最大1000，推荐值 1000
      * @return
      */
-    @Cacheable(value = "ossPictures")
-    public List<com.lingxiao.blog.bean.vo.FileInfo> getFileList(String prefix,int limit){
-        List<com.lingxiao.blog.bean.vo.FileInfo> infoList = new ArrayList<>();
+    public List<OssFileInfo> getFileList(String prefix, int limit){
+        List<OssFileInfo> infoList = new ArrayList<>();
         //构造一个带指定 Region 对象的配置类
         Configuration cfg = new Configuration(Region.region0());
         BucketManager bucketManager = new BucketManager(mAuth, cfg);
         //指定目录分隔符，列出所有公共前缀（模拟列出目录效果）。缺省值为空字符串
         String delimiter = "";
+        prefix = StringUtils.isBlank(ossProperties.getRootPath())? "": ossProperties.getRootPath();
         //列举空间文件列表
         BucketManager.FileListIterator fileListIterator = bucketManager.createFileListIterator(ossProperties.getBucketName(), prefix, limit, delimiter);
         while (fileListIterator.hasNext()) {
             //处理获取的file list结果
-            /*FileInfo[] items = fileListIterator.next();
-            for (FileInfo item : items) {
-                System.out.println(item.key);
-                System.out.println(item.hash);
-                System.out.println(item.fsize);
-                System.out.println(item.mimeType);
-                System.out.println(item.putTime);
-                System.out.println(item.endUser);
-            }*/
-            List<com.lingxiao.blog.bean.vo.FileInfo> collect =
-                    Arrays.stream(fileListIterator.next())
-                            .map((item)->{
-                                com.lingxiao.blog.bean.vo.FileInfo fileInfo = new com.lingxiao.blog.bean.vo.FileInfo();
+            FileInfo[] next = fileListIterator.next();
+            if (next == null){
+                return Collections.emptyList();
+            }
+            List<OssFileInfo> collect =
+                    Arrays.stream(next)
+                            .map(item->{
+                                OssFileInfo fileInfo = new OssFileInfo();
                                 String name = StringUtils.substringAfterLast(item.key, "/");
                                 if (StringUtils.isBlank(name)){
                                     name = item.key;
                                 }
                                 fileInfo.setName(name);
                                 fileInfo.setMimeType(item.mimeType);
-                                fileInfo.setPath(ossProperties.getPrefixImg() + item.key);
+                                fileInfo.setPath(ossProperties.getPrefixDomain() + item.key);
                                 fileInfo.setEndUser(item.endUser);
-                                fileInfo.setSize(FileUtil.getFileSize(item.fsize));
+                                fileInfo.setFileMd5(item.md5);
+                                fileInfo.setSize(item.fsize);
+                                fileInfo.setBucket(item.endUser);
                                 DateTime dateTime = new DateTime(item.putTime/10000);
                                 String dateString = dateTime.toString("yyyy-MM-dd HH:mm:ss");
                                 fileInfo.setTime(dateString);
@@ -226,5 +235,15 @@ public class UploadUtil {
     //简单上传，使用默认策略，只需要设置上传的空间名就可以了
     private String getUpToken(Auth auth) {
         return auth.uploadToken(ossProperties.getBucketName());
+    }
+
+    /**
+     * 覆盖上传
+     * @param auth
+     * @param key 文件名
+     * @return
+     */
+    private String getUpToken(Auth auth,String key) {
+        return auth.uploadToken(ossProperties.getBucketName(),key);
     }
 }

@@ -3,13 +3,12 @@ package com.lingxiao.blog;
 import com.google.gson.Gson;
 import com.lingxiao.blog.bean.Address;
 import com.lingxiao.blog.bean.BingImageData;
-import com.lingxiao.blog.bean.po.BingImage;
+import com.lingxiao.blog.bean.po.*;
 import com.lingxiao.blog.bean.po.Dictionary;
-import com.lingxiao.blog.bean.po.IpRegion;
-import com.lingxiao.blog.bean.po.ResourceInfo;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.global.api.ResponseResult;
+import com.lingxiao.blog.mapper.ArticleMapper;
 import com.lingxiao.blog.mapper.BingImageMapper;
 import com.lingxiao.blog.mapper.IP2RegionMapper;
 import com.lingxiao.blog.mapper.ResourceInfoMapper;
@@ -189,7 +188,7 @@ class BlogApplicationTests {
     }
 
     @Test
-    public void reverseString() {
+    void reverseString() {
         /*long beforDayStart = getBeforDayStart(1);
         Date date = new Date(beforDayStart);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -346,5 +345,18 @@ class BlogApplicationTests {
             return resourceInfo;
         }).collect(Collectors.toList());
         int insert = resourceInfoMapper.insertList(resourceInfos);
+    }
+
+    @Autowired
+    private ArticleMapper articleMapper;
+    @Test
+    void getArticles(){
+        List<Article> articles = articleMapper.selectArticles();
+        articles.forEach(item ->{
+            String title = item.getTitle();
+            List<Label> labels = item.getLabels();
+            log.info("标题: {}, 标签: {}",title, Arrays.toString(labels.toArray()));
+        });
+        //log.info("查询结果: {}",Arrays.toString(articles.toArray()));
     }
 }

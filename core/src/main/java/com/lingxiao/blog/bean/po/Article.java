@@ -1,20 +1,19 @@
 package com.lingxiao.blog.bean.po;
 
+import com.lingxiao.blog.bean.BaseModel;
 import lombok.Data;
-
-import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.Date;
 import java.util.List;
 
+/**
+ * @author Admin
+ */
 @Table(name = "articles")
 @Data
-public class Article {
-    @Id
-    private Long id;
+public class Article extends BaseModel {
     private Long userId;
     @NotNull(message = "分类id不能为空")
     private Long categoryId;
@@ -26,12 +25,14 @@ public class Article {
     private String headImage;
     private Long watchCount;
     private Long commentCount;
-    private Date createAt;
-    private Date updateAt;
     private Long likeCount;
     private Integer status;
+    private String author;
+    private String categoryName;
 
     @Transient
     private List<Long> labelIds;
+
+    private List<Label> labels;
 }
 

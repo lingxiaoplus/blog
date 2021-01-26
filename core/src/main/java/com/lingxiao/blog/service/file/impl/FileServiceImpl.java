@@ -6,18 +6,18 @@ import com.google.gson.Gson;
 import com.lingxiao.blog.bean.BingImageData;
 import com.lingxiao.blog.bean.form.PageQueryForm;
 import com.lingxiao.blog.bean.po.BingImage;
-import com.lingxiao.blog.bean.vo.FileInfo;
-import com.lingxiao.blog.enums.ExceptionEnum;
-import com.lingxiao.blog.exception.BlogException;
+import com.lingxiao.blog.bean.po.ResourceInfo;
+import com.lingxiao.blog.bean.po.User;
 import com.lingxiao.blog.global.ContentValue;
-import com.lingxiao.blog.global.OssProperties;
 import com.lingxiao.blog.global.RedisConstants;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.mapper.BingImageMapper;
+import com.lingxiao.blog.mapper.ResourceInfoMapper;
 import com.lingxiao.blog.service.file.FileService;
 import com.lingxiao.blog.utils.*;
-import com.qiniu.common.QiniuException;
-import com.qiniu.http.Response;
+import com.lingxiao.oss.bean.OssFileInfo;
+import com.lingxiao.oss.bean.OssProperties;
+import com.lingxiao.oss.service.OssFileService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Connection;
@@ -35,6 +35,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author Admin
@@ -42,13 +43,15 @@ import java.util.concurrent.TimeUnit;
 @Service
 @Slf4j
 public class FileServiceImpl implements FileService {
-
-    @Autowired
-    private UploadUtil uploadUtil;
     @Autowired
     private BingImageMapper imageMapper;
     @Autowired
     private RedisUtil redisUtil;
+
+    @Autowired
+    private OssFileService ossFileService;
+    @Autowired
+    private ResourceInfoMapper resourceInfoMapper;
 
     /**
      * format js/xml
@@ -61,76 +64,89 @@ public class FileServiceImpl implements FileService {
     private BingImageMapper bingImageMapper;
 
     @Override
-    public FileInfo uploadFile(File file) {
-        try {
-            return uploadUtil.upload(file);
-        } catch (QiniuException e) {
-            Response r = e.response;
-            // 请求失败时打印的异常的信息
-            log.error("上传文件失败: {}",r.toString());
-            //响应的文本信息
-            try {
-                log.error("上传文件失败body: {}",r.bodyString());
-            } catch (QiniuException ex) {
-                ex.printStackTrace();
-            }
-            throw new BlogException(ExceptionEnum.UPLOAD_FILE_ERROR);
+    public OssFileInfo uploadFile(File file) {
+        String fileMd5 = FileUtil.getFileMd5(file.getAbsolutePath());
+        ResourceInfo select = new ResourceInfo();
+        select.setResourceMd5(fileMd5);
+        ResourceInfo resourceInfo = resourceInfoMapper.selectOne(select);
+        if (resourceInfo != null){
+            return resource2OssFile(resourceInfo);
         }
+        OssFileInfo ossFileInfo = ossFileService.uploadFile(file);
+        ResourceInfo insert = ossFile2Resource(ossFileInfo);
+        insert.setResourceMd5(fileMd5);
+        resourceInfoMapper.insert(insert);
+        return ossFileInfo;
     }
 
     @Override
-    public FileInfo uploadFile(File file, String folder) {
-        try {
-            return uploadUtil.upload(file,folder);
-        } catch (QiniuException e) {
-            try {
-                Response r = e.response;
-                // 请求失败时打印的异常的信息
-                log.error("上传文件失败: {},上传文件失败body: {}",r.toString(),r.bodyString());
-            } catch (QiniuException ex) {
-                ex.printStackTrace();
-            }
-            throw new BlogException(ExceptionEnum.UPLOAD_FILE_ERROR);
+    public OssFileInfo uploadFile(File file, String folder) {
+        String fileMd5 = FileUtil.getFileMd5(file.getAbsolutePath());
+        ResourceInfo select = new ResourceInfo();
+        select.setResourceMd5(fileMd5);
+        ResourceInfo resourceInfo = resourceInfoMapper.selectOne(select);
+        if (resourceInfo != null){
+            return resource2OssFile(resourceInfo);
         }
+        OssFileInfo ossFileInfo = ossFileService.uploadFile(file);
+        ResourceInfo insert = ossFile2Resource(ossFileInfo);
+        insert.setResourceMd5(fileMd5);
+        resourceInfoMapper.insert(insert);
+        return ossFileService.uploadFile(file,folder,true);
     }
 
     @Override
     public OssProperties getOssProperties() {
-        OssProperties ossProperties = uploadUtil.getOssProperties();
+        OssProperties ossProperties = ossFileService.getOssProperties();
         ossProperties.setSecretKey("***********");
         return ossProperties;
     }
 
-    @Override
-    public void deleteFile(String fileName) {
-        try {
-            uploadUtil.deleteFile(fileName);
-        } catch (QiniuException ex) {
-            //如果遇到异常，说明删除失败
-            log.error("删除文件错误，错误码：{}，错误详细;{}",ex.code(),ex.response.toString());
-            throw new BlogException(ExceptionEnum.DELETE_OSS_FILE_ERROR);
+    private OssFileInfo resource2OssFile(ResourceInfo resourceInfo){
+        OssFileInfo ossFileInfo = new OssFileInfo();
+        ossFileInfo.setFileMd5(resourceInfo.getResourceMd5());
+        ossFileInfo.setSize(resourceInfo.getSize());
+        ossFileInfo.setPath(resourceInfo.getPath());
+        ossFileInfo.setName(resourceInfo.getName());
+        ossFileInfo.setBucket(resourceInfo.getBucket());
+        ossFileInfo.setTime(DateUtil.parseDate(resourceInfo.getCreateAt()));
+        ossFileInfo.setMimeType(FileUtil.getFileSuffix(resourceInfo.getName()));
+        return ossFileInfo;
+    }
+
+    private ResourceInfo ossFile2Resource(OssFileInfo ossFileInfo){
+        ResourceInfo resourceInfo = new ResourceInfo();
+        //resourceInfo.setResourceMd5(ossFileInfo.getFileMd5());
+        resourceInfo.setPath(ossFileInfo.getPath());
+        resourceInfo.setName(ossFileInfo.getName());
+        resourceInfo.setBucket(ossFileService.getOssProperties().getBucketName());
+        resourceInfo.setSize(ossFileInfo.getSize());
+        User user = SecurityUtil.getCurrentUser();
+        if (user != null) {
+            resourceInfo.setResourceCreator(user.getUserId()+"");
         }
+        resourceInfo.setCreateAt(new Date());
+        return resourceInfo;
     }
 
     @Override
-    public PageResult getFileList(String fileName, String date,int pageNum, int pageSize) {
-        List<FileInfo> fileList = uploadUtil.getFileList("", pageSize*pageNum);
-        int totalPage = fileList.size() / pageSize + 1;
-        List<FileInfo> subList = fileList.subList((pageSize * (pageNum - 1)), (pageSize * pageNum));
-        return new PageResult<>(fileList.size(),totalPage,subList);
+    public void deleteFile(String fileName) {
+        ossFileService.deleteFile(fileName);
+    }
+
+    @Override
+    public PageResult<OssFileInfo> getFileList(String fileName, String date, int pageNum, int pageSize) {
+        PageHelper.startPage(pageNum,pageSize);
+        List<ResourceInfo> resourceInfos = resourceInfoMapper.selectAll();
+        PageInfo<ResourceInfo> pageInfo = PageInfo.of(resourceInfos);
+        List<OssFileInfo> resultList = pageInfo.getList().stream().map(this::resource2OssFile).collect(Collectors.toList());
+        return new PageResult<>(pageInfo.getTotal(),pageInfo.getPages(),resultList);
     }
 
 
     @Override
     public void moveOrRenameFile(String oldName,String newName, String toBucket) {
-        try {
-            uploadUtil.moveOrRenameFile(oldName, newName, toBucket);
-        } catch (QiniuException ex) {
-            //如果遇到异常，说明移动失败
-            //ex.response.error
-            log.error("移动/重命名文件错误：错误码：{}，错误详细: {}",ex.code(),ex.response.toString());
-            throw new BlogException(ExceptionEnum.MOVE_OR_RENAME_OSS_FILE_ERROR);
-        }
+        ossFileService.moveOrRenameFile(oldName, newName, toBucket);
     }
 
 
@@ -233,12 +249,12 @@ public class FileServiceImpl implements FileService {
                     bingImage.setCreateDate(new Date());
 
                     //下载文件并上传到oss
-                    FileUtil.createFolder(uploadUtil.getOssProperties().getTemporaryFolder());
+                    FileUtil.createFolder(ossFileService.getOssProperties().getTemporaryFolder());
                     //FileUtil.createFolder("D:\\bingImage\\");
-                    File localFile = new File(uploadUtil.getOssProperties().getTemporaryFolder() + hashCode + ".jpg");
+                    File localFile = new File(ossFileService.getOssProperties().getTemporaryFolder() + hashCode + ".jpg");
                     boolean success = ImageUtil.downloadImageWithHeaders(replaceUrl, "jpg",localFile,downloadheaders);
                     log.info("jsoup：{}, 下载成功：{}",bingImage,success);
-                    FileInfo fileInfo = uploadFile(localFile, "bingImage");
+                    OssFileInfo fileInfo = uploadFile(localFile, "bingImage");
                     bingImage.setUrl(fileInfo.getPath());
                     images.add(bingImage);
                     try {

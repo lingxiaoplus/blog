@@ -33,10 +33,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -180,8 +177,6 @@ public class UserServiceImpl implements UserService{
         //判断是否有系统管理员, 没有就注册
         if (roleService.haveAdmin()){
             log.info("有系统管理员");
-        }else {
-
         }
     }
     @Override
@@ -234,6 +229,8 @@ public class UserServiceImpl implements UserService{
         emailConfigure.setReceiveAddress(receiver);
         emailConfigure.setAuthCode(enableEmail.getAuthCode());
         emailConfigure.setTitle("注册博客");
+        emailConfigure.setHost(enableEmail.getHost());
+        emailConfigure.setProtocol(enableEmail.getProtocol());
 
         int minute = 3;
         emailConfigure.setMinute(minute);
@@ -242,7 +239,7 @@ public class UserServiceImpl implements UserService{
         try {
             emailUtil.sendEmail(emailConfigure);
             redisUtil.pushValue(RedisConstants.KEY_BACK_REGISTER_EMAIL_CODE,randomCode, TimeUnit.MINUTES.toMillis(minute));
-        } catch (MessagingException e) {
+        } catch (MessagingException|GeneralSecurityException e) {
             e.printStackTrace();
             throw new BlogException(ExceptionEnum.SEND_EMAIL_ERROR);
         }

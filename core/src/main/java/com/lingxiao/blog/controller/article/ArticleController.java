@@ -3,10 +3,10 @@ package com.lingxiao.blog.controller.article;
 import com.lingxiao.blog.annotation.OperationLogDetail;
 import com.lingxiao.blog.bean.po.Article;
 import com.lingxiao.blog.enums.OperationType;
+import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.service.article.ArticleService;
-import com.lingxiao.blog.bean.vo.ArticleDetailVo;
 import com.lingxiao.blog.bean.vo.ArticleVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -52,8 +52,8 @@ public class ArticleController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ResponseResult<ArticleDetailVo>> getArticle(@PathVariable("id") Long id){
-        ResponseResult<ArticleDetailVo> responseResult = new ResponseResult<>(articleService.getArticleContent(id));
+    public ResponseEntity<ResponseResult<ArticleVo>> getArticle(@PathVariable("id") Long id){
+        ResponseResult<ArticleVo> responseResult = new ResponseResult<>(articleService.getArticleContent(id));
         return ResponseEntity.ok(responseResult);
     }
 
@@ -70,7 +70,7 @@ public class ArticleController {
             @RequestParam(value = "keyword",defaultValue = "") String keyword,
             @RequestParam(value = "pageNum",defaultValue = "1")int pageNum,
             @RequestParam(value = "pageSize",defaultValue = "5")int pageSize){
-        return ResponseEntity.ok(articleService.getArticles(keyword,pageNum,pageSize));
+        return ResponseEntity.ok(articleService.getArticles(keyword, ContentValue.ARTICLE_STATUS_NONE, pageNum,pageSize));
     }
 
 

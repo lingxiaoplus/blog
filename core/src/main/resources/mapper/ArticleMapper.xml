@@ -5,9 +5,60 @@
         <result column="count" property="count" javaType="java.lang.Integer"/>
         <result column="time" property="time" />
     </resultMap>
+
+    <resultMap type="com.lingxiao.blog.bean.po.Article" id="articleMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="userId" column="user_id" jdbcType="INTEGER"/>
+        <result property="categoryId" column="category_id" jdbcType="INTEGER"/>
+        <result property="title" column="title" jdbcType="VARCHAR"/>
+        <result property="content" column="content" jdbcType="OTHER"/>
+        <result property="watchCount" column="watch_count" jdbcType="INTEGER"/>
+        <result property="commentCount" column="comment_count" jdbcType="INTEGER"/>
+        <result property="createAt" column="create_at" jdbcType="TIMESTAMP"/>
+        <result property="updateAt" column="update_at" jdbcType="TIMESTAMP"/>
+        <result property="likeCount" column="like_count" jdbcType="INTEGER"/>
+        <result property="status" column="status" jdbcType="OTHER"/>
+        <result property="headImage" column="head_image" jdbcType="VARCHAR"/>
+        <result property="author" column="author" jdbcType="VARCHAR"/>
+        <result property="categoryName" column="category_name" jdbcType="VARCHAR"/>
+
+        <collection property="labels" ofType="com.lingxiao.blog.bean.po.Label">
+            <result property="id" column="id" jdbcType="INTEGER" />
+            <result property="name" column="name" jdbcType="VARCHAR" />
+            <result property="description" column="description" jdbcType="VARCHAR" />
+            <result property="createAt" column="create_at" jdbcType="TIMESTAMP" />
+            <result property="image" column="image" jdbcType="VARCHAR" />
+        </collection>
+    </resultMap>
+
+    <sql id="allArticle" >
+        id,user_id,category_id,title,content,watch_count,comment_count,create_at,update_at,like_count,
+        status,head_image,author,category_name
+    </sql>
+
+    <sql id="label">
+        name,description,createAt,image
+    </sql>
+
     <select id="weekIncreased" resultMap="columnMap">
         SELECT date_format(create_at,'%Y-%m-%d') `time`, count(id) `count` FROM articles
         WHERE YEARWEEK(date_format(create_at,'%Y-%m-%d'),1) = YEARWEEK(now(),1)
         GROUP BY date_format(create_at,'%Y-%m-%d')
     </select>
+
+    <select id="selectYearArticles" resultMap="articleMap">
+        SELECT <include refid="allArticle"/>
+        from `articles` where `status`=1 and YEAR(create_at)=YEAR(#{date}) order by create_at desc
+    </select>
+
+    <select id="selectArticles" resultMap="articleMap">
+        SELECT a.*, l.name,l.description,l.create_at
+        FROM  `articles` a, `labels` l, `article_label` al
+        where a.id = al.article_id and l.id = al.label_id
+    </select>
+
+    <update id="updateArticleStatus">
+        update articles set status=#{status} where id=#{id}
+    </update>
+
 </mapper>

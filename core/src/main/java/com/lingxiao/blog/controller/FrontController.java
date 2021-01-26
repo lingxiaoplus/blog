@@ -4,12 +4,11 @@ import com.lingxiao.blog.annotation.OperationLogDetail;
 import com.lingxiao.blog.bean.po.Category;
 import com.lingxiao.blog.bean.po.FriendLink;
 import com.lingxiao.blog.bean.po.Label;
-import com.lingxiao.blog.bean.vo.ArticleDetailVo;
 import com.lingxiao.blog.bean.vo.ArticleVo;
 import com.lingxiao.blog.bean.vo.CommentVo;
 import com.lingxiao.blog.bean.vo.HomePageVo;
 import com.lingxiao.blog.enums.OperationType;
-import com.lingxiao.blog.global.RedisConstants;
+import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.service.article.ArticleService;
@@ -28,7 +27,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 
@@ -71,7 +69,7 @@ public class FrontController {
             @RequestParam(value = "keyword",defaultValue = "") String keyword,
             @RequestParam(value = "pageNum",defaultValue = "1")int pageNum,
             @RequestParam(value = "pageSize",defaultValue = "5")int pageSize){
-        return ResponseEntity.ok(articleService.getArticlesFromPublished(keyword,pageNum,pageSize));
+        return ResponseEntity.ok(articleService.getArticles(keyword, ContentValue.ARTICLE_STATUS_PUBLISHED, pageNum,pageSize));
     }
 
     @GetMapping("/banner")
@@ -80,8 +78,8 @@ public class FrontController {
     }
 
     @GetMapping("/article/{id}")
-    public ResponseEntity<ResponseResult<ArticleDetailVo>> getArticle(@PathVariable("id") Long id){
-        ResponseResult<ArticleDetailVo> responseResult = new ResponseResult<>(articleService.getArticleContent(id));
+    public ResponseEntity<ResponseResult<ArticleVo>> getArticle(@PathVariable("id") Long id){
+        ResponseResult<ArticleVo> responseResult = new ResponseResult<>(articleService.getArticleContent(id));
         return ResponseEntity.ok(responseResult);
     }
 
@@ -143,8 +141,7 @@ public class FrontController {
         Context context = new Context();
         context.setVariable("expireTime", "5");
         context.setVariable("verifyCode", "54657");
-        String emailText = templateEngine.process("email", context);
-        return emailText;
+        return templateEngine.process("email", context);
     }
 
     @Autowired

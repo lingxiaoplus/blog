@@ -40,6 +40,10 @@ public class ContentValue {
 
 
     /**
+     * 文章状态
+     */
+    public static final int ARTICLE_STATUS_NONE = -1;
+    /**
      * 文章状态 草稿箱
      */
     public static final int ARTICLE_STATUS_DRAFT = 0;

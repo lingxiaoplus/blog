@@ -7,7 +7,6 @@ import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.service.system.OperationLogService;
 import com.lingxiao.blog.utils.IPUtils;
-import com.lingxiao.blog.utils.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -74,8 +73,9 @@ public class CommonExceptionHandler {
 
     private void insertOperationLog(Throwable throwable) {
         OperationLog operationLog = new OperationLog();
-        User user = SecurityUtil.getCurrentUser();
-        if (user != null) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() != null) {
+            User user = (User) authentication.getPrincipal();
             operationLog.setUsername(user.getUsername());
             operationLog.setNickname(user.getNickname());
         }

@@ -16,19 +16,16 @@ import com.lingxiao.blog.service.article.ArticleService;
 import com.lingxiao.blog.service.article.LabelService;
 import com.lingxiao.blog.service.system.DictionaryService;
 import com.lingxiao.blog.service.system.ThemeService;
-import com.lingxiao.blog.service.user.CommentService;
+import com.lingxiao.blog.utils.BeanUtil;
 import com.lingxiao.blog.utils.RedisUtil;
+import com.lingxiao.blog.utils.SecurityUtil;
 import com.lingxiao.blog.utils.UIDUtil;
-import com.lingxiao.blog.bean.vo.ArticleDetailVo;
 import com.lingxiao.blog.bean.vo.ArticleVo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.RowBounds;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -48,8 +45,6 @@ public class ArticleServiceImpl implements ArticleService {
     @Autowired
     private ArticleMapper articleMapper;
     @Autowired
-    private UserMapper userMapper;
-    @Autowired
     private CategoryMapper categoryMapper;
     @Autowired
     private ArticleLabelMapper articleLabelMapper;
@@ -59,8 +54,6 @@ public class ArticleServiceImpl implements ArticleService {
     private ThemeService themeService;
     @Autowired
     private DictionaryService dictionaryService;
-    @Autowired
-    private CommentService commentService;
     @Autowired
     private RedisUtil redisUtil;
 
@@ -72,16 +65,21 @@ public class ArticleServiceImpl implements ArticleService {
             updateArticle(article);
             return article.getId();
         }
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) authentication.getPrincipal();
+
         long id = UIDUtil.nextId();
         article.setId(id);
         article.setCreateAt(new Date());
         article.setUpdateAt(article.getCreateAt());
+
+        User user = SecurityUtil.getCurrentUser();
         article.setUserId(user.getUserId());
+        article.setAuthor(user.getUsername());
+        Category category = categoryMapper.selectByPrimaryKey(article.getCategoryId());
+        article.setCategoryName(category.getName());
+
         int count = articleMapper.insertSelective(article);
         if (count != 1) {
-            throw new BlogException(ExceptionEnum.CATEGORY_INSERT_ERROR);
+            throw new BlogException(ExceptionEnum.ARTICLE_INSERT_ERROR);
         }
         if (!CollectionUtils.isEmpty(article.getLabelIds())){
             addLabels(article.getId(),article.getLabelIds());
@@ -107,9 +105,6 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional(rollbackFor = {Exception.class})
     @Override
     public void updateArticle(Article article) {
-        if (null == articleMapper.selectByPrimaryKey(article.getId())){
-            throw new BlogException(ExceptionEnum.ARTICLE_SELECT_ERROR);
-        }
         article.setCreateAt(null);
         article.setUserId(null);
         article.setUpdateAt(new Date());
@@ -125,70 +120,30 @@ public class ArticleServiceImpl implements ArticleService {
 
 
     @Override
-    public ArticleDetailVo getArticleContent(Long id) {
+    public ArticleVo getArticleContent(Long id) {
         Article article = articleMapper.selectByPrimaryKey(id);
         if (article == null){
             throw new BlogException(ExceptionEnum.ARTICLE_SELECT_ERROR);
         }
         article.setWatchCount(article.getWatchCount()+1);
-        ArticleDetailVo articleDetailVo = transformArticle(article);
         articleMapper.updateByPrimaryKeySelective(article);
-        return articleDetailVo;
+        return articleConvert(article);
     }
 
-    private ArticleDetailVo transformArticle(Article article){
-        ArticleDetailVo articleDetail = new ArticleDetailVo();
-        articleDetail.setId(String.valueOf(article.getId()));
-        articleDetail.setUserId(String.valueOf(article.getUserId()));
-        articleDetail.setCategoryId(String.valueOf(article.getCategoryId()));
-
-        articleDetail.setTitle(article.getTitle());
-        articleDetail.setContent(article.getContent());
-        articleDetail.setHeadImage(article.getHeadImage());
-
-        DateTime createTime = new DateTime(article.getCreateAt());
-        String createString = createTime.toString("yyyy-MM-dd HH:mm:ss");
-        articleDetail.setCreateAt(createString);
-        DateTime updateTime = new DateTime(article.getUpdateAt());
-        String updateString = updateTime.toString("yyyy-MM-dd HH:mm:ss");
-        articleDetail.setUpdateAt(updateString);
-
-        articleDetail.setCommentCount(article.getCommentCount());
-        articleDetail.setLikeCount(article.getLikeCount());
-        articleDetail.setWatchCount(article.getWatchCount());
-
-        List<Label> labels = labelService.getLabelByArticleId(article.getId());
-        articleDetail.setLabels(labels);
-
-        return articleDetail;
-    }
 
     @Override
-    public PageResult<ArticleVo> getArticles(String keyword,int pageNum, int pageSize) {
+    public PageResult<ArticleVo> getArticles(String keyword, int status, int pageNum, int pageSize) {
         PageHelper.startPage(pageNum,pageSize,"create_at desc");
         Example example = new Example(Article.class);
-        example.createCriteria()
-                .andLike("title","%"+keyword+"%");
-        List<Article> articles = articleMapper.selectByExample(example);
-
-        PageInfo<Article> pageInfo = PageInfo.of(articles);
-
-
-        List<ArticleVo> articleVoList = articleVoConvert(pageInfo.getList());
-        return new PageResult<>(pageInfo.getTotal(),pageInfo.getPages(),articleVoList);
-    }
-
-    @Override
-    public PageResult<ArticleVo> getArticlesFromPublished(String keyword, int pageNum, int pageSize) {
-        PageHelper.startPage(pageNum,pageSize,"create_at desc");
-        Example example = new Example(Article.class);
-        example.createCriteria()
-                .andEqualTo("status",ContentValue.ARTICLE_STATUS_PUBLISHED)
-                .andLike("title","%"+keyword+"%");
+        Example.Criteria criteria = example.createCriteria();
+        if (status != ContentValue.ARTICLE_STATUS_NONE){
+            criteria.andEqualTo("status",status);
+        }
+        criteria.andLike("title","%"+keyword+"%");
         List<Article> articles = articleMapper.selectByExample(example);
         PageInfo<Article> pageInfo = PageInfo.of(articles);
-        List<ArticleVo> articleVoList = articleVoConvert(pageInfo.getList());
-        return new PageResult<>(pageInfo.getTotal(),pageInfo.getPages(),articleVoList);
+        List<ArticleVo> articleVoList = articleListConvert(pageInfo.getList());
+        return new PageResult<>(pageInfo.getTotal(), pageInfo.getPages(), articleVoList);
     }
 
     @Override
@@ -205,7 +160,7 @@ public class ArticleServiceImpl implements ArticleService {
             return result;
         }
         List<Article> articles = articleMapper.selectYearArticles(date);
-        result = articleVoConvert(articles);
+        result = articleListConvert(articles);
         redisUtil.rightPushAll(String.format(RedisConstants.KEY_FRONT_ARTICLE_TIMELINE_YEAR,date.getTime()),result, TimeUnit.DAYS.toMillis(1));
         return result;
     }
@@ -214,7 +169,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public ResponseResult<HomePageVo> getHomePageBanner(int bannerSize){
         List<Article> articles = getRankArticle(bannerSize);
-        List<ArticleVo> banners = articleVoConvert(articles);
+        List<ArticleVo> banners = articleListConvert(articles);
         Hitokoto hitokoto = themeService.getHitokoto();
         HomePageVo homePageVo = new HomePageVo();
         homePageVo.setBanners(banners);
@@ -232,50 +187,29 @@ public class ArticleServiceImpl implements ArticleService {
         }
     }
 
-    private List<ArticleVo> articleVoConvert(List<Article> articles){
-        return articles
-                .stream()
-                .map(item -> {
-                    ArticleVo articleVo = new ArticleVo();
-                    articleVo.setId(String.valueOf(item.getId()));
-                    articleVo.setTitle(item.getTitle());
-                    DateTime dateTime = new DateTime(item.getUpdateAt());
-                    String dateString = dateTime.toString("yyyy-MM-dd");
-                    articleVo.setUpdateTime(dateString);
-                    String createString = new DateTime(item.getCreateAt()).toString("yyyy-MM-dd");
-                    articleVo.setCreateTime(createString);
-                    User user = userMapper.selectByPrimaryKey(item.getUserId());
-                    articleVo.setAuthor(user.getUsername());
-                    articleVo.setHeadImage(item.getHeadImage());
+    private List<ArticleVo>  articleListConvert(List<Article> articles){
+        return articles.stream().map(item ->{
+            ArticleVo articleVo = articleConvert(item);
+            String content = stringFilter(item.getContent());
+            //缩略字符串
+            articleVo.setContent(content);
+            return articleVo;
+        }).collect(Collectors.toList());
+    }
 
-                    articleVo.setCategoryId(String.valueOf(item.getCategoryId()));
-                    Category category = categoryMapper.selectByPrimaryKey(item.getCategoryId());
-                    articleVo.setCategoryName(category.getName());
-                    articleVo.setWatchCount(item.getWatchCount());
-                    String content = item.getContent();
-                    content = stringFilter(content);
-                    if (content.length() > 100){
-                        //缩略字符串
-                        articleVo.setContent(StringUtils.abbreviate(content,100));
-                    }else {
-                        articleVo.setContent(content);
-                    }
-                    List<Label> labels = labelService.getLabelByArticleId(item.getId());
-                    articleVo.setLabels(labels);
-
-                    //设置状态
-                    articleVo.setStatus(dictionaryService.getDictionaryByNameAndCode("articleStatus",
-                            String.valueOf(item.getStatus())));
-                    articleVo.setCommentCount(commentService.getCommentCount(item.getId()));
-                    return articleVo;
-                })
-                .collect(Collectors.toList());
+    private ArticleVo articleConvert(Article article){
+        ArticleVo articleVo = BeanUtil.map(ArticleVo.class, article);
+        //设置状态
+        articleVo.setStatus(dictionaryService.getDictionaryByNameAndCode("articleStatus",
+                String.valueOf(article.getStatus())));
+        return articleVo;
     }
 
     private static String stringFilter (String str){
         String regEx="[`~!@#$%^&*()+=|{}\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘”“’]";
         Pattern p = Pattern.compile(regEx);
         Matcher m = p.matcher(str);
-        return m.replaceAll("").trim();
+        String trim = m.replaceAll("").trim();
+        return StringUtils.abbreviate(trim,100);
     }
 }

@@ -67,6 +67,9 @@ public class RedisUtil {
      * @param list
      */
     public void rightPushAll(String key, List list) {
+        if (CollectionUtils.isEmpty(list)) {
+            return;
+        }
         // 先删除再push
         delRedis(key);
         redisTemplate.opsForList().rightPushAll(key, list);
@@ -82,12 +85,12 @@ public class RedisUtil {
         redisTemplate.expire(key,time, TimeUnit.MILLISECONDS);
     }
 
+    //private Gson gson = new Gson();
     public <T> void pushValue(String key, T data) {
-        Gson gson = new Gson();
-        Type type = new TypeToken<T>() {
+        /*Type type = new TypeToken<T>() {
         }.getType();
-        String json = gson.toJson(data, type);
-        redisTemplate.opsForValue().set(key, json);
+        String json = gson.toJson(data, type);*/
+        redisTemplate.opsForValue().set(key, data);
 
     }
 
