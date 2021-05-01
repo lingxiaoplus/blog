@@ -8,6 +8,10 @@ spring:
     driver-class-name: com.mysql.jdbc.Driver
   jackson:
     default-property-inclusion: non_null
+  redis:
+    port: 16379
+    password: 123456
+    host: 127.0.0.1
   # 环境 dev:开发环境|test:测试环境|prod:生产环境
   profiles:
     active: "@profiles.active@"
@@ -25,7 +29,7 @@ spring:
     locations: classpath:db
     clean-disabled: true
   thymeleaf:
-    mode: HTML5
+    mode: HTML
   servlet:
     multipart:
       max-file-size: 10MB

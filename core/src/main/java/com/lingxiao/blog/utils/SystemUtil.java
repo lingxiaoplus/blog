@@ -1,16 +1,25 @@
 package com.lingxiao.blog.utils;
 
+import com.google.gson.Gson;
+import com.lingxiao.blog.bean.statistics.LineChartData;
+import com.lingxiao.blog.bean.statistics.Memory;
+import com.lingxiao.blog.bean.statistics.Series;
+import com.lingxiao.blog.bean.statistics.jvm.JvmHeapInfo;
+import com.lingxiao.blog.bean.statistics.jvm.JvmInfo;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 import oshi.SystemInfo;
 import oshi.hardware.*;
+import oshi.software.os.OperatingSystem;
 
 import java.io.File;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryUsage;
 import java.text.DecimalFormat;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -19,10 +28,34 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class SystemUtil {
     private static final SystemInfo SYSTEM_INFO = new SystemInfo();
+    private final DecimalFormat mFormat = new DecimalFormat("#.##%");
 
-    private DecimalFormat mFormat = new DecimalFormat("#.##%");
+    private CpuInfo mCpuInfo = null;
+
+    /**
+     * 这些不变的信息只需要获取一次
+     */
+    private void getBasicCpuInfo(){
+        if (mCpuInfo != null) {
+            return;
+        }
+        CentralProcessor processor = SYSTEM_INFO.getHardware().getProcessor();
+        log.debug("cpu供应商: {}",processor.getVendor());
+        log.debug("cpu名字: {}",processor.getName());
+        log.debug("cpu负载: {}",processor.getSystemCpuLoad());
+        log.debug("cpu核数:{}",processor.getLogicalProcessorCount());
+
+
+
+        mCpuInfo = new CpuInfo();
+        mCpuInfo.setVendor(processor.getVendor());
+        mCpuInfo.setName(processor.getName());
+        mCpuInfo.setCoreNum(processor.getLogicalProcessorCount());
+
+
+    }
+
     public CpuInfo getCpuInfo() throws InterruptedException {
-        //System.out.println("----------------cpu信息----------------");
         CentralProcessor processor = SYSTEM_INFO.getHardware().getProcessor();
         long[] prevTicks = processor.getSystemCpuLoadTicks();
         // 睡眠1s
@@ -39,32 +72,44 @@ public class SystemUtil {
         long totalCpu = user + nice + cSys + idle + iowait + irq + softirq + steal;
 
         log.debug("----------------cpu信息----------------");
-        log.debug("cpu核数:{}",processor.getLogicalProcessorCount());
         log.debug("cpu系统使用率:{}",mFormat.format(cSys * 1.0 / totalCpu));
         log.debug("cpu用户使用率:{}",mFormat.format(user * 1.0 / totalCpu));
         log.debug("cpu当前等待率:{}",mFormat.format(iowait * 1.0 / totalCpu));
         log.debug("cpu当前使用率:{}",mFormat.format(1.0 - (idle * 1.0 / totalCpu)));
-        CpuInfo cpuInfo = new CpuInfo();
-        cpuInfo.setCoreNum(processor.getLogicalProcessorCount());
-        cpuInfo.setSystemUsage(mFormat.format(cSys * 1.0 / totalCpu));
-        cpuInfo.setUserUsage(mFormat.format(user * 1.0 / totalCpu));
-        cpuInfo.setWaitRate(mFormat.format(iowait * 1.0 / totalCpu));
-        cpuInfo.setUsageRate(mFormat.format(1.0 - (idle * 1.0 / totalCpu)));
-        return cpuInfo;
+
+        getBasicCpuInfo();
+
+        Sensors sensors = SYSTEM_INFO.getHardware().getSensors();
+        double temperature = sensors.getCpuTemperature();
+        double cpuVoltage = sensors.getCpuVoltage();
+        int[] fanSpeeds = sensors.getFanSpeeds();
+        log.debug("cpu温度: {} 摄氏度",temperature);
+        log.debug("cpu电压: {} 伏",cpuVoltage);
+        log.debug("cpu风扇速度: {}", Arrays.toString(fanSpeeds));
+        mCpuInfo.setTemperature(temperature + "");
+        mCpuInfo.setVoltage(cpuVoltage + "v");
+        mCpuInfo.setFanSpeeds(Arrays.toString(fanSpeeds));
+
+        mCpuInfo.setLoad(mFormat.format(processor.getSystemCpuLoad()));
+        mCpuInfo.setSystemUsage(mFormat.format(cSys * 1.0 / totalCpu));
+        mCpuInfo.setUserUsage(mFormat.format(user * 1.0 / totalCpu));
+        mCpuInfo.setWaitRate(mFormat.format(iowait * 1.0 / totalCpu));
+        mCpuInfo.setUsageRate(mFormat.format(1.0 - (idle * 1.0 / totalCpu)));
+        return mCpuInfo;
     }
 
     public MemoryInfo getMemInfo() {
-        System.out.println("----------------主机内存信息----------------");
+        log.debug("----------------主机内存信息----------------");
         GlobalMemory memory = SYSTEM_INFO.getHardware().getMemory();
         //总内存
         long totalByte = memory.getTotal();
         //剩余
         long acaliableByte = memory.getAvailable();
 
-        System.out.println("总内存 = " + formatByte(totalByte));
-        System.out.println("使用" + formatByte(totalByte - acaliableByte));
-        System.out.println("剩余内存 = " + formatByte(acaliableByte));
-        System.out.println("使用率：" + mFormat.format((totalByte - acaliableByte) * 1.0 / totalByte));
+        log.debug("总内存 = {}" , formatByte(totalByte));
+        log.debug("使用 = {}" , formatByte(totalByte - acaliableByte));
+        log.debug("剩余内存 = {}" , formatByte(acaliableByte));
+        log.debug("使用率 = {}" , mFormat.format((totalByte - acaliableByte) * 1.0 / totalByte));
 
         MemoryInfo memoryInfo = new MemoryInfo();
         memoryInfo.setTotal(formatByte(totalByte));
@@ -109,22 +154,13 @@ public class SystemUtil {
         return diskStoreInfo;
     }
 
-    public String getOsName(){
-        Properties props = System.getProperties();
-        //系统名称
-        String osName = props.getProperty("os.name");
-        return osName;
-    }
-    public String getOsArch(){
-        Properties props = System.getProperties();
-        //系统名称
-        String osArch = props.getProperty("os.arch");
-        return osArch;
+    public OperatingSystem getOsInfo(){
+        return SYSTEM_INFO.getOperatingSystem();
     }
 
 
     public JvmInfo getJvmInfo() {
-        System.out.println("----------------jvm信息----------------");
+        log.debug("----------------jvm信息----------------");
         Properties props = System.getProperties();
         Runtime runtime = Runtime.getRuntime();
         //jvm总内存
@@ -137,12 +173,19 @@ public class SystemUtil {
         String jdkVersion = props.getProperty("java.version");
         //jdk路径
         String jdkHome = props.getProperty("java.home");
-        System.out.println("jvm内存总量 = " + formatByte(jvmTotalMemoryByte));
-        System.out.println("jvm已使用内存 = " + formatByte(jvmTotalMemoryByte - freeMemoryByte));
-        System.out.println("jvm剩余内存 = " + formatByte(freeMemoryByte));
-        System.out.println("jvm内存使用率 = " + mFormat.format((jvmTotalMemoryByte - freeMemoryByte) * 1.0 / jvmTotalMemoryByte));
-        System.out.println("java版本 = " + jdkVersion);
-        //System.out.println("jdkHome = " + jdkHome);
+        log.debug("jvm内存总量 = {}" , formatByte(jvmTotalMemoryByte));
+        log.debug("jvm已使用内存 = {}" , formatByte(jvmTotalMemoryByte - freeMemoryByte));
+        log.debug("jvm剩余内存 = {}" , formatByte(freeMemoryByte));
+        log.debug("jvm内存使用率 = {}" , mFormat.format((jvmTotalMemoryByte - freeMemoryByte) * 1.0 / jvmTotalMemoryByte));
+        log.debug("java版本 = {}" , jdkVersion);
+        log.debug("jdk安装路径 = {}",jdkHome);
+
+        //非堆内存
+        MemoryUsage nonHeapMemoryUsage = ManagementFactory.getMemoryMXBean().getNonHeapMemoryUsage();
+        log.debug("jvm初始非堆内存: {}",formatByte(nonHeapMemoryUsage.getInit()));
+        log.debug("jvm最大非堆内存: {}",formatByte(nonHeapMemoryUsage.getMax()));
+        log.debug("jvm已用非堆内存: {}",formatByte(nonHeapMemoryUsage.getUsed()));
+
 
         JvmInfo jvmInfo = new JvmInfo();
         jvmInfo.setTotal(formatByte(jvmTotalMemoryByte));
@@ -150,11 +193,75 @@ public class SystemUtil {
         jvmInfo.setAcaliable(formatByte(freeMemoryByte));
         jvmInfo.setUsageRate(mFormat.format((jvmTotalMemoryByte - freeMemoryByte) * 1.0 / jvmTotalMemoryByte));
         jvmInfo.setVersion(jdkVersion);
+        jvmInfo.setJvmHeapInfo(getJvmHeapInfo());
         return jvmInfo;
     }
 
+    private final LineChartData<String> heapLineChartData = new LineChartData<>();
+    private BlockingQueue<String> usedHeapQueue;
+    private BlockingQueue<String> canUseHeapQueue;
+    private BlockingQueue<String> heapXAxisQueue;
+    private List<Series<String>> heapSeries;
+    private boolean initHeapQueued = false;
+    private void initHeapQueue(){
+        if (initHeapQueued){
+            return;
+        }
+        usedHeapQueue = new ArrayBlockingQueue<>(5);
+        canUseHeapQueue = new ArrayBlockingQueue<>(5);
+        heapXAxisQueue = new ArrayBlockingQueue<>(5);
+        Series<String> usedSeries = new Series<>();
+        usedSeries.setName("已用堆内存");
+
+        Series<String> canUseSeries = new Series<>();
+        canUseSeries.setName("可用堆内存");
+        heapSeries = new ArrayList<>();
+        heapSeries.add(usedSeries);
+        heapSeries.add(canUseSeries);
+        initHeapQueued = true;
+    }
+    public JvmHeapInfo getJvmHeapInfo(){
+        //获取堆内存信息
+        MemoryUsage heapMemoryUsage = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
+
+        Memory usedMemory = NumberUtil.formatByte(heapMemoryUsage.getUsed());
+        Memory canUseMemory = NumberUtil.formatByte(heapMemoryUsage.getCommitted());
+        String initMemory = formatByte(heapMemoryUsage.getInit());
+        String maxMemory = formatByte(heapMemoryUsage.getMax());
+
+        initHeapQueue();
+
+        DateTime dateTime = new DateTime();
+        String date = dateTime.toString("HH:mm:ss");
+        addDataToQueue(heapXAxisQueue,5,date);
+        addDataToQueue(usedHeapQueue,5,usedMemory.getValue());
+        addDataToQueue(canUseHeapQueue,5,canUseMemory.getValue());
+        heapLineChartData.setXAxis(heapXAxisQueue);
+        heapSeries.get(0).setData(new ArrayList<>(usedHeapQueue));
+        heapSeries.get(0).setUnit(StringUtils.substring(usedMemory.getUnit(),5));
+        heapSeries.get(1).setData(new ArrayList<>(canUseHeapQueue));
+        heapSeries.get(1).setUnit(StringUtils.substring(canUseMemory.getUnit(),5));
+        heapLineChartData.setSeries(heapSeries);
+
+        JvmHeapInfo jvmHeapInfo = new JvmHeapInfo();
+        jvmHeapInfo.setInitMemory(initMemory);
+        jvmHeapInfo.setMaxMemory(maxMemory);
+        jvmHeapInfo.setHeapLineChartData(heapLineChartData);
+        return jvmHeapInfo;
+    }
+
+    private void addDataToQueue(BlockingQueue<String> queue, int limit, String date){
+        if (queue.size() >= limit){
+            if (queue.poll() != null){
+                queue.add(date);
+            }
+        }else {
+            queue.add(date);
+        }
+    }
+
     public void getThread() {
-        System.out.println("----------------线程信息----------------");
+        log.debug("----------------线程信息----------------");
         ThreadGroup currentGroup = Thread.currentThread().getThreadGroup();
 
         while (currentGroup.getParent() != null) {
@@ -168,7 +275,7 @@ public class SystemUtil {
         //把对此线程组中的所有活动子组的引用复制到指定数组中。
         currentGroup.enumerate(lstThreads);
         for (Thread thread : lstThreads) {
-            System.out.println("线程数量：" + noThreads + " 线程id：" + thread.getId() + " 线程名称：" + thread.getName() + " 线程状态：" + thread.getState());
+            log.debug("线程数量：{}, 线程id：{}, 线程名称：{}, 线程状态：{}" , noThreads , thread.getId() , thread.getName() , thread.getState());
         }
     }
 
@@ -229,44 +336,88 @@ public class SystemUtil {
         return new DecimalFormat("#.##TB").format(tbNumber);
     }
 
+
+
+
+    public String[] getNearTime(){
+        Calendar calendar = Calendar.getInstance();
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
+        int second = Integer.parseInt(String.valueOf(calendar.get(Calendar.SECOND) / 10).concat("0"));
+        if (second >= 60){
+            minute = minute + 1;
+            second = 0;
+        }
+        if (minute >= 60){
+            hour = hour + 1;
+            minute = 0;
+        }
+        if (hour >= 24){
+            hour = 0;
+        }
+        String[] nearTimeArray = new String[5];
+        for (int i = 0; i < 5; i++) {
+            StringBuilder builder = new StringBuilder();
+            nearTimeArray[i] = builder.append(hour).append(":").append(minute).append(":").append(second).toString();
+            second = second + 5;
+            if (second >= 60){
+                minute = minute + 1;
+                second = 0;
+            }
+            if (minute >= 60){
+                hour = hour + 1;
+                minute = 0;
+            }
+            if (hour >= 24){
+                hour = 0;
+            }
+        }
+        return nearTimeArray;
+    }
+
     public static void main(String[] args) {
-        while (true){
+        boolean tag = true;
+        SystemUtil systemUtil = new SystemUtil();
+        while (tag){
             try {
-                SystemUtil systemUtil = new SystemUtil();
-                systemUtil.getDiskStore();
+               /* systemUtil.getDiskStore();
+                systemUtil.getJvmInfo();
+                systemUtil.getThread();
+                systemUtil.getCpuInfo();
+                systemUtil.getOsInfo();*/
+                systemUtil.getJvmHeapInfo();
                 TimeUnit.SECONDS.sleep(5);
             }catch (Exception e){
                 e.printStackTrace();
+                tag = false;
             }
         }
     }
 
     @Data
-    public class CpuInfo{
+    public static class CpuInfo{
         private int coreNum;  //cpu核数
         private String systemUsage; //cpu系统使用率
         private String userUsage; //cpu用户使用率
         private String waitRate; //cpu当前等待率
         private String usageRate; //cpu当前使用率
+        private String vendor; //cpu供应商
+        private String name; //cpu名字
+        private String load; //cpu负载
+        private String temperature;
+        private String voltage;
+        private String fanSpeeds;
     }
     @Data
-    public class MemoryInfo{
+    public static class MemoryInfo{
         private String total; //总内存
         private String used; //使用
         private String acaliable; //剩余内存
         private String usageRate; //使用率
     }
-    @Data
-    public class JvmInfo{
-        private String total; //jvm内存总量
-        private String used; //jvm已使用内存
-        private String acaliable; //jvm剩余内存
-        private String usageRate; //jvm内存使用率
-        private String version; //java版本
-    }
 
     @Data
-    public class DiskStoreInfo{
+    public static class DiskStoreInfo{
         private String total; //总量
         private String used; //已使用
         private String acaliable; //剩余
@@ -274,7 +425,7 @@ public class SystemUtil {
     }
 
     @Data
-    public class NetworkData {
+    public static class NetworkData {
         private BlockingQueue<String> xAxis = new ArrayBlockingQueue<>(8);
         private int[] yAxis = new int[]{0,5,10,15,20,25,30};
         private BlockingQueue<Double> series = new ArrayBlockingQueue<>(8);

@@ -7,6 +7,7 @@ import com.lingxiao.blog.bean.po.Label;
 import com.lingxiao.blog.bean.vo.ArticleVo;
 import com.lingxiao.blog.bean.vo.CommentVo;
 import com.lingxiao.blog.bean.vo.HomePageVo;
+import com.lingxiao.blog.enums.ArticleStatusEnum;
 import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.api.PageResult;
@@ -69,7 +70,7 @@ public class FrontController {
             @RequestParam(value = "keyword",defaultValue = "") String keyword,
             @RequestParam(value = "pageNum",defaultValue = "1")int pageNum,
             @RequestParam(value = "pageSize",defaultValue = "5")int pageSize){
-        return ResponseEntity.ok(articleService.getArticles(keyword, ContentValue.ARTICLE_STATUS_PUBLISHED, pageNum,pageSize));
+        return ResponseEntity.ok(articleService.getArticles(keyword, ArticleStatusEnum.ARTICLE_STATUS_PUBLISHED.getCode(), pageNum,pageSize));
     }
 
     @GetMapping("/banner")

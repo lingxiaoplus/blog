@@ -351,12 +351,12 @@ class BlogApplicationTests {
     private ArticleMapper articleMapper;
     @Test
     void getArticles(){
-        List<Article> articles = articleMapper.selectArticles();
+        /*List<Article> articles = articleMapper.selectArticles();
         articles.forEach(item ->{
             String title = item.getTitle();
             List<Label> labels = item.getLabels();
             log.info("标题: {}, 标签: {}",title, Arrays.toString(labels.toArray()));
-        });
+        });*/
         //log.info("查询结果: {}",Arrays.toString(articles.toArray()));
     }
 }

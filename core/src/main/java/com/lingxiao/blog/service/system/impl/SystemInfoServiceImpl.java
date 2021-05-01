@@ -1,5 +1,6 @@
 package com.lingxiao.blog.service.system.impl;
 
+import com.lingxiao.blog.bean.statistics.jvm.JvmInfo;
 import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.service.system.SystemInfoService;
 import com.lingxiao.blog.utils.SystemUtil;
@@ -18,11 +19,12 @@ public class SystemInfoServiceImpl implements SystemInfoService {
     @Override
     public ResponseResult<Map<String, Object>> getSystemLoad() {
         Map<String, Object> map = new HashMap<>();
-        map.put("osName",systemUtil.getOsName());
-        map.put("osArch",systemUtil.getOsArch());
+        map.put("osName",systemUtil.getOsInfo().getFamily());
+        map.put("osArch",systemUtil.getOsInfo().getVersion());
+        map.put("manufacturer",systemUtil.getOsInfo().getManufacturer());
         SystemUtil.MemoryInfo memInfo = systemUtil.getMemInfo();
         map.put("memoryInfo",memInfo);
-        SystemUtil.JvmInfo jvmInfo = systemUtil.getJvmInfo();
+        JvmInfo jvmInfo = systemUtil.getJvmInfo();
         map.put("jvmInfo",jvmInfo);
         SystemUtil.DiskStoreInfo diskStore = systemUtil.getDiskStore();
         map.put("diskStore",diskStore);

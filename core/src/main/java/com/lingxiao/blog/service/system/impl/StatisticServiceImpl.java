@@ -4,11 +4,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.lingxiao.blog.bean.po.*;
 import com.lingxiao.blog.bean.statistics.AggregationData;
 import com.lingxiao.blog.bean.statistics.LineChartData;
+import com.lingxiao.blog.bean.statistics.Series;
 import com.lingxiao.blog.bean.statistics.WeekData;
 import com.lingxiao.blog.global.RedisConstants;
 import com.lingxiao.blog.global.api.ResponseResult;
 import com.lingxiao.blog.mapper.*;
 import com.lingxiao.blog.service.system.StatisticService;
+import com.lingxiao.blog.utils.DateUtil;
 import com.lingxiao.blog.utils.IPUtils;
 import com.lingxiao.blog.utils.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -16,13 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * @author admin
@@ -56,27 +53,51 @@ public class StatisticServiceImpl implements StatisticService {
         }
         List<WeekData> weekData = articleMapper.weekIncreased();
         jsonObject = new JSONObject();
-        LineChartData increasedData = transformWeekData(weekData);
+        LineChartData<Integer> increasedData = transformWeekData(weekData);
         jsonObject.put("articleIncreasedData",increasedData);
         getTotalNumber(jsonObject);
         redisUtil.pushValue(RedisConstants.KEY_FRONT_STATTICS_ARTICLE_INCREASE, jsonObject, TimeUnit.HOURS.toMillis(4));
         return new ResponseResult<>(jsonObject);
     }
 
-    private LineChartData transformWeekData(List<WeekData> weekDataList){
-        LineChartData increasedData = new LineChartData();
-        int[] series = increasedData.getSeries();
-        List<String> weekXAxis = increasedData.getXAxis();
+    private LineChartData<Integer> transformWeekData(List<WeekData> weekDataList){
+        LineChartData<Integer> increasedData = new LineChartData<>();
+        List<String> days = DateUtil.getDays(7);
+        List<Integer> series = new ArrayList<>(7);
         if (!CollectionUtils.isEmpty(weekDataList)){
-            for (int i = 0; i < weekXAxis.size(); i++) {
+            for (int i = 0; i < days.size(); i++) {
                 for (int j = 0; j < weekDataList.size(); j++) {
                     WeekData data = weekDataList.get(j);
-                    if (weekXAxis.get(i).equals(data.getTime())){
-                        series[i] = data.getCount();
+                    if (days.get(i).equals(data.getTime())){
+                        series.add(i,data.getCount());
                         break;
                     }
                 }
             }
+
+            Series<Integer> integerSeries = new Series<>();
+            integerSeries.setData(series);
+            List<Series<Integer>> seriesList = new ArrayList<>();
+            seriesList.add(integerSeries);
+            increasedData.setSeries(seriesList);
+
+
+            BlockingQueue<String> xAxis = new ArrayBlockingQueue<>(7,false,days);
+            increasedData.setXAxis(xAxis);
+
+            Integer count = weekDataList
+                    .stream()
+                    .max(Comparator.comparing(WeekData::getCount))
+                    .get()
+                    .getCount();
+            int quotient = count / 10;
+            int average = (quotient + 1) * 10 / 5;
+            int[] yAxis = new int[5];
+            for (int i = 0; i < 5; i++) {
+                yAxis[i] = (average);
+                average += average;
+            }
+            increasedData.setYAxis(yAxis);
         }
         return increasedData;
     }

@@ -20,6 +20,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.web.cors.CorsConfiguration;
@@ -93,7 +94,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 //CRSF禁用，因为不使用session
                 .csrf().disable()
                 //禁用session
-                .sessionManagement().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
                 .formLogin().disable() //禁用form登录
                 //添加header设置，支持跨域和ajax请求
                 .addFilterAfter(corsFilter(), CorsFilter.class)
@@ -111,8 +113,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 //logout成功后返回200
                 .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler())
                 .and()
-                .sessionManagement()
-                .disable()
                 .exceptionHandling()
                 .accessDeniedHandler(accessDeniedHandler);
     }

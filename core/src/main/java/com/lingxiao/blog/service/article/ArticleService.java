@@ -6,6 +6,7 @@ import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.bean.vo.ArticleVo;
 import com.lingxiao.blog.global.api.ResponseResult;
 
+import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.List;
 
@@ -38,5 +39,5 @@ public interface ArticleService {
      * @param pageSize
      * @return
      */
-    PageResult<ArticleVo> getArticles(String keyword, int status,int pageNum, int pageSize);
+    PageResult<ArticleVo> getArticles(String keyword, @Nullable Integer status, int pageNum, int pageSize);
 }

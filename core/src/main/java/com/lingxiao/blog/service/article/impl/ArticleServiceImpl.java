@@ -2,9 +2,11 @@ package com.lingxiao.blog.service.article.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.github.pagehelper.page.PageMethod;
 import com.lingxiao.blog.bean.*;
 import com.lingxiao.blog.bean.po.*;
 import com.lingxiao.blog.bean.vo.HomePageVo;
+import com.lingxiao.blog.enums.ArticleStatusEnum;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.global.ContentValue;
@@ -31,8 +33,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -132,14 +136,16 @@ public class ArticleServiceImpl implements ArticleService {
 
 
     @Override
-    public PageResult<ArticleVo> getArticles(String keyword, int status, int pageNum, int pageSize) {
-        PageHelper.startPage(pageNum,pageSize,"create_at desc");
+    public PageResult<ArticleVo> getArticles(String keyword, @Nullable Integer status, int pageNum, int pageSize) {
+        PageMethod.startPage(pageNum,pageSize,"create_at desc");
         Example example = new Example(Article.class);
         Example.Criteria criteria = example.createCriteria();
-        if (status != ContentValue.ARTICLE_STATUS_NONE){
+        if (status != null){
             criteria.andEqualTo("status",status);
         }
-        criteria.andLike("title","%"+keyword+"%");
+        if (StringUtils.isNotBlank(keyword)){
+            criteria.andLike("title","%"+keyword+"%");
+        }
         List<Article> articles = articleMapper.selectByExample(example);
         PageInfo<Article> pageInfo = PageInfo.of(articles);
         List<ArticleVo> articleVoList = articleListConvert(pageInfo.getList());
@@ -148,9 +154,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public List<Article> getRankArticle(int size){
-        Example example = new Example(Article.class);
-        example.setOrderByClause("watch_count desc");
-        return articleMapper.selectByExampleAndRowBounds(example,new RowBounds(0,size));
+        return articleMapper.selectRankArticles(size);
     }
 
     @Override
@@ -187,10 +191,11 @@ public class ArticleServiceImpl implements ArticleService {
         }
     }
 
-    private List<ArticleVo>  articleListConvert(List<Article> articles){
+    private List<ArticleVo> articleListConvert(List<Article> articles){
         return articles.stream().map(item ->{
             ArticleVo articleVo = articleConvert(item);
             String content = stringFilter(item.getContent());
+            articleVo.setLabels(labelService.getLabelByArticleId(item.getId()));
             //缩略字符串
             articleVo.setContent(content);
             return articleVo;
@@ -198,10 +203,13 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     private ArticleVo articleConvert(Article article){
-        ArticleVo articleVo = BeanUtil.map(ArticleVo.class, article);
         //设置状态
-        articleVo.setStatus(dictionaryService.getDictionaryByNameAndCode("articleStatus",
-                String.valueOf(article.getStatus())));
+        Dictionary dictionary = new Dictionary();
+        ArticleStatusEnum statusEnum = ArticleStatusEnum.get(article.getStatus());
+        dictionary.setCode(String.valueOf(statusEnum.getCode()));
+        dictionary.setName(statusEnum.getName());
+        ArticleVo articleVo = BeanUtil.map(ArticleVo.class, article);
+        articleVo.setStatus(dictionary);
         return articleVo;
     }
 
@@ -210,6 +218,6 @@ public class ArticleServiceImpl implements ArticleService {
         Pattern p = Pattern.compile(regEx);
         Matcher m = p.matcher(str);
         String trim = m.replaceAll("").trim();
-        return StringUtils.abbreviate(trim,100);
+        return StringUtils.abbreviate(trim,200);
     }
 }

@@ -70,7 +70,7 @@ public class ArticleController {
             @RequestParam(value = "keyword",defaultValue = "") String keyword,
             @RequestParam(value = "pageNum",defaultValue = "1")int pageNum,
             @RequestParam(value = "pageSize",defaultValue = "5")int pageSize){
-        return ResponseEntity.ok(articleService.getArticles(keyword, ContentValue.ARTICLE_STATUS_NONE, pageNum,pageSize));
+        return ResponseEntity.ok(articleService.getArticles(keyword, null, pageNum,pageSize));
     }
 
 
