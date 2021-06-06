@@ -5,9 +5,11 @@ import com.lingxiao.blog.bean.po.MenuRole;
 import com.lingxiao.blog.bean.po.Role;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
+import com.lingxiao.blog.global.base.BaseMapper;
 import com.lingxiao.blog.mapper.MenuMapper;
 import com.lingxiao.blog.mapper.MenuRoleMapper;
 import com.lingxiao.blog.mapper.RoleMapper;
+import com.lingxiao.blog.service.BaseServiceImpl;
 import com.lingxiao.blog.service.system.MenuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,14 +19,22 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @author lingxiao
+ */
 @Service
-public class MenuServiceImpl implements MenuService {
+public class MenuServiceImpl extends BaseServiceImpl<Menu> implements MenuService {
     @Autowired
     private MenuMapper menuMapper;
     @Autowired
     private MenuRoleMapper menuRoleMapper;
     @Autowired
     private RoleMapper roleMapper;
+
+    @Override
+    public BaseMapper<Menu,Long> getMapper() {
+        return menuMapper;
+    }
 
     @Override
     public void addMenu(Menu menu) {

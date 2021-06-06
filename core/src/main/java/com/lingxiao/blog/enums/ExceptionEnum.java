@@ -4,10 +4,17 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * @author lingxiao
+ */
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public enum ExceptionEnum {
+    /**
+     * 异常
+     */
     ILLEGA_ARGUMENT(500,"传递的参数不正确"),
     UPDATE_USER_ERROR(500,"更新用户信息失败"),
     REGISTER_EMAIL_ERROR(500,"邮箱已被注册，请更换邮箱"),
@@ -59,6 +66,11 @@ public enum ExceptionEnum {
     JOB_ADD_ERROR_JOB_START(10003,"添加任务失败，任务触发失败"),
     IP_REGION_INIT_ERROR(10004,"ip地址库初始化失败"),
     IP_REGION_TRANSFORM_ERROR(10005,"ip地址转换失败"),
+
+    DATA_DELETE_ERROR(500,"删除数据失败"),
+    DATA_SELECT_ERROR(404,"查询数据失败"),
+    DATA_UPDATE_ERROR(500,"更新数据失败"),
+    DATA_INSERT_ERROR(500,"添加数据失败"),
 
     UPLOAD_FILE_ERROR(11001,"文件上传失败"),
     DELETE_OSS_FILE_ERROR(11002,"删除oss上的文件失败"),

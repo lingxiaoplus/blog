@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  * @author renml
  * @date 2020/12/4 15:53
  */
-@WebFilter(filterName = "frontStatisticsFilter")
+//@WebFilter(filterName = "frontStatisticsFilter")
 @Slf4j
 public class FrontStatisticsFilter implements Filter {
     private static final String URL_PATTERN = "/front";

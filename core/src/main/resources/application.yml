@@ -89,7 +89,7 @@ cors:
     - "/image/**"
     - "/user/register"
     - "/user/email/**"
-    - "/swagger-ui.html"
+    - "/swagger-ui/**"
     - "/swagger-resources/*"
     - "/webjars/*"
     - "/v2/api-docs*"
@@ -97,9 +97,6 @@ cors:
     - "/error/**"
     - "/front/**"
     - "/comment"
-nacos:
-  config:
-    server-addr: 81.68.255.230:8848
 
 
 

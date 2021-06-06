@@ -1,6 +1,7 @@
 package com.lingxiao.blog.bean.po;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.lingxiao.blog.bean.BaseModel;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 import tk.mybatis.mapper.annotation.KeySql;
@@ -12,26 +13,32 @@ import javax.validation.constraints.NotBlank;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * @author  renml
+ * @date  2021-06-05
+ */
 @Table(name = "menu")
 @Data
-public class Menu {
-    @Id
-    @KeySql(useGeneratedKeys = true)
-    private Long id;
+public class Menu extends BaseModel {
+    //@Id
+
+    //private Long id;
     private Long parentId;
     @NotBlank(message = "菜单路径不能为空")
     private String url;
-    //@NotBlank(message = "组件名字不能为空")
     private String component;
     @NotBlank(message = "菜单名字不能为空")
     private String name;
     private String icon;
     private Integer keepAlive;
     private Integer sortIndex;
-    @DateTimeFormat(pattern = "yyyy-MM-dd  HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd",timezone = "GMT+8")
-    private Date createAt;
 
     @Transient
     private List<Menu> children;
+
+    @KeySql(useGeneratedKeys = true)
+    @Override
+    public Long getId() {
+        return super.getId();
+    }
 }
