@@ -43,7 +43,14 @@ public class CommonExceptionHandler {
     @ExceptionHandler(BlogException.class)
     public ResponseEntity<ExceptionResult> handleException(BlogException e) {
         ExceptionEnum exceptionEnum = e.getExceptionEnum();
-        return ResponseEntity.status(exceptionEnum.getCode()).body(new ExceptionResult(exceptionEnum));
+        if (exceptionEnum == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ExceptionResult(HttpStatus.BAD_REQUEST.value(),e.getMessage()));
+        }
+        int code = exceptionEnum.getCode();
+        if (code > HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.value()){
+            code = HttpStatus.BAD_REQUEST.value();
+        }
+        return ResponseEntity.status(code).body(new ExceptionResult(exceptionEnum));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -1,6 +1,7 @@
 package com.lingxiao.blog.global.security.filter;
 
 import com.lingxiao.blog.bean.po.User;
+import com.lingxiao.blog.exception.BlogException;
 import com.lingxiao.blog.global.ContentValue;
 import com.lingxiao.blog.global.security.JwtAuthenticationToken;
 import com.lingxiao.blog.global.security.handler.AuthFailHandler;
@@ -10,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -65,9 +67,13 @@ public class JwtRequestAuthFilter extends OncePerRequestFilter {
             //如果token的长度是0
             failed = new InsufficientAuthenticationException("JWT is Empty");
         }else {
-            User user = userService.verify(token);
-            JwtAuthenticationToken authenticationToken = new JwtAuthenticationToken(user);
-            authResult = authenticationManager.authenticate(authenticationToken);
+            try {
+                User user = userService.verify(token);
+                JwtAuthenticationToken authenticationToken = new JwtAuthenticationToken(user);
+                authResult = authenticationManager.authenticate(authenticationToken);
+            } catch (BlogException e) {
+                failed = new InternalAuthenticationServiceException(e.getExceptionEnum().getMsg());
+            }
         }
         if (authResult != null){
             //成功的回调方法

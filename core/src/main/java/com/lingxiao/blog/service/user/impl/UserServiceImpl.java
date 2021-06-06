@@ -28,7 +28,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.stereotype.Service;
 
@@ -259,7 +261,7 @@ public class UserServiceImpl implements UserService{
     public UserDetails loadUserByUsername(String username) {
         User user = userMapper.login(username);
         if (user == null){
-            throw new BlogException(ExceptionEnum.LOGIN_NAME_ERROR);
+            throw new UsernameNotFoundException(ExceptionEnum.LOGIN_NAME_ERROR.getMsg());
         }
         List<Role> roles = roleService.getRolesByUser(user.getUserId());
         user.setRoles(roles);

@@ -1,7 +1,9 @@
 package com.lingxiao.blog.controller.system;
 
 import com.lingxiao.blog.bean.po.Menu;
+import com.lingxiao.blog.controller.BaseController;
 import com.lingxiao.blog.global.api.ResponseResult;
+import com.lingxiao.blog.service.BaseService;
 import com.lingxiao.blog.service.system.MenuService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,14 +13,20 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
+/**
+ * @author lingxiao
+ */
 @RestController
 @Api("菜单管理接口")
 @RequestMapping(value = "/menu")
-public class MenuController {
+public class MenuController extends BaseController<Menu> {
     @Autowired
     private MenuService menuService;
-
-    @ApiOperation(value = "获取所有菜单，不同用户可能显示不同菜单", notes = "获取所有菜单")
+    @Override
+    public BaseService<Menu> getService() {
+        return menuService;
+    }
+    /*@ApiOperation(value = "获取所有菜单，不同用户可能显示不同菜单", notes = "获取所有菜单")
     @GetMapping
     public ResponseEntity<ResponseResult<List<Menu>>> selectAllMenu(){
         ResponseResult<List<Menu>> result = new ResponseResult<>(menuService.selectAll());
@@ -47,5 +55,5 @@ public class MenuController {
     public ResponseEntity<Void> deleteMenu(@PathVariable("mid") Long id){
         menuService.deleteMenu(id);
         return ResponseEntity.ok().build();
-    }
+    }*/
 }

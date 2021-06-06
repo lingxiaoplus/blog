@@ -1,4 +1,4 @@
-FROM java:latest
+FROM java:8-jdk-alpine
 MAINTAINER "lingxiao"<1755979775@qq.com>
 ADD target/core-0.0.1-SNAPSHOT.jar blog.jar
 ADD src/main/resources/ip2region.db /blog/ip2region.db

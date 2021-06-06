@@ -2,10 +2,11 @@ package com.lingxiao.blog.service.system;
 
 import com.lingxiao.blog.bean.po.Menu;
 import com.lingxiao.blog.bean.po.Role;
+import com.lingxiao.blog.service.BaseService;
 
 import java.util.List;
 
-public interface MenuService {
+public interface MenuService extends BaseService<Menu> {
     void addMenu(Menu menu);
     void deleteMenu(Long id);
     void updateMenu(Menu menu);

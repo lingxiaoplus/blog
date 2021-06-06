@@ -15,6 +15,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+/**
+ * @author lingxiao
+ */
 @Slf4j
 @Component
 public class AuthFailHandler extends SimpleUrlAuthenticationFailureHandler {
@@ -36,6 +39,14 @@ public class AuthFailHandler extends SimpleUrlAuthenticationFailureHandler {
             respBean.setMessage("账户被禁用，请联系管理员!");
         } else if (e instanceof BadCredentialsException) {
             respBean.setMessage("用户名或者密码输入错误，请重新输入!");
+        }else if (e instanceof InsufficientAuthenticationException){
+            respBean.setMessage("token不能为空!");
+            respBean.setCode(HttpStatus.UNAUTHORIZED.value());
+            resp.setStatus(HttpStatus.UNAUTHORIZED.value());
+        }else if (e instanceof InternalAuthenticationServiceException){
+            respBean.setMessage("token解析失败!");
+            respBean.setCode(HttpStatus.UNAUTHORIZED.value());
+            resp.setStatus(HttpStatus.UNAUTHORIZED.value());
         }
         String json = new Gson().toJson(respBean,ExceptionResult.class);
         out.write(json);
