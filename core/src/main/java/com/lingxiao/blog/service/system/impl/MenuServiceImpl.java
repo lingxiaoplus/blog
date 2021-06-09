@@ -11,11 +11,12 @@ import com.lingxiao.blog.mapper.MenuRoleMapper;
 import com.lingxiao.blog.mapper.RoleMapper;
 import com.lingxiao.blog.service.BaseServiceImpl;
 import com.lingxiao.blog.service.system.MenuService;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Date;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,46 +38,10 @@ public class MenuServiceImpl extends BaseServiceImpl<Menu> implements MenuServic
     }
 
     @Override
-    public void addMenu(Menu menu) {
-        //验证当前用户是否有修改菜单的权利
-        menu.setId(null);
-        menu.setCreateAt(new Date());
-        int count = menuMapper.insertSelective(menu);
-        if (count != 1){
-            throw new BlogException(ExceptionEnum.MENU_ADD_ERROR);
-        }
-    }
-
-    @Override
-    public void deleteMenu(Long id) {
-        int count = menuMapper.deleteByPrimaryKey(id);
-        if (count != 1){
-            throw new BlogException(ExceptionEnum.MENU_DELETE_ERROR);
-        }
-    }
-
-    @Override
-    public void updateMenu(Menu menu) {
-        int count = menuMapper.updateByPrimaryKeySelective(menu);
-        if (count != 1){
-            throw new BlogException(ExceptionEnum.MENU_UPDATE_ERROR);
-        }
-    }
-
-    @Override
-    public Menu selectById(Long id) {
-        Menu menu = menuMapper.selectByPrimaryKey(id);
-        if (menu == null){
-            throw new BlogException(ExceptionEnum.MENU_SELECT_ERROR);
-        }
-        return menu;
-    }
-
-    @Override
-    public List<Menu> selectAll() {
-        Menu selectmenu = new Menu();
-        selectmenu.setParentId(0L);
-        List<Menu> menus = menuMapper.select(selectmenu);
+    public List<Menu> getByCondition(@Nullable Menu data) {
+        Menu selectMenu = new Menu();
+        selectMenu.setParentId(0L);
+        List<Menu> menus = menuMapper.select(selectMenu);
         if (menus == null) {
             throw new BlogException(ExceptionEnum.MENU_SELECT_ERROR);
         }
@@ -105,11 +70,11 @@ public class MenuServiceImpl extends BaseServiceImpl<Menu> implements MenuServic
                 .stream()
                 .map(MenuRole::getId)
                 .collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(ids)) return null;
+        if (CollectionUtils.isEmpty(ids)) return Collections.emptyList();
         List<Role> roles = roleMapper.selectByIdList(ids);
-        /*if (CollectionUtils.isEmpty(roles)){
-            throw new BlogException(ExceptionEnum.ROLE_SELECT_ERROR);
-        }*/
+        if (CollectionUtils.isEmpty(roles)){
+            return Collections.emptyList();
+        }
         return roles;
     }
 }

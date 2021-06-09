@@ -1,7 +1,7 @@
 package com.lingxiao.blog.service.user.impl;
 
-import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.github.pagehelper.page.PageMethod;
 import com.lingxiao.blog.bean.po.Article;
 import com.lingxiao.blog.bean.po.Comment;
 import com.lingxiao.blog.bean.vo.ArticleVo;
@@ -9,12 +9,12 @@ import com.lingxiao.blog.bean.vo.CommentVo;
 import com.lingxiao.blog.enums.CommentState;
 import com.lingxiao.blog.enums.ExceptionEnum;
 import com.lingxiao.blog.exception.BlogException;
+import com.lingxiao.blog.global.RedisConstants;
 import com.lingxiao.blog.global.api.PageResult;
 import com.lingxiao.blog.mapper.CommentMapper;
-import com.lingxiao.blog.mapper.UserMapper;
 import com.lingxiao.blog.service.article.ArticleService;
 import com.lingxiao.blog.service.user.CommentService;
-import com.lingxiao.blog.service.user.UserService;
+import com.lingxiao.blog.utils.RedisUtil;
 import com.lingxiao.blog.utils.UIDUtil;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,18 +26,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @author Admin
+ */
 @Service
 public class CommentServiceImpl implements CommentService {
     @Autowired
     private CommentMapper commentMapper;
-
     @Autowired
     private ArticleService articleService;
-
     @Autowired
-    private UserService userService;
-    @Autowired
-    private UserMapper userMapper;
+    private RedisUtil redisUtil;
 
     @Override
     public int getCommentCount(long articleId){
@@ -78,7 +77,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public PageResult<CommentVo> getComments(String keyword, int pageNum, int pageSize) {
-        PageHelper.startPage(pageNum,pageSize);
+        PageMethod.startPage(pageNum,pageSize);
         Example example = new Example(Comment.class);
         example.createCriteria()
                 .andLike("content","%"+keyword+"%");
@@ -96,7 +95,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public PageResult<CommentVo> getCommentsByArticleId(int pageNum, int pageSize, long id) {
-        PageHelper.startPage(pageNum,pageSize);
+        PageMethod.startPage(pageNum,pageSize);
         Comment comment = new Comment();
         //已通过的评论
         comment.setStatus(CommentState.APPROVAL.getState());
@@ -123,6 +122,7 @@ public class CommentServiceImpl implements CommentService {
         if(count != ids.size()){
             throw new BlogException(ExceptionEnum.COMMENT_DELETE_ERROR);
         }
+        ids.forEach(item -> redisUtil.delRedis(String.format(RedisConstants.KEY_BACK_ARTICLE_COMMENT_DETAIL,item)));
     }
 
     @Override
@@ -131,7 +131,7 @@ public class CommentServiceImpl implements CommentService {
             throw new BlogException(ExceptionEnum.ILLEGA_ARGUMENT);
         }
         List<Comment> comments = commentMapper.selectByIdList(ids);
-        comments.stream().forEach(item->{
+        comments.forEach(item->{
             item.setStatus(status);
             int i = commentMapper.updateByPrimaryKeySelective(item);
             if(i != 1){
@@ -141,7 +141,11 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private CommentVo parseComment(Comment item){
-        CommentVo commentVo = new CommentVo();
+        CommentVo commentVo = redisUtil.getValueByKey(String.format(RedisConstants.KEY_BACK_ARTICLE_COMMENT_DETAIL, item.getId()));
+        if (commentVo != null){
+            return commentVo;
+        }
+        commentVo = new CommentVo();
         commentVo.setId(String.valueOf(item.getId()));
         commentVo.setContent(item.getContent());
         commentVo.setParentId(String.valueOf(item.getParentId()));
@@ -170,6 +174,7 @@ public class CommentServiceImpl implements CommentService {
                 .map(this::parseComment)
                 .collect(Collectors.toList());
         commentVo.setReplies(collect);
+        redisUtil.pushValue(String.format(RedisConstants.KEY_BACK_ARTICLE_COMMENT_DETAIL,item.getId()),commentVo);
         return commentVo;
     }
 }

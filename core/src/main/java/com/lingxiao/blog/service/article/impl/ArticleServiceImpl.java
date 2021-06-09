@@ -120,18 +120,25 @@ public class ArticleServiceImpl implements ArticleService {
         if (!CollectionUtils.isEmpty(labelIds)) {
             labelService.updateArticleLabelByArticleId(article.getId(),labelIds);
         }
+        redisUtil.pushValue(String.format(RedisConstants.KEY_BACK_ARTICLE_DETAIL,article.getId()),articleConvert(articleMapper.selectByPrimaryKey(article.getId())),TimeUnit.DAYS.toMillis(1));
     }
 
 
     @Override
     public ArticleVo getArticleContent(Long id) {
+        ArticleVo articleVo = redisUtil.getValueByKey(String.format(RedisConstants.KEY_BACK_ARTICLE_DETAIL, id));
+        if (articleVo != null){
+            return articleVo;
+        }
         Article article = articleMapper.selectByPrimaryKey(id);
         if (article == null){
             throw new BlogException(ExceptionEnum.ARTICLE_SELECT_ERROR);
         }
         article.setWatchCount(article.getWatchCount()+1);
         articleMapper.updateByPrimaryKeySelective(article);
-        return articleConvert(article);
+        articleVo = articleConvert(article);
+        redisUtil.pushValue(String.format(RedisConstants.KEY_BACK_ARTICLE_DETAIL,id),articleVo,TimeUnit.DAYS.toMillis(1));
+        return articleVo;
     }
 
 
@@ -169,17 +176,21 @@ public class ArticleServiceImpl implements ArticleService {
         return result;
     }
 
-    @Cacheable(value = "banners")
     @Override
     public ResponseResult<HomePageVo> getHomePageBanner(int bannerSize){
+        ResponseResult<HomePageVo> result = redisUtil.getValueByKey(String.format(RedisConstants.KEY_BACK_ARTICLE_BANNER,bannerSize));
+        if (result != null){
+            return result;
+        }
         List<Article> articles = getRankArticle(bannerSize);
         List<ArticleVo> banners = articleListConvert(articles);
         Hitokoto hitokoto = themeService.getHitokoto();
         HomePageVo homePageVo = new HomePageVo();
         homePageVo.setBanners(banners);
         homePageVo.setHitokoto(hitokoto);
-        ResponseResult<HomePageVo> result = new ResponseResult<>();
+        result = new ResponseResult<>();
         result.setData(homePageVo);
+        redisUtil.pushValue(String.format(RedisConstants.KEY_BACK_ARTICLE_BANNER,bannerSize),result,TimeUnit.DAYS.toMillis(7));
         return result;
     }
 

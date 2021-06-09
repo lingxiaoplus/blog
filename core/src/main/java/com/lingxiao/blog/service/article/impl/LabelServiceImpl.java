@@ -75,7 +75,7 @@ public class LabelServiceImpl implements LabelService {
                 .andLike("name","%"+keyword+"%");
         List<Label> articles = labelMapper.selectByExample(example);
         PageInfo<Label> pageInfo = PageInfo.of(articles);
-        return new PageResult<Label>(pageInfo.getTotal(),pageInfo.getPages(),pageInfo.getList());
+        return new PageResult<>(pageInfo.getTotal(),pageInfo.getPages(),pageInfo.getList());
     }
 
     @Override
@@ -89,13 +89,17 @@ public class LabelServiceImpl implements LabelService {
         labels = labelMapper.selectAll();
         result.setData(labels);
         if (!CollectionUtils.isEmpty(labels)){
-            redisUtil.rightPushAll(RedisConstants.KEY_FRONT_LABEL_LIST,labels, TimeUnit.DAYS.toMillis(1));
+            redisUtil.rightPushAll(RedisConstants.KEY_FRONT_LABEL_LIST,labels);
         }
         return result;
     }
 
     @Override
     public List<Label> getLabelByArticleId(long id){
+        List<Label> labels = redisUtil.getListByKey(String.format(RedisConstants.KEY_BACK_ARTICLE_LABELS,id));
+        if (!CollectionUtils.isEmpty(labels)){
+            return labels;
+        }
         ArticleLabel articleLabel = new ArticleLabel();
         articleLabel.setArticleId(id);
         List<ArticleLabel> articleLabels = articleLabelMapper.select(articleLabel);
@@ -103,7 +107,10 @@ public class LabelServiceImpl implements LabelService {
         if (CollectionUtils.isEmpty(idList)){
             return null;
         }
-        List<Label> labels = labelMapper.selectByIdList(idList);
+        labels = labelMapper.selectByIdList(idList);
+        if (!CollectionUtils.isEmpty(labels)){
+            redisUtil.rightPushAll(String.format(RedisConstants.KEY_BACK_ARTICLE_LABELS,id),labels);
+        }
         return labels;
     }
 
@@ -123,7 +130,7 @@ public class LabelServiceImpl implements LabelService {
         if (insertCount != insertList.size()){
             throw new BlogException(ExceptionEnum.ILLEGA_ARGUMENT);
         }
-        redisUtil.delRedis(RedisConstants.KEY_FRONT_LABEL_LIST);
+        redisUtil.delRedis(String.format(RedisConstants.KEY_BACK_ARTICLE_LABELS,id));
     }
 
 }

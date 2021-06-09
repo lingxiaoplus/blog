@@ -28,6 +28,12 @@ public class RedisConstants {
      * 文章
      */
     public static final String KEY_BACK_ARTICLE_PAGE = "blog:back:article:page:currentPage:%s:pageSize:%s";
+    public static final String KEY_BACK_ARTICLE_DETAIL = "blog:back:article:detail:%s";
+    public static final String KEY_BACK_ARTICLE_BANNER = "blog:back:article:banner:%s";
+    public static final String KEY_BACK_ARTICLE_LABELS = "blog:back:article:labels:%s";
+
+
+    public static final String KEY_BACK_ARTICLE_COMMENT_DETAIL = "blog:back:article:comment:%s";
 
     public static final String KEY_BACK_DICTIONARY_NAME_CODE = "blog:back:dictionary:name:%s:code:%s";
 

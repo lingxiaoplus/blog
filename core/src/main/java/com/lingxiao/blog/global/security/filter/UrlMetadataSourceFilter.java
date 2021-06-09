@@ -33,7 +33,7 @@ public class UrlMetadataSourceFilter implements FilterInvocationSecurityMetadata
     public Collection<ConfigAttribute> getAttributes(Object object) throws IllegalArgumentException {
         //获取请求地址
         String requestUrl = ((FilterInvocation) object).getRequestUrl();
-        List<Menu> menus = menuService.selectAll();
+        List<Menu> menus = menuService.getByCondition(null);
         for (Menu menu: menus) {
             if (antPathMatcher.match(menu.getUrl(),requestUrl)){
                 List<Role> roles = menuService.getRolesByMenu(menu.getId());

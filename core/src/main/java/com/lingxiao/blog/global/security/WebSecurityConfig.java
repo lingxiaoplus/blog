@@ -148,7 +148,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         CorsConfiguration config = new CorsConfiguration();
         //.1 允许的域，不要写*
         List<String> allowedOrigins = securityProperties.getAllowedOrigins();
-        allowedOrigins.forEach(config::addAllowedOriginPattern);
+        config.setAllowedOriginPatterns(allowedOrigins);
         //.2是否发送cookie信息
         config.setAllowCredentials(true);
         //.3允许的请求方式
