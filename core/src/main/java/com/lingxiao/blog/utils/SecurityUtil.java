@@ -15,6 +15,6 @@ public class SecurityUtil {
         if (authentication != null && authentication.getPrincipal() != null) {
             return (User) authentication.getPrincipal();
         }
-        throw new BlogException(ExceptionEnum.VERIFY_USER_LOGIN_ERROR);
+        return null;
     }
 }

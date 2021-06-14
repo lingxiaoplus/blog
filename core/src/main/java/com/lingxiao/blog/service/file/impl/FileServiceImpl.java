@@ -2,6 +2,7 @@ package com.lingxiao.blog.service.file.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.github.pagehelper.page.PageMethod;
 import com.google.gson.Gson;
 import com.lingxiao.blog.bean.BingImageData;
 import com.lingxiao.blog.bean.form.PageQueryForm;
@@ -124,6 +125,8 @@ public class FileServiceImpl implements FileService {
         User user = SecurityUtil.getCurrentUser();
         if (user != null) {
             resourceInfo.setResourceCreator(user.getUserId()+"");
+        }else {
+            resourceInfo.setResourceCreator("0");
         }
         resourceInfo.setCreateAt(new Date());
         return resourceInfo;
@@ -213,6 +216,9 @@ public class FileServiceImpl implements FileService {
     @Override
     public void getBingImageByJsoup(int currentPage){
         Integer maxPage = redisUtil.getValueByKey(RedisConstants.KEY_BACK_BINGIMAGE_TASK_MAXPAGE);
+        if (maxPage == null){
+            maxPage = 1;
+        }
         if (maxPage != null && maxPage <= currentPage) {
             return;
         }
@@ -293,10 +299,10 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public PageResult<BingImage> getImageFromDB(PageQueryForm queryForm){
-        PageHelper.startPage(queryForm.getPageNum(),queryForm.getPageSize());
-        List<BingImage> bingImages = bingImageMapper.selectAll();
-        PageInfo<BingImage> pageInfo = PageInfo.of(bingImages);
-        return new PageResult<>(pageInfo.getTotal(),pageInfo.getPages(),bingImages);
+        //PageMethod.startPage(queryForm.getPageNum(),queryForm.getPageSize());
+        List<BingImage> bingImages = bingImageMapper.selectByRandom(queryForm.getPageSize());
+        //PageInfo<BingImage> pageInfo = PageInfo.of(bingImages);
+        return new PageResult<>(1,1,bingImages);
     }
 
     private Random random = new Random();

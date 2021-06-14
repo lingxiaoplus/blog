@@ -67,6 +67,7 @@ cors:
     - "https://blog.lingxiaomz.top"
     - "https://www.lingxiaomz.top"
     - "https://api.lingxiaomz.top"
+    - "*"
   allowedMethods:
     - "OPTIONS"
     - "HEAD"

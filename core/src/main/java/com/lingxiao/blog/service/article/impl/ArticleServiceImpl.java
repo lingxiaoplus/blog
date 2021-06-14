@@ -76,6 +76,9 @@ public class ArticleServiceImpl implements ArticleService {
         article.setUpdateAt(article.getCreateAt());
 
         User user = SecurityUtil.getCurrentUser();
+        if (user == null){
+            throw new BlogException(ExceptionEnum.VERIFY_USER_LOGIN_ERROR);
+        }
         article.setUserId(user.getUserId());
         article.setAuthor(user.getUsername());
         Category category = categoryMapper.selectByPrimaryKey(article.getCategoryId());
@@ -206,7 +209,6 @@ public class ArticleServiceImpl implements ArticleService {
         return articles.stream().map(item ->{
             ArticleVo articleVo = articleConvert(item);
             String content = stringFilter(item.getContent());
-            articleVo.setLabels(labelService.getLabelByArticleId(item.getId()));
             //缩略字符串
             articleVo.setContent(content);
             return articleVo;
@@ -221,6 +223,7 @@ public class ArticleServiceImpl implements ArticleService {
         dictionary.setName(statusEnum.getName());
         ArticleVo articleVo = BeanUtil.map(ArticleVo.class, article);
         articleVo.setStatus(dictionary);
+        articleVo.setLabels(labelService.getLabelByArticleId(article.getId()));
         return articleVo;
     }
 
