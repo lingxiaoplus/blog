@@ -1,7 +1,7 @@
 package com.lingxiao.blog.service.article.impl;
 
-import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.github.pagehelper.page.PageMethod;
 import com.lingxiao.blog.bean.po.ArticleLabel;
 import com.lingxiao.blog.bean.po.Label;
 import com.lingxiao.blog.enums.ExceptionEnum;
@@ -13,17 +13,16 @@ import com.lingxiao.blog.mapper.ArticleLabelMapper;
 import com.lingxiao.blog.mapper.LabelMapper;
 import com.lingxiao.blog.service.article.LabelService;
 import com.lingxiao.blog.utils.RedisUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -69,10 +68,12 @@ public class LabelServiceImpl implements LabelService {
 
     @Override
     public PageResult<Label> getLabels(String keyword, int pageNum, int pageSize) {
-        PageHelper.startPage(pageNum,pageSize);
+        PageMethod.startPage(pageNum,pageSize);
         Example example = new Example(Label.class);
-        example.createCriteria()
-                .andLike("name","%"+keyword+"%");
+        if (StringUtils.isNotBlank(keyword)){
+            example.createCriteria()
+                    .andLike("name","%"+keyword+"%");
+        }
         List<Label> articles = labelMapper.selectByExample(example);
         PageInfo<Label> pageInfo = PageInfo.of(articles);
         return new PageResult<>(pageInfo.getTotal(),pageInfo.getPages(),pageInfo.getList());
@@ -105,7 +106,7 @@ public class LabelServiceImpl implements LabelService {
         List<ArticleLabel> articleLabels = articleLabelMapper.select(articleLabel);
         List<Long> idList = articleLabels.stream().map(ArticleLabel::getLabelId).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(idList)){
-            return null;
+            return Collections.emptyList();
         }
         labels = labelMapper.selectByIdList(idList);
         if (!CollectionUtils.isEmpty(labels)){
@@ -120,7 +121,7 @@ public class LabelServiceImpl implements LabelService {
         ArticleLabel deleteArticle = new ArticleLabel();
         deleteArticle.setArticleId(id);
         articleLabelMapper.delete(deleteArticle);
-        List<ArticleLabel> insertList = labelIds.stream().map((labelId) -> {
+        List<ArticleLabel> insertList = labelIds.stream().map(labelId -> {
             ArticleLabel articleLabel = new ArticleLabel();
             articleLabel.setArticleId(id);
             articleLabel.setLabelId(labelId);
