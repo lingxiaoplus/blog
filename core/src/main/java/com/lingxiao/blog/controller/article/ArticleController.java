@@ -1,6 +1,8 @@
 package com.lingxiao.blog.controller.article;
 
 import com.lingxiao.blog.annotation.OperationLogDetail;
+import com.lingxiao.blog.bean.ArticleCommitResponse;
+import com.lingxiao.blog.bean.ArticleCommitUrlVo;
 import com.lingxiao.blog.bean.po.Article;
 import com.lingxiao.blog.enums.OperationType;
 import com.lingxiao.blog.global.ContentValue;
@@ -73,5 +75,11 @@ public class ArticleController {
         return ResponseEntity.ok(articleService.getArticles(keyword, null, pageNum,pageSize));
     }
 
-
+    @PutMapping
+    @ApiOperation(value = "提交文章链接")
+    @ApiImplicitParam(name = "ArticleCommitUrlVo",value = "文章提交链接")
+    @OperationLogDetail(detail = "提交文章链接",operationType = OperationType.INSERT)
+    public ResponseEntity<ArticleCommitResponse> commitArticles(@RequestBody ArticleCommitUrlVo articleCommit){
+        return articleService.commitUrl(articleCommit);
+    }
 }

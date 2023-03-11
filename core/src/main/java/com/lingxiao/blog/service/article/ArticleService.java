@@ -1,5 +1,7 @@
 package com.lingxiao.blog.service.article;
 
+import com.lingxiao.blog.bean.ArticleCommitResponse;
+import com.lingxiao.blog.bean.ArticleCommitUrlVo;
 import com.lingxiao.blog.bean.po.Article;
 import com.lingxiao.blog.bean.vo.HomePageVo;
 import com.lingxiao.blog.global.api.PageResult;
@@ -9,6 +11,7 @@ import com.lingxiao.blog.global.api.ResponseResult;
 import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.List;
+import org.springframework.http.ResponseEntity;
 
 public interface ArticleService {
     /**
@@ -40,4 +43,9 @@ public interface ArticleService {
      * @return
      */
     PageResult<ArticleVo> getArticles(String keyword, @Nullable Integer status, int pageNum, int pageSize);
+
+    /**
+     * 提交链接至搜索引擎
+     */
+    ResponseEntity<ArticleCommitResponse> commitUrl(ArticleCommitUrlVo articleCommitUrl);
 }

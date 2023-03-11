@@ -28,9 +28,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.RestTemplate;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Nullable;
@@ -60,6 +65,8 @@ public class ArticleServiceImpl implements ArticleService {
     private DictionaryService dictionaryService;
     @Autowired
     private RedisUtil redisUtil;
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -204,6 +211,23 @@ public class ArticleServiceImpl implements ArticleService {
             throw new BlogException(ExceptionEnum.ARTICLE_DELETE_ERROR);
         }
     }
+
+    @Override
+    public ResponseEntity<ArticleCommitResponse> commitUrl(ArticleCommitUrlVo articleCommitUrl) {
+        String url = "http://data.zz.baidu.com/urls?site=%s&token=%s";
+        HttpHeaders uploadHeaders = new HttpHeaders();
+        uploadHeaders.setContentType(MediaType.TEXT_PLAIN);
+        StringBuilder urlString = new StringBuilder();
+        articleCommitUrl.getUrls().forEach(item -> urlString.append(item).append("\n"));
+        HttpEntity<String> uploadRequest = new HttpEntity<>(urlString.toString(), uploadHeaders);
+        ResponseEntity<ArticleCommitResponse> responseEntity = restTemplate
+            .postForEntity(
+                String.format(url, articleCommitUrl.getSite(), articleCommitUrl.getToken()),
+                uploadRequest, ArticleCommitResponse.class);
+        return responseEntity;
+    }
+
+
 
     private List<ArticleVo> articleListConvert(List<Article> articles){
         return articles.stream().map(item ->{
